@@ -1,0 +1,25 @@
+{
+  "name": "airbnb-visualization",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kbhomes/airbnb-visualization.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kbhomes/airbnb-visualization/issues"
+  },
+  "homepage": "https://github.com/kbhomes/airbnb-visualization#readme",
+  "devDependencies": {
+    "rollup": "^0.36.3",
+    "rollup-plugin-typescript": "^0.8.1",
+    "rollup-watch": "^2.5.0",
+    "typescript": "^2.0.3"
+  }
+}
