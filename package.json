@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "node_modules/.bin/rollup -c",
+    "watch": "node_modules/.bin/rollup -c --watch"
   },
   "repository": {
     "type": "git",
@@ -17,6 +18,25 @@
   },
   "homepage": "https://github.com/kbhomes/airbnb-visualization#readme",
   "devDependencies": {
+    "@types/d3-array": "^1.0.5",
+    "@types/d3-axis": "^1.0.5",
+    "@types/d3-collection": "^1.0.4",
+    "@types/d3-color": "^1.0.4",
+    "@types/d3-dispatch": "^1.0.4",
+    "@types/d3-dsv": "^1.0.29",
+    "@types/d3-ease": "^1.0.4",
+    "@types/d3-format": "^1.0.5",
+    "@types/d3-geo": "^1.2.3",
+    "@types/d3-interpolate": "^1.1.5",
+    "@types/d3-path": "^1.0.4",
+    "@types/d3-queue": "^3.0.4",
+    "@types/d3-random": "^1.0.5",
+    "@types/d3-request": "^1.0.1",
+    "@types/d3-scale": "^1.0.4",
+    "@types/d3-selection": "^1.0.5",
+    "@types/d3-time": "^1.0.4",
+    "@types/d3-timer": "^1.0.5",
+    "@types/d3-transition": "^1.0.5",
     "rollup": "^0.36.3",
     "rollup-plugin-typescript": "^0.8.1",
     "rollup-watch": "^2.5.0",
