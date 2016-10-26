@@ -17,3 +17,28 @@ export * from 'd3-selection';
 export * from 'd3-time';
 export * from 'd3-timer';
 export * from 'd3-transition';
+
+import * as d3Selection from 'd3-selection';
+
+// Extension to D3 to facilitate re-ordering elements
+d3Selection.selection.prototype.moveToFront = function() {  
+      return this.each(function(){
+        this.parentNode.appendChild(this);
+      });
+    };
+
+d3Selection.selection.prototype.moveToBack = function() {  
+    return this.each(function() { 
+        var firstChild = this.parentNode.firstChild; 
+        if (firstChild) { 
+            this.parentNode.insertBefore(this, firstChild); 
+        } 
+    });
+};
+
+// declare module d3 {
+//     interface Selection {
+//         moveToFront() : Selection;
+//         moveToBack() : Selection;
+//     }
+// }
