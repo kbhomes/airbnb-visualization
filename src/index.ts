@@ -1,7 +1,3 @@
-/// <reference path='d3.d.ts' />
+import { Application } from './application';
 
-import { barChartDemo } from './bar-chart-demo';
-import { mapDemo }  from './map-demo';
-
-// barChartDemo();
-mapDemo();
+let app = new Application();

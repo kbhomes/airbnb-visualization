@@ -1,5 +1,3 @@
-export as namespace d3;
-
 export * from 'd3-array';
 export * from 'd3-axis';
 export * from 'd3-collection';
