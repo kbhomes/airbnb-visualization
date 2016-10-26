@@ -23,17 +23,16 @@ div {
 
 .section {
   flex: 1;
-  border: 1px solid #ccc;
-  padding: 10px;
+  padding: 5px;
 }
 
 .section div.title {
   flex: 0;
   text-transform: uppercase;
-  font-size: 16pt;
-  line-height: 20pt;
-  padding: 5px;
-  text-align: center;
+  font-weight: bold;
+  font-size: 12pt;
+  text-align: left;
+  color: #555;
 }
 
 .section div.content {
@@ -41,20 +40,9 @@ div {
   flex: 1;
 }
 
-#map {
-
-}
-
-#quadrants {
-
-}
-
-#panel-right {
-  max-width: 350px;
-}
-
 #section-top {
-
+  border-bottom: 1px solid #ccc;
+  padding: 0;
 }
 
 #section-bottom {
@@ -62,8 +50,25 @@ div {
   height: 200px;
 }
 
-.chart rect {
-  
+#map {
+  border-right: 1px solid #ccc;
+}
+
+#quadrants {
+  border-right: 1px solid #ccc;
+}
+
+#panel-right {
+  max-width: 350px;
+  padding: 0;
+}
+
+#options {
+  border-bottom: 1px solid #ccc;
+}
+
+#details {
+
 }
 
 .chart text {
