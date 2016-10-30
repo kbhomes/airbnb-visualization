@@ -70,11 +70,29 @@ export class NeighborhoodMapComponent extends BaseComponent {
             .attr('data-name', d => d.properties.name)
             .style('fill', '#FB5B1F')
             .style('stroke', '#FFFFFF')
-            .on('mouseenter', function(d) { 
-                d3.select(this).style('fill', '#FBAB8F');
+            .on('mouseenter', function(d) {
+                // Scale up the particular neighborhood. 
+                let sel = d3.select(this);
+                sel.moveToFront();
+
+                let box = (sel.node() as SVGPathElement).getBBox();
+
+                // Do some really naive clamping to get already large neighborhood slightly scaled,
+                // and teeny tiny neighborhoods more highly scaled. The 2500 figures from a bounding
+                // box of approximately 50x50. Scale factor remains in range [1.5, 2.5].
+                let scale = Math.min(2.5, Math.max(1.5, 2500 / (box.width * box.height)));
+                let cx = box.x + box.width/2;
+                let cy = box.y + box.height/2;
+                
+                sel.transition()
+                    .style('fill', '#FBAB8F')
+                    .style('transform', `translate(-${(scale - 1) * cx}px, -${(scale - 1) * cy}px) scale(${scale})`);
             })
             .on('mouseleave', function(d) {
-                d3.select(this).style('fill', '#FB5B1F');
+                let sel = d3.select(this);
+                sel.transition()
+                    .style('fill', '#FB5B1F')
+                    .style('transform', `translate(0px, 0px) scale(1.0)`);
             });
     }
 } 
