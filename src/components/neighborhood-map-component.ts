@@ -87,6 +87,8 @@ export class NeighborhoodMapComponent extends BaseComponent {
                 sel.transition()
                     .style('fill', '#FBAB8F')
                     .style('transform', `translate(-${(scale - 1) * cx}px, -${(scale - 1) * cy}px) scale(${scale})`);
+
+                    console.log(d.listings);
             })
             .on('mouseleave', function(d) {
                 let sel = d3.select(this);
