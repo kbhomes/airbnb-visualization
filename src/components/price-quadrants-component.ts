@@ -1,7 +1,7 @@
 import * as d3 from '../d3';
 
 import { BaseComponent } from './base-component';
-import { Dispatch, DispatchEvent, LoadEventData } from '../data/dispatch';
+import { Dispatch, DispatchEvent, LoadEventData, SelectEventData, HighlightEventData, FilterEventData } from '../data/dispatch';
 
 export class PriceQuadrantsComponent extends BaseComponent {
 
@@ -10,19 +10,23 @@ export class PriceQuadrantsComponent extends BaseComponent {
     }
 
     public onLoad(data: LoadEventData) {
+        super.onLoad(data);
         this.render();
     }
 
-    public onSelect() {
-
+    public onSelect(selection: SelectEventData) {
+        super.onSelect(selection);
+        this.render();
     }
 
-    public onHighlight() {
-
+    public onHighlight(highlight: HighlightEventData) {
+        super.onHighlight(highlight);
+        this.render();
     }
 
-    public onFilter() {
-
+    public onFilter(filter: FilterEventData) {
+        super.onFilter(filter);
+        this.render();
     }
 
     public resize() {

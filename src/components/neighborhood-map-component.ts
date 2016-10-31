@@ -1,31 +1,33 @@
 import * as d3 from '../d3';
 
 import { BaseComponent } from './base-component';
-import { Dispatch, DispatchEvent, LoadEventData } from '../data/dispatch';
+import { Dispatch, DispatchEvent, LoadEventData, SelectEventData, HighlightEventData, FilterEventData } from '../data/dispatch';
 import { NeighborhoodGeoJSON } from '../data/geojson';
 
 export class NeighborhoodMapComponent extends BaseComponent {
-    private data: NeighborhoodGeoJSON;
 
     public constructor(selector: string, dispatcher: Dispatch) {
         super(selector, dispatcher);
     }
 
     public onLoad(data: LoadEventData) {
-        this.data = data.geo;
+        super.onLoad(data);
         this.render();
     }
 
-    public onSelect() {
-
+    public onSelect(selection: SelectEventData) {
+        super.onSelect(selection);
+        this.render();
     }
 
-    public onHighlight() {
-
+    public onHighlight(highlight: HighlightEventData) {
+        super.onHighlight(highlight);
+        this.render();
     }
 
-    public onFilter() {
-
+    public onFilter(filter: FilterEventData) {
+        super.onFilter(filter);
+        this.render();
     }
 
     public resize() {
@@ -47,7 +49,7 @@ export class NeighborhoodMapComponent extends BaseComponent {
             .precision(0);
             
         let path = d3.geoPath().projection(projection);
-        let bounds = path.bounds(this.data);
+        let bounds = path.bounds(this.data.geo);
 
         let xScale = width / Math.abs(bounds[1][0] - bounds[0][0]);
         let yScale = height / Math.abs(bounds[1][1] - bounds[0][1]);
@@ -62,7 +64,7 @@ export class NeighborhoodMapComponent extends BaseComponent {
             .translate(transl);
 
         svg.selectAll('path')
-            .data(this.data.features)
+            .data(this.data.geo.features)
             .enter()
           .append('path')
             .attr('d', path)
