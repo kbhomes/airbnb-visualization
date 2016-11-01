@@ -7,43 +7,21 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
     public constructor(selector: string, dispatcher: Dispatch) {
         super(selector, dispatcher);
-    }
 
-    public onLoad(data: LoadEventData) {
-        super.onLoad(data);
-        this.render();
-    }
-
-    public onSelect(selection: SelectEventData) {
-        super.onSelect(selection);
-        this.render();
-    }
-
-    public onHighlight(highlight: HighlightEventData) {
-        super.onHighlight(highlight);
-        this.render();
-    }
-
-    public onFilter(filter: FilterEventData) {
-        super.onFilter(filter);
-        this.render();
-    }
-
-    public resize() {
-
-    }
-
-    public render() {
-        // Configure our visualization
+        // Initialize our canvas
         let width = this.element.clientWidth;
         let barHeight = 20;
+
+        d3.select(this.selector).append('svg')
+            .attr('class', 'chart')
+            .attr('width', width);
+
+        // Configure our visualization
         let data = [4, 8, 15, 16, 23, 42];
 
         let generator = d3.randomUniform(10, 100);
 
-        let chart = d3.select(this.selector).append('svg')
-            .attr('class', 'chart')
-            .attr('width', width)
+        let chart = d3.select(this.selector + ' .chart')
             .attr('height', data.length * barHeight);
 
         // Create the x-axis's scale
@@ -105,5 +83,33 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
         drawBars();
         d3.interval(generateRandomData, 1500);
+    }
+
+    public onLoad(data: LoadEventData) {
+        super.onLoad(data);
+        this.render();
+    }
+
+    public onSelect(selection: SelectEventData) {
+        super.onSelect(selection);
+        this.render();
+    }
+
+    public onHighlight(highlight: HighlightEventData) {
+        super.onHighlight(highlight);
+        this.render();
+    }
+
+    public onFilter(filter: FilterEventData) {
+        super.onFilter(filter);
+        this.render();
+    }
+
+    public resize() {
+
+    }
+
+    public render() {
+        
     }
 } 

@@ -2,6 +2,7 @@ import * as d3 from './d3';
 
 import { Dispatch, DispatchEvent, LoadEventData } from './data/dispatch';
 import { NeighborhoodGeoJSON } from './data/geojson';
+import { Listing, Neighborhood } from './data/listing';
 
 import * as components from './components/';
 
@@ -25,9 +26,17 @@ export class Application {
     }
 
     private loadData() {
+        let neighborhoods = new Map<Neighborhood.NameType, Neighborhood>();
+        neighborhoods.set('South of Market', { name: 'South of Market', listings: []});
+
+        let listings = new Map<Listing.IDType, Listing>();
+        listings.set(0, null);
+
         d3.json('data/neighborhoods.geojson', (error, data: NeighborhoodGeoJSON) => {
             let loadData: LoadEventData = {
-                geo: data
+                geo: data,
+                neighborhoods: neighborhoods,
+                listings: listings
             };
 
             this.dispatcher.call(DispatchEvent.Load, undefined, loadData)

@@ -8,6 +8,15 @@ export class NeighborhoodMapComponent extends BaseComponent {
 
     public constructor(selector: string, dispatcher: Dispatch) {
         super(selector, dispatcher);
+
+        // Initialize our canvas
+        let width = this.element.clientWidth,
+            height = this.element.clientHeight;
+
+        let svg = d3.select(this.selector).append('svg')
+            .attr('class', 'map-chart')
+            .attr('width', width)
+            .attr('height', height);
     }
 
     public onLoad(data: LoadEventData) {
@@ -35,13 +44,11 @@ export class NeighborhoodMapComponent extends BaseComponent {
     }
 
     public render() {
-        let width = this.element.clientWidth,
-            height = this.element.clientHeight;
+        let self = this;
 
-        let svg = d3.select(this.selector).append('svg')
-            .attr('class', 'map-chart')
-            .attr('width', width)
-            .attr('height', height);
+        let width = this.element.clientWidth,
+            height = this.element.clientHeight,
+            svg = d3.select(this.selector + ' .map-chart');
 
         let projection = d3.geoMercator()
             .scale(1)
@@ -69,10 +76,17 @@ export class NeighborhoodMapComponent extends BaseComponent {
           .append('path')
             .attr('d', path)
             .attr('data-id', d => d.id)
-            .attr('data-name', d => d.properties.name)
+            .attr('data-name', d => d.properties.nbrhood)
             .style('fill', '#FB5B1F')
             .style('stroke', '#FFFFFF')
             .on('mouseenter', function(d) {
+                // Dispatch a highlight event for this neighborhood
+                let highlight: HighlightEventData = {
+                    neighborhood: self.data.neighborhoods.get(d.properties.nbrhood),
+                    listing: null
+                };
+                self.dispatcher.call(DispatchEvent.Highlight, null, highlight);
+
                 // Scale up the particular neighborhood. 
                 let sel = d3.select(this);
                 sel.moveToFront();
