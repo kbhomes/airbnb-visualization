@@ -3,7 +3,7 @@ import * as d3 from '../d3';
 import { NeighborhoodGeoJSON } from './geojson';
 import { Listing, Neighborhood } from './listing';
 
-export type Dispatch = d3.Dispatch<EventTarget>;
+export type Dispatch = d3.Dispatch<any>;
 export const DispatchEvent = {
     Load: 'load',
     Select: 'select',

@@ -70,9 +70,11 @@ export class NeighborhoodMapComponent extends BaseComponent {
             .scale(scale)
             .translate(transl);
 
-        svg.selectAll('path')
-            .data(this.data.geo.features)
-            .enter()
+        let paths = svg.selectAll('path')
+            .data(this.data.geo.features);
+
+        // Draw all the neighborhoods for the first time
+        let pathsEnter = paths.enter()
           .append('path')
             .attr('d', path)
             .attr('data-id', d => d.id)
@@ -81,11 +83,10 @@ export class NeighborhoodMapComponent extends BaseComponent {
             .style('stroke', '#FFFFFF')
             .on('mouseenter', function(d) {
                 // Dispatch a highlight event for this neighborhood
-                let highlight: HighlightEventData = {
+                self.dispatcher.call(DispatchEvent.Highlight, this, {
                     neighborhood: self.data.neighborhoods.get(d.properties.nbrhood),
-                    listing: null
-                };
-                self.dispatcher.call(DispatchEvent.Highlight, null, highlight);
+                    listing: undefined
+                } as HighlightEventData);
 
                 // Scale up the particular neighborhood. 
                 let sel = d3.select(this);
@@ -105,10 +106,30 @@ export class NeighborhoodMapComponent extends BaseComponent {
                     .style('transform', `translate(-${(scale - 1) * cx}px, -${(scale - 1) * cy}px) scale(${scale})`);
             })
             .on('mouseleave', function(d) {
+                // Dispatch an empty highlight event
+                self.dispatcher.call(DispatchEvent.Highlight, this, {
+                    neighborhood: undefined,
+                    listing: undefined
+                } as HighlightEventData);
+
                 let sel = d3.select(this);
                 sel.transition()
                     .style('fill', '#FB5B1F')
                     .style('transform', `translate(0px, 0px) scale(1.0)`);
             });
+
+        // Create the update selection
+        let pathsUpdate = pathsEnter.merge(paths);
+        
+        // Highlight the current neighborhood, if any
+        pathsUpdate.style('fill', d => {
+            if (this.highlight.neighborhood)
+                console.log(this.highlight.neighborhood.name)
+
+            if (this.highlight.neighborhood && this.highlight.neighborhood.name == d.properties.nbrhood) 
+                return '#FBAB8F';
+            else
+                return '#FB5B1F';
+        });
     }
 } 

@@ -15,74 +15,6 @@ export class PriceQuadrantsComponent extends BaseComponent {
         d3.select(this.selector).append('svg')
             .attr('class', 'chart')
             .attr('width', width);
-
-        // Configure our visualization
-        let data = [4, 8, 15, 16, 23, 42];
-
-        let generator = d3.randomUniform(10, 100);
-
-        let chart = d3.select(this.selector + ' .chart')
-            .attr('height', data.length * barHeight);
-
-        // Create the x-axis's scale
-        let x = d3.scaleLinear()
-            .range([0, width])
-            .domain([0, 100]);
-
-        function drawBars() {
-            // Create our data join
-            let bar = chart.selectAll('g').data(data);
-
-            // Create the bars for the entering elements
-            let barEnter = bar.enter()
-            .append('g')
-                .attr('transform', (d, i) => 'translate(0,' + i * barHeight + ')');
-
-            barEnter.append('rect')
-                .attr('fill', 'steelblue')
-                .attr('height', barHeight - 1);
-                
-            barEnter.append('text')
-                .attr('y', barHeight / 2)
-                .attr('dy', '.35em');
-
-            barEnter.on('mouseenter', function() {
-                    d3.select(this)
-                        .select('rect')
-                        .attr('fill', 'red');
-                })
-                .on('mouseleave', function() {
-                    d3.select(this)
-                        .select('rect')
-                        .attr('fill', 'steelblue');
-                });
-
-            // Update all the bars
-            let barUpdate = barEnter.merge(bar);
-            let barTransition = barUpdate.transition();
-
-            barUpdate.select('rect')
-                .transition(barTransition)
-                .attr('width', d => x(d));
-
-            barUpdate.select('text')
-                .transition(barTransition)
-                .text(d => '' + d)
-                .attr('x', d => x(d) - 3)
-        }
-
-        function generateRandomData() {
-            // Generate random values for data
-            for (let i = 0; i < data.length; i++) {
-                data[i] = Math.floor(generator());
-            }
-
-            // Redraw our bar chart
-            drawBars();
-        }
-
-        drawBars();
-        d3.interval(generateRandomData, 1500);
     }
 
     public onLoad(data: LoadEventData) {
@@ -110,6 +42,69 @@ export class PriceQuadrantsComponent extends BaseComponent {
     }
 
     public render() {
-        
+        let self = this;
+
+        let width = this.element.clientWidth;
+        let barHeight = 20;
+        let chart = d3.select(this.selector + ' .chart')
+            .attr('height', this.data.neighborhoods.size * barHeight);
+
+        // Create the x-axis's scale
+        let x = d3.scaleLinear()
+            .range([0, width])
+            .domain([0, 100]);
+
+        // Create our data join
+        let bar = chart.selectAll('g').data(Array.from(this.data.neighborhoods.values()));
+
+        // Create the bars for the entering elements
+        let barEnter = bar.enter()
+          .append('g')
+            .attr('transform', (d, i) => 'translate(0,' + i * barHeight + ')');
+
+        barEnter.append('rect')
+            .attr('fill', 'steelblue')
+            .attr('width', d => x(d.listings.length))
+            .attr('height', barHeight - 1);
+            
+        barEnter.append('text')
+            .attr('y', barHeight / 2)
+            .attr('dy', '.35em')
+            .attr('x', 3)
+            .text(d => d.name)
+
+        barEnter.on('mouseenter', function(d) {
+                // Dispatch a highlight event for this neighborhood
+                self.dispatcher.call(DispatchEvent.Highlight, this, {
+                    neighborhood: d,
+                    listing: undefined
+                } as HighlightEventData);
+
+                d3.select(this)
+                    .select('rect')
+                    .attr('fill', 'red');
+            })
+            .on('mouseleave', function() {
+                // Dispatch an empty highlight event
+                self.dispatcher.call(DispatchEvent.Highlight, this, {
+                    neighborhood: undefined,
+                    listing: undefined
+                } as HighlightEventData);
+
+                d3.select(this)
+                    .select('rect')
+                    .attr('fill', 'steelblue');
+            });
+
+        // Update all the bars
+        let barUpdate = barEnter.merge(bar);
+
+        // Color the neighborhood that is currently highlighted (if any)
+        barUpdate.attr('fill', d => {
+            if (this.highlight.neighborhood == d)
+                return 'red';
+            else
+                return 'steelblue';
+        });
     }
 } 

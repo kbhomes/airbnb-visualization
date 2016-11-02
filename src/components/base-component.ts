@@ -21,6 +21,17 @@ export abstract class BaseComponent {
         this.dispatcher.on(this.getComponentEventName(dispatch.DispatchEvent.Select), this.onSelect.bind(this));
         this.dispatcher.on(this.getComponentEventName(dispatch.DispatchEvent.Highlight), this.onHighlight.bind(this));
         this.dispatcher.on(this.getComponentEventName(dispatch.DispatchEvent.Filter), this.onFilter.bind(this));
+
+        // Set up empty events
+        this.selection = { neighborhoods: undefined, listings: undefined };
+        this.highlight = { neighborhood: undefined, listing: undefined };
+        this.filter = { filter: false };
+    }
+
+    private eventBind(handler: Function) {
+        return function() {
+            // 'this' 
+        }
     }
 
     private getComponentName(): string {
