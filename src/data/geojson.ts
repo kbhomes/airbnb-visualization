@@ -4,6 +4,10 @@ export interface NeighborhoodGeoJSONProperties {
     nbrhood: string;
 }
 
-export interface NeighborhoodGeoJSON extends d3.ExtendedFeatureCollection<d3.ExtendedFeature<GeoJSON.GeometryObject, NeighborhoodGeoJSONProperties>> {
+export interface NeighborhoodGeoJSONFeature extends d3.ExtendedFeature<GeoJSON.GeometryObject, NeighborhoodGeoJSONProperties> {
+    
+}
+
+export interface NeighborhoodGeoJSON extends d3.ExtendedFeatureCollection<NeighborhoodGeoJSONFeature> {
 
 }

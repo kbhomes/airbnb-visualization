@@ -36,9 +36,9 @@ d3Selection.selection.prototype.moveToBack = function() {
     });
 };
 
-// declare module d3 {
-//     interface Selection {
-//         moveToFront() : Selection;
-//         moveToBack() : Selection;
-//     }
-// }
+export module d3 {
+    export interface Selection {
+        moveToFront() : Selection;
+        moveToBack() : Selection;
+    }
+}

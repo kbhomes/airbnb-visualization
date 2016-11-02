@@ -17,10 +17,10 @@ export abstract class BaseComponent {
         this.dispatcher = dispatcher;
 
         // Set up dispatch listeners
-        this.dispatcher.on(this.getComponentEventName(dispatch.DispatchEvent.Load), this.onLoad.bind(this));
-        this.dispatcher.on(this.getComponentEventName(dispatch.DispatchEvent.Select), this.onSelect.bind(this));
-        this.dispatcher.on(this.getComponentEventName(dispatch.DispatchEvent.Highlight), this.onHighlight.bind(this));
-        this.dispatcher.on(this.getComponentEventName(dispatch.DispatchEvent.Filter), this.onFilter.bind(this));
+        this.dispatcher.on(this.getComponentEventName(dispatch.DispatchEvent.Load), this.eventBind(this.onLoad));
+        this.dispatcher.on(this.getComponentEventName(dispatch.DispatchEvent.Select), this.eventBind(this.onSelect));
+        this.dispatcher.on(this.getComponentEventName(dispatch.DispatchEvent.Highlight), this.eventBind(this.onHighlight));
+        this.dispatcher.on(this.getComponentEventName(dispatch.DispatchEvent.Filter), this.eventBind(this.onFilter));
 
         // Set up empty events
         this.selection = { neighborhoods: undefined, listings: undefined };
@@ -29,8 +29,14 @@ export abstract class BaseComponent {
     }
 
     private eventBind(handler: Function) {
-        return function() {
-            // 'this' 
+        let self = this;
+
+        return function(args: any) {
+            // In this function, 'this' is the sender of the dispatch call
+            // Only forward the call if the sender is a different component
+            if (self !== this) {
+                handler.call(self, args);
+            }
         }
     }
 

@@ -2,8 +2,14 @@ import * as d3 from '../d3';
 
 import { BaseComponent } from './base-component';
 import { Dispatch, DispatchEvent, LoadEventData, SelectEventData, HighlightEventData, FilterEventData } from '../data/dispatch';
+import { Listing, Neighborhood } from '../data/listing';
 
 export class PriceQuadrantsComponent extends BaseComponent {
+    
+    private view: {
+        svg?: d3.Selection<d3.BaseType, {}, d3.BaseType, {}>;
+        bars?: d3.Selection<d3.BaseType, Neighborhood, d3.BaseType, {}>;
+    }
 
     public constructor(selector: string, dispatcher: Dispatch) {
         super(selector, dispatcher);
@@ -12,7 +18,8 @@ export class PriceQuadrantsComponent extends BaseComponent {
         let width = this.element.clientWidth;
         let barHeight = 20;
 
-        d3.select(this.selector).append('svg')
+        this.view = {};
+        this.view.svg = d3.select(this.selector).append('svg')
             .attr('class', 'chart')
             .attr('width', width);
     }
@@ -24,12 +31,18 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
     public onSelect(selection: SelectEventData) {
         super.onSelect(selection);
-        this.render();
     }
 
     public onHighlight(highlight: HighlightEventData) {
         super.onHighlight(highlight);
-        this.render();
+
+        this.view.bars.select('rect')
+            .attr('fill', d => {
+                if (this.highlight.neighborhood === d)
+                    return 'red';
+                else
+                    return 'steelblue';
+            });
     }
 
     public onFilter(filter: FilterEventData) {
@@ -46,8 +59,8 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
         let width = this.element.clientWidth;
         let barHeight = 20;
-        let chart = d3.select(this.selector + ' .chart')
-            .attr('height', this.data.neighborhoods.size * barHeight);
+        
+        this.view.svg.attr('height', this.data.neighborhoods.size * barHeight);
 
         // Create the x-axis's scale
         let x = d3.scaleLinear()
@@ -55,10 +68,10 @@ export class PriceQuadrantsComponent extends BaseComponent {
             .domain([0, 100]);
 
         // Create our data join
-        let bar = chart.selectAll('g').data(Array.from(this.data.neighborhoods.values()));
+        let barSelection = this.view.svg.selectAll('g').data(Array.from(this.data.neighborhoods.values()));
 
         // Create the bars for the entering elements
-        let barEnter = bar.enter()
+        let barEnter = barSelection.enter()
           .append('g')
             .attr('transform', (d, i) => 'translate(0,' + i * barHeight + ')');
 
@@ -97,14 +110,6 @@ export class PriceQuadrantsComponent extends BaseComponent {
             });
 
         // Update all the bars
-        let barUpdate = barEnter.merge(bar);
-
-        // Color the neighborhood that is currently highlighted (if any)
-        barUpdate.attr('fill', d => {
-            if (this.highlight.neighborhood == d)
-                return 'red';
-            else
-                return 'steelblue';
-        });
+        this.view.bars = barEnter.merge(barSelection);
     }
 } 

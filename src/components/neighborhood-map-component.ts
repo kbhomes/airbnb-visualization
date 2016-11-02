@@ -2,9 +2,14 @@ import * as d3 from '../d3';
 
 import { BaseComponent } from './base-component';
 import { Dispatch, DispatchEvent, LoadEventData, SelectEventData, HighlightEventData, FilterEventData } from '../data/dispatch';
-import { NeighborhoodGeoJSON } from '../data/geojson';
+import { NeighborhoodGeoJSON, NeighborhoodGeoJSONFeature } from '../data/geojson';
 
 export class NeighborhoodMapComponent extends BaseComponent {
+
+    private view: {
+        svg?: d3.Selection<d3.BaseType, {}, d3.BaseType, {}>;
+        paths?: d3.Selection<d3.BaseType, NeighborhoodGeoJSONFeature, d3.BaseType, {}>;
+    }
 
     public constructor(selector: string, dispatcher: Dispatch) {
         super(selector, dispatcher);
@@ -13,7 +18,8 @@ export class NeighborhoodMapComponent extends BaseComponent {
         let width = this.element.clientWidth,
             height = this.element.clientHeight;
 
-        let svg = d3.select(this.selector).append('svg')
+        this.view = {};
+        this.view.svg = d3.select(this.selector).append('svg')
             .attr('class', 'map-chart')
             .attr('width', width)
             .attr('height', height);
@@ -26,17 +32,21 @@ export class NeighborhoodMapComponent extends BaseComponent {
 
     public onSelect(selection: SelectEventData) {
         super.onSelect(selection);
-        this.render();
     }
 
     public onHighlight(highlight: HighlightEventData) {
         super.onHighlight(highlight);
-        this.render();
+
+        this.view.paths.style('fill', d => {
+            if (this.highlight.neighborhood && this.highlight.neighborhood.name == d.properties.nbrhood) 
+                return '#FBAB8F';
+            else
+                return '#FB5B1F';
+        });
     }
 
     public onFilter(filter: FilterEventData) {
         super.onFilter(filter);
-        this.render();
     }
 
     public resize() {
@@ -47,8 +57,7 @@ export class NeighborhoodMapComponent extends BaseComponent {
         let self = this;
 
         let width = this.element.clientWidth,
-            height = this.element.clientHeight,
-            svg = d3.select(this.selector + ' .map-chart');
+            height = this.element.clientHeight;
 
         let projection = d3.geoMercator()
             .scale(1)
@@ -70,11 +79,12 @@ export class NeighborhoodMapComponent extends BaseComponent {
             .scale(scale)
             .translate(transl);
 
-        let paths = svg.selectAll('path')
-            .data(this.data.geo.features);
+        
+        let pathsSelection = this.view.svg.selectAll('path')
+            .data(this.data.geo.features, d => d['id']);
 
         // Draw all the neighborhoods for the first time
-        let pathsEnter = paths.enter()
+        let pathsEnter = pathsSelection.enter()
           .append('path')
             .attr('d', path)
             .attr('data-id', d => d.id)
@@ -115,21 +125,11 @@ export class NeighborhoodMapComponent extends BaseComponent {
                 let sel = d3.select(this);
                 sel.transition()
                     .style('fill', '#FB5B1F')
-                    .style('transform', `translate(0px, 0px) scale(1.0)`);
+                    .style('transform', `translate(0px, 0px) scale(1.0)`)
+                    .on('end', () => sel.moveToBack());
             });
 
         // Create the update selection
-        let pathsUpdate = pathsEnter.merge(paths);
-        
-        // Highlight the current neighborhood, if any
-        pathsUpdate.style('fill', d => {
-            if (this.highlight.neighborhood)
-                console.log(this.highlight.neighborhood.name)
-
-            if (this.highlight.neighborhood && this.highlight.neighborhood.name == d.properties.nbrhood) 
-                return '#FBAB8F';
-            else
-                return '#FB5B1F';
-        });
+        this.view.paths = pathsEnter.merge(pathsSelection);
     }
 } 
