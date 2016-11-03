@@ -27,12 +27,27 @@ export class ListingBarsComponent extends BaseComponent {
             .attr('height', height);
     }
 
+    private sortList(property: 'price'|'markup', list: Listing[] = this.sortedListings) {
+        this.sortedListings = list.sort((a, b) => {
+            let comparison = 0;
+
+            if (property === 'price')
+                comparison = b.prices.airbnb.daily - a.prices.airbnb.daily;
+            else
+                comparison = b.prices.markup_percentage - a.prices.markup_percentage;
+
+            if (comparison === 0) 
+                return b.id - a.id;
+            else
+                return comparison;
+        });
+    }
+
     public onLoad(data: LoadEventData) {
         super.onLoad(data);
         
         // Sort the listings by price
-        this.sortedListings = Array.from(this.data.listings.values()).sort((a, b) => b.prices.airbnb.daily - a.prices.airbnb.daily);
-
+        this.sortList('price', Array.from(this.data.listings.values()));
         this.render();
     }
 
@@ -77,12 +92,10 @@ export class ListingBarsComponent extends BaseComponent {
         let markupMax = d3.max(this.sortedListings, l => l.prices.markup_percentage);
 
         // Create our data join
-        let barSelection = this.view.svg.selectAll('g').data(this.sortedListings);
+        let barSelection = this.view.svg.selectAll('g').data(this.sortedListings, l => l['id']);
 
         // Create the bars for the entering elements
-        let barEnter = barSelection.enter()
-          .append('g')
-            .attr('transform', (d, i) => `translate(${i * barWidth}, 0)`);
+        let barEnter = barSelection.enter().append('g');
 
         barEnter.append('rect')
             .attr('class', 'bar-price')
@@ -121,6 +134,15 @@ export class ListingBarsComponent extends BaseComponent {
                     .attr('fill', 'steelblue');
             });
 
+        
+        barEnter.selectAll('rect').on('click', function(d) {
+            let className = d3.select(this).attr('class');
+
+            // Sort by the clicked measure and re-render
+            self.sortList(className === 'bar-price' ? 'price' : 'markup');
+            self.render();
+        });
+
         // Draw the axes
         this.view.svg.append('line')
             .attr('id', 'bar-axis-prices')
@@ -142,5 +164,10 @@ export class ListingBarsComponent extends BaseComponent {
 
         // Update all the bars
         this.view.bars = barEnter.merge(barSelection);
+
+        this.view.bars
+            .transition()
+            .delay((d, i) => i * (500 / this.sortedListings.length))
+            .attr('transform', (d, i) => `translate(${i * barWidth}, 0)`);
     }
 } 
