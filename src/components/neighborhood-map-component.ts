@@ -38,7 +38,7 @@ export class NeighborhoodMapComponent extends BaseComponent {
         super.onHighlight(highlight);
 
         this.view.paths.style('fill', d => {
-            if (this.highlight.neighborhood && this.highlight.neighborhood.name == d.properties.nbrhood) 
+            if (this.highlight.neighborhood && this.highlight.neighborhood.name == d.properties.neighborho) 
                 return '#FBAB8F';
             else
                 return '#FB5B1F';
@@ -94,7 +94,7 @@ export class NeighborhoodMapComponent extends BaseComponent {
             .on('mouseenter', function(d) {
                 // Dispatch a highlight event for this neighborhood
                 self.dispatcher.call(DispatchEvent.Highlight, this, {
-                    neighborhood: self.data.neighborhoods.get(d.properties.nbrhood),
+                    neighborhood: self.data.neighborhoods.get(d.properties.neighborho),
                     listing: undefined
                 } as HighlightEventData);
 

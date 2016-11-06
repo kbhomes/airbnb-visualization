@@ -1,7 +1,7 @@
 import * as d3 from '../d3';
 
 export interface NeighborhoodGeoJSONProperties {
-    nbrhood: string;
+    neighborho: string;
 }
 
 export interface NeighborhoodGeoJSONFeature extends d3.ExtendedFeature<GeoJSON.GeometryObject, NeighborhoodGeoJSONProperties> {
