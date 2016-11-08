@@ -12,6 +12,7 @@ export class Application {
     // Components
     private mapComponent: components.NeighborhoodMapComponent;
     private barsComponent: components.ListingBarsComponent;
+    private quadrantsComponent: components.PriceQuadrantsComponent;
 
     public constructor() {
         // Create the dispatcher
@@ -20,6 +21,7 @@ export class Application {
         // Initialize components
         this.mapComponent = new components.NeighborhoodMapComponent('#map .content', this.dispatcher);
         this.barsComponent = new components.ListingBarsComponent('#listing-bars .content', this.dispatcher);
+        this.quadrantsComponent = new components.PriceQuadrantsComponent('#quadrants .content', this.dispatcher);
 
         // Begin loading
         this.loadData();

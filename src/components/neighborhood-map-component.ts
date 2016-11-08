@@ -88,7 +88,7 @@ export class NeighborhoodMapComponent extends BaseComponent {
           .append('path')
             .attr('d', path)
             .attr('data-id', d => d.id)
-            .attr('data-name', d => d.properties.nbrhood)
+            .attr('data-name', d => d.properties.neighborho)
             .style('fill', '#FB5B1F')
             .style('stroke', '#FFFFFF')
             .on('mouseenter', function(d) {

@@ -36,7 +36,7 @@ div {
 }
 
 .section div.content {
-  height: 100%;
+  height: calc(100% - 18px);
   flex: 1;
 }
 
@@ -71,8 +71,7 @@ div {
 
 }
 
-.chart text {
-  fill: black;
-  font: 10px sans-serif;
-  text-anchor: start;
+.chart .axis-label text {
+  font: 12px sans-serif;
+  text-anchor: middle;
 }
