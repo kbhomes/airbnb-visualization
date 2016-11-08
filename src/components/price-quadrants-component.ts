@@ -172,7 +172,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
         }
         else {
             this.view.listingCircles.attr('fill', d => {
-                if (highlight.listing === d) 
+                if (highlight.listing === d || highlight.neighborhood === d.neighborhood) 
                     return 'rgba(255, 100, 100, 0.5)';
                 else
                     return 'rgba(50, 50, 100, 0.5)';
