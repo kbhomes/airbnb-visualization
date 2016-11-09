@@ -36,8 +36,23 @@ div {
 }
 
 .section div.content {
-  height: 100%;
+  height: calc(100% - 18px);
   flex: 1;
+  position: relative;
+}
+
+.section div.content div.overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+
+.section div.content div.overlay > div {
+  position: absolute;
+  pointer-events: auto;
 }
 
 #section-top {
@@ -71,8 +86,7 @@ div {
 
 }
 
-.chart text {
-  fill: black;
-  font: 10px sans-serif;
-  text-anchor: start;
+.chart .axis-label text {
+  font: 12px sans-serif;
+  text-anchor: middle;
 }
