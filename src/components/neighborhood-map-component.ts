@@ -47,9 +47,15 @@ export class NeighborhoodMapComponent extends BaseComponent {
 
     }
 
-    public  shadeOfGreen(neighborhood):string{
+//computes the average neighborhood price
+    public getNeighborhoodPriceAverage(neighborhood):number{
 
         let sum  = 0;
+
+
+        if(neighborhood == undefined){
+            return 0;
+        }
         let neighborhood_listings = neighborhood.listings;
 
         for (var house in neighborhood_listings) {
@@ -59,11 +65,19 @@ export class NeighborhoodMapComponent extends BaseComponent {
 
         let average = sum/neighborhood_listings.length;
 
+        return Math.round(average);
+    }
+//returns shade of green
+    public shadeOfGreen(neighborhood):string{
+
+        let average = this.getNeighborhoodPriceAverage(neighborhood)
+
         return this.getColor(average);
         
     }
-
-    public getColor(averageNeighborhoodPrice):string{
+//return green based on price
+//color scale: https://color.adobe.com/This-Green-color-theme-8084268/ for each green
+    private getColor(averageNeighborhoodPrice):string{
 
         if(averageNeighborhoodPrice>200 && averageNeighborhoodPrice<400 ){
 
@@ -172,6 +186,19 @@ export class NeighborhoodMapComponent extends BaseComponent {
                     .on('end', () => sel.moveToBack());
             });
 
+                //label each neighborhood
+                //TODO: tidy label up 
+                var label = this.view.svg.selectAll("text")
+                    .data(this.data.geo.features)
+                    .enter()
+                    .append("text")
+                    .attr("class", "label")
+                    .attr("transform", function(d) { return "translate(" + path.centroid(d) + ")"; })
+                    .text(function(d) { 
+                        return d.properties.neighborho +" $"+self.getNeighborhoodPriceAverage(self.data.neighborhoods.get(d.properties.neighborho)) ;
+                    })
+                    .attr('font-size',8);
+                   
         // Create the update selection
         this.view.paths = pathsEnter.merge(pathsSelection);
     }
