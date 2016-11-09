@@ -37,12 +37,6 @@ export class NeighborhoodMapComponent extends BaseComponent {
     public onHighlight(highlight: HighlightEventData) {
         super.onHighlight(highlight);
 
-        this.view.paths.style('fill', d => {
-            if (this.highlight.neighborhood && this.highlight.neighborhood.name == d.properties.neighborho) 
-                return '#FBAB8F';
-            else
-                return '#FB5B1F';
-        });
     }
 
     public onFilter(filter: FilterEventData) {
@@ -51,6 +45,50 @@ export class NeighborhoodMapComponent extends BaseComponent {
 
     public resize() {
 
+    }
+
+    public  shadeOfGreen(neighborhood):string{
+
+        let sum  = 0;
+        let neighborhood_listings = neighborhood.listings;
+
+        for (var house in neighborhood_listings) {
+
+            sum += (+neighborhood_listings[house]['prices']['airbnb']['daily']);
+        }
+
+        let average = sum/neighborhood_listings.length;
+
+        return this.getColor(average);
+        
+    }
+
+    public getColor(averageNeighborhoodPrice):string{
+
+        if(averageNeighborhoodPrice>200 && averageNeighborhoodPrice<400 ){
+
+            return 'rgb(100,255,100)';
+        }else if(averageNeighborhoodPrice>401 && averageNeighborhoodPrice<600 ){
+            return 'rgb(80,225,80)';
+        }else if(averageNeighborhoodPrice>601 && averageNeighborhoodPrice<800){
+            return 'rgb(60,195,60)'
+        }else if(averageNeighborhoodPrice>801 && averageNeighborhoodPrice<1000){
+            return 'rgb(40,165,40)'
+        }else if(averageNeighborhoodPrice>1001 && averageNeighborhoodPrice<1200){
+            return 'rgb(20,135,20)'
+        } else if(averageNeighborhoodPrice>1001 && averageNeighborhoodPrice<1200){
+            return 'rgb(10,105,00)'
+        }else if(averageNeighborhoodPrice>1201 && averageNeighborhoodPrice<1400){
+            return 'rgb(5,75,5)'
+        }else if(averageNeighborhoodPrice>1401 && averageNeighborhoodPrice<1600){
+            return 'rgb(0,45,0)'
+        }
+
+        return 'rgb(12,200,30)';
+    }
+
+    private getNeighborhoodAverages(){
+        
     }
 
     public render() {
@@ -88,8 +126,14 @@ export class NeighborhoodMapComponent extends BaseComponent {
           .append('path')
             .attr('d', path)
             .attr('data-id', d => d.id)
-            .attr('data-name', d => d.properties.nbrhood)
-            .style('fill', '#FB5B1F')
+            .attr('data-name', d => d.properties.neighborho)
+            .style('fill', function(d){
+
+                let neighborhood = self.data.neighborhoods.get(d.properties.neighborho);
+                //if the neighborhood exists
+                // return a color giving the price range
+                return (neighborhood != undefined) ? self.shadeOfGreen(neighborhood) : '#000000';
+            })
             .style('stroke', '#FFFFFF')
             .on('mouseenter', function(d) {
                 // Dispatch a highlight event for this neighborhood
@@ -97,13 +141,12 @@ export class NeighborhoodMapComponent extends BaseComponent {
                     neighborhood: self.data.neighborhoods.get(d.properties.neighborho),
                     listing: undefined
                 } as HighlightEventData);
-
-                // Scale up the particular neighborhood. 
                 let sel = d3.select(this);
+                // Scale up the particular neighborhood. 
                 sel.moveToFront();
 
                 let box = (sel.node() as SVGPathElement).getBBox();
-
+                
                 // Do some really naive clamping to get already large neighborhood slightly scaled,
                 // and teeny tiny neighborhoods more highly scaled. The 2500 figures from a bounding
                 // box of approximately 50x50. Scale factor remains in range [1.5, 2.5].
@@ -112,7 +155,7 @@ export class NeighborhoodMapComponent extends BaseComponent {
                 let cy = box.y + box.height/2;
                 
                 sel.transition()
-                    .style('fill', '#FBAB8F')
+                    .style('fill', 'rgb(255,29,35)')
                     .style('transform', `translate(-${(scale - 1) * cx}px, -${(scale - 1) * cy}px) scale(${scale})`);
             })
             .on('mouseleave', function(d) {
@@ -124,7 +167,7 @@ export class NeighborhoodMapComponent extends BaseComponent {
 
                 let sel = d3.select(this);
                 sel.transition()
-                    .style('fill', '#FB5B1F')
+                    .style('fill', self.shadeOfGreen(self.data.neighborhoods.get(d.properties.neighborho)))
                     .style('transform', `translate(0px, 0px) scale(1.0)`)
                     .on('end', () => sel.moveToBack());
             });
