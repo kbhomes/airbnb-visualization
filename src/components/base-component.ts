@@ -52,6 +52,27 @@ export abstract class BaseComponent {
         this.data = data;
     }
 
+       //computes the average neighborhood price
+    public getNeighborhoodPriceAverage(neighborhood):number{
+
+        let sum  = 0;
+
+
+        if(neighborhood == undefined){
+            return 0;
+        }
+        let neighborhood_listings = neighborhood.listings;
+
+        for (var house in neighborhood_listings) {
+
+            sum += (+neighborhood_listings[house]['prices']['airbnb']['daily']);
+        }
+
+        let average = sum/neighborhood_listings.length;
+
+        return Math.round(average);
+    }
+
     public onSelect(selection: dispatch.SelectEventData) : void {
         this.selection = selection;
     }

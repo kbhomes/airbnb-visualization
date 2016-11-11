@@ -82,8 +82,8 @@ div {
   border-bottom: 1px solid #ccc;
 }
 
-#details {
-
+#details #price, #rating, #common_amenities, #common_words {
+  color:#ff1d23;
 }
 
 .chart .axis-label text {

@@ -3,7 +3,7 @@ import * as d3 from '../d3';
 import { BaseComponent } from './base-component';
 import { Dispatch, DispatchEvent, LoadEventData, SelectEventData, HighlightEventData, FilterEventData } from '../data/dispatch';
 import { NeighborhoodGeoJSON, NeighborhoodGeoJSONFeature } from '../data/geojson';
-
+import { Attribute } from '../data/attribute';
 export class NeighborhoodMapComponent extends BaseComponent {
 
     private view: {
@@ -45,27 +45,6 @@ export class NeighborhoodMapComponent extends BaseComponent {
 
     public resize() {
 
-    }
-
-//computes the average neighborhood price
-    public getNeighborhoodPriceAverage(neighborhood):number{
-
-        let sum  = 0;
-
-
-        if(neighborhood == undefined){
-            return 0;
-        }
-        let neighborhood_listings = neighborhood.listings;
-
-        for (var house in neighborhood_listings) {
-
-            sum += (+neighborhood_listings[house]['prices']['airbnb']['daily']);
-        }
-
-        let average = sum/neighborhood_listings.length;
-
-        return Math.round(average);
     }
 //returns shade of green
     public shadeOfGreen(neighborhood):string{
@@ -195,7 +174,13 @@ export class NeighborhoodMapComponent extends BaseComponent {
                     .attr("class", "label")
                     .attr("transform", function(d) { return "translate(" + path.centroid(d) + ")"; })
                     .text(function(d) { 
-                        return d.properties.neighborho +" $"+self.getNeighborhoodPriceAverage(self.data.neighborhoods.get(d.properties.neighborho)) ;
+                        let neighborhood = self.data.neighborhoods.get(d.properties.neighborho);  
+                        let price = '0';
+                        if (neighborhood != undefined){
+                           price = Attribute.price.neighborhoodAccessor(neighborhood);
+                           return d.properties.neighborho +" $"+price ; 
+                        }
+                        return d.properties.neighborho +" $"+price;
                     })
                     .attr('font-size',8);
                    

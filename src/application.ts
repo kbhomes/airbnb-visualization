@@ -23,7 +23,7 @@ export class Application {
         this.mapComponent = new components.NeighborhoodMapComponent('#map .content', this.dispatcher);
         this.barsComponent = new components.ListingBarsComponent('#listing-bars .content', this.dispatcher);
         this.quadrantsComponent = new components.PriceQuadrantsComponent('#quadrants .content', this.dispatcher);
-        this.detailComponent = new components.DetailComponent('detail .content', this.dispatcher);
+        this.detailComponent = new components.DetailComponent('details .content', this.dispatcher);
 
         // Begin loading
         this.loadData();
