@@ -21,7 +21,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
         
         markupScale?: d3.ScaleLinear<number, number>;
         otherScale?: d3.ScaleLinear<number, number> | d3.ScalePoint<string>;
-        countScale?: d3.ScaleLinear<number, number>;
+        sizeScale?: d3.ScaleLinear<number, number>;
 
         neighborhoodCircles?: d3.Selection<d3.BaseType, Neighborhood, d3.BaseType, {}>;
         listingCircles?: d3.Selection<d3.BaseType, Listing, d3.BaseType, {}>;
@@ -80,8 +80,8 @@ export class PriceQuadrantsComponent extends BaseComponent {
                 .domain(this.selectedAttribute.ordinalDomain);
         }
 
-        this.view.countScale = d3.scaleLinear()
-            .domain(d3.extent(data, l => 5));
+        this.view.sizeScale = d3.scaleLinear()
+            .domain(d3.extent(data, Attribute.price[accessorName]));
     }
 
     public onLoad(data: LoadEventData) {
@@ -199,7 +199,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
         this.view.markupScale.range([innerPadding.height(height) + innerPadding.top, innerPadding.top]);
         this.view.otherScale.range([innerPadding.left, innerPadding.left + innerPadding.width(width)]);
-        this.view.countScale.range([5, 30]);
+        this.view.sizeScale.range([5, 30]);
 
         let markupAxis = d3.axisLeft(this.view.markupScale);
         let otherAxis = d3.axisBottom(this.view.otherScale);
@@ -257,9 +257,17 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
             this.view.neighborhoodCircles = circleSelection.merge(circleEnter);
             this.view.neighborhoodCircles
+                .transition()
+                .duration(1000)
+                .attr('opacity', d => {
+                    if (isNaN(this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d))))
+                        return 0;
+                    else
+                        return 1;
+                })
                 .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d)))
                 .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d)))
-                .attr('r', d => this.view.countScale(d.listings.length))
+                .attr('r', d => this.view.sizeScale(Attribute.price.neighborhoodAccessor(d)))
                 .attr('fill', 'rgba(50, 50, 100, 0.5)')
         }
         else if (this.selectedLevel === 'Listings') {
@@ -294,9 +302,17 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
             this.view.listingCircles = circleSelection.merge(circleEnter);
             this.view.listingCircles
+                .transition()
+                .duration(1000)
+                .attr('opacity', d => {
+                    if (isNaN(this.view.otherScale(this.selectedAttribute.accessor(d))))
+                        return 0;
+                    else
+                        return 1;
+                })
                 .attr('cx', d => this.view.otherScale(this.selectedAttribute.accessor(d)))
                 .attr('cy', d => this.view.markupScale(Attribute.markup.accessor(d)))
-                .attr('r', d => this.view.countScale(d.amenities.length))
+                .attr('r', d => this.view.sizeScale(Attribute.price.accessor(d)))
                 .attr('fill', 'rgba(50, 50, 100, 0.5)')
         }
     }
