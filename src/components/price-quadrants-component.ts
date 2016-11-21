@@ -76,7 +76,10 @@ export class PriceQuadrantsComponent extends BaseComponent {
         }
 
         if (this.selectedAttribute.kind === 'ordinal') {
-            this.view.otherScale = d3.scalePoint().domain(this.selectedAttribute.ordinalDomain);
+            this.view.otherScale = 
+                d3.scalePoint()
+                    .domain(this.selectedAttribute.ordinalDomain)
+                    .padding(1);
         }
     }
 
