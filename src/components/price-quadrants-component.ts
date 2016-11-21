@@ -56,32 +56,28 @@ export class PriceQuadrantsComponent extends BaseComponent {
     }
 
     private updateScales() {
-        let accessorName: string;
-        let data: Neighborhood[] | Listing[];
-
         if (this.selectedLevel === 'Neighborhoods') {
-            accessorName = 'neighborhoodAccessor';
-            data = this.neighborhoods;
+            let data = this.neighborhoods;
+
+            this.view.markupScale = d3.scaleLinear().domain(d3.extent(data, Attribute.markup.neighborhoodAccessor));
+            this.view.sizeScale = d3.scaleLinear().domain(d3.extent(data, Attribute.price.neighborhoodAccessor));
+
+            if (this.selectedAttribute.kind === 'continuous') 
+                this.view.otherScale = d3.scaleLinear().domain(d3.extent(data, this.selectedAttribute.neighborhoodAccessor));
         }
         else {
-            accessorName = 'accessor';
-            data = this.listings;
+            let data = this.listings;
+
+            this.view.markupScale = d3.scaleLinear().domain(d3.extent(data, Attribute.markup.accessor));
+            this.view.sizeScale = d3.scaleLinear().domain(d3.extent(data, Attribute.price.accessor));
+
+            if (this.selectedAttribute.kind === 'continuous')
+                this.view.otherScale = d3.scaleLinear().domain(d3.extent(data, this.selectedAttribute.accessor));
         }
 
-        this.view.markupScale = d3.scaleLinear()
-            .domain(d3.extent(data, Attribute.markup[accessorName]));
-
-        if (this.selectedAttribute.kind === 'continuous') {
-            this.view.otherScale = d3.scaleLinear()
-                .domain(d3.extent(data, this.selectedAttribute[accessorName]));
+        if (this.selectedAttribute.kind === 'ordinal') {
+            this.view.otherScale = d3.scalePoint().domain(this.selectedAttribute.ordinalDomain);
         }
-        else if (this.selectedAttribute.kind === 'ordinal') {
-            this.view.otherScale = d3.scalePoint()
-                .domain(this.selectedAttribute.ordinalDomain);
-        }
-
-        this.view.sizeScale = d3.scaleLinear()
-            .domain(d3.extent(data, Attribute.price[accessorName]));
     }
 
     public onLoad(data: LoadEventData) {
