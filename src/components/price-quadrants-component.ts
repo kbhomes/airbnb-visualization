@@ -20,7 +20,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
         padding?: d3.Padding;
         
         markupScale?: d3.ScaleLinear<number, number>;
-        otherScale?: d3.ScaleLinear<number, number> | d3.ScalePoint<string>;
+        otherScale?: d3.GenericScale<any, any>; //d3.ScaleLinear<number, number> | d3.ScalePoint<string>;
         sizeScale?: d3.ScaleLinear<number, number>;
 
         neighborhoodCircles?: d3.Selection<d3.BaseType, Neighborhood, d3.BaseType, {}>;

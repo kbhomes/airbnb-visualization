@@ -19,6 +19,7 @@ export * from 'd3-timer';
 export * from 'd3-transition';
 
 import * as d3Selection from 'd3-selection';
+import * as d3Axis from 'd3-axis';
 
 /* 
  * Extension to D3 to facilitate re-ordering elements
@@ -37,6 +38,20 @@ d3Selection.selection.prototype.moveToBack = function() {
         } 
     });
 };
+
+export interface GenericScale<Domain, Range> {
+    (x: Domain): Range;
+    domain(): Array<Domain>;
+    range(): Array<number>;
+    copy(): this;
+    bandwidth?(): number;
+    ticks?(count: number | d3Axis.AxisTimeInterval): Array<number> | Array<Date>;
+    tickFormat?(count: number | d3Axis.AxisTimeInterval, specifier?: string): ((d: number) => string) | ((d: Date) => string);
+
+    domain(domain: Array<Domain | { valueOf(): Domain }>): this;
+    range(range: Array<Range>): this;
+    padding?(padding: number): this;
+}
 
 export class Padding {
     public top: number;
