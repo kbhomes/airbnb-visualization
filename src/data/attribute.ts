@@ -7,7 +7,8 @@ export interface Attribute {
     neighborhoodAccessor: (neighborhood: Neighborhood) => any;
 
     kind: 'continuous' | 'ordinal';
-    ordinalDomain?: string[];
+    listingDomain?: (data: Listing[]) => any;
+    neighborhoodDomain?: (data: Neighborhood[]) => any;
 }
 
 export module Attribute {
@@ -15,7 +16,7 @@ export module Attribute {
         name: 'Rating', 
         accessor: l => l.reviews.rating, 
         neighborhoodAccessor: n => d3.mean(n.listings, l => l.reviews.rating),
-        kind: 'continuous' 
+        kind: 'continuous'
     };
 
     export var price: Attribute = {
@@ -37,6 +38,13 @@ export module Attribute {
         accessor: l => l.cancellation_policy,
         neighborhoodAccessor: n => n.listings[0].cancellation_policy,
         kind: 'ordinal',
-        ordinalDomain: ['flexible', 'moderate', 'strict', 'super_strict_30', 'super_strict_60']
+        listingDomain: (data) => ['flexible', 'moderate', 'strict', 'super_strict_30', 'super_strict_60'],
+        neighborhoodDomain: (data) => ['flexible', 'moderate', 'strict', 'super_strict_30', 'super_strict_60']
     };
+
+    // Set default domain accessors
+    for (let attr of [rating, price, markup]) {
+        attr.listingDomain = (data) => d3.extent(data, d => attr.accessor(d));
+        attr.neighborhoodDomain = (data) => d3.extent(data, d => attr.neighborhoodAccessor(d));
+    }
 }

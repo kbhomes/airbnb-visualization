@@ -56,30 +56,32 @@ export class PriceQuadrantsComponent extends BaseComponent {
     }
 
     private updateScales() {
+        let markupDomain: any;
+        let sizeDomain: any;
+        let otherDomain: any;
+
         if (this.selectedLevel === 'Neighborhoods') {
             let data = this.neighborhoods;
+            markupDomain = Attribute.markup.neighborhoodDomain(data);
+            sizeDomain = Attribute.price.neighborhoodDomain(data);
+            otherDomain = this.selectedAttribute.neighborhoodDomain(data);
 
-            this.view.markupScale = d3.scaleLinear().domain(d3.extent(data, Attribute.markup.neighborhoodAccessor));
-            this.view.sizeScale = d3.scaleLinear().domain(d3.extent(data, Attribute.price.neighborhoodAccessor));
-
-            if (this.selectedAttribute.kind === 'continuous') 
-                this.view.otherScale = d3.scaleLinear().domain(d3.extent(data, this.selectedAttribute.neighborhoodAccessor));
         }
         else {
             let data = this.listings;
-
-            this.view.markupScale = d3.scaleLinear().domain(d3.extent(data, Attribute.markup.accessor));
-            this.view.sizeScale = d3.scaleLinear().domain(d3.extent(data, Attribute.price.accessor));
-
-            if (this.selectedAttribute.kind === 'continuous')
-                this.view.otherScale = d3.scaleLinear().domain(d3.extent(data, this.selectedAttribute.accessor));
+            markupDomain = Attribute.markup.listingDomain(data);
+            sizeDomain = Attribute.price.listingDomain(data);
+            otherDomain = this.selectedAttribute.listingDomain(data);
         }
 
-        if (this.selectedAttribute.kind === 'ordinal') {
-            this.view.otherScale = 
-                d3.scalePoint()
-                    .domain(this.selectedAttribute.ordinalDomain)
-                    .padding(1);
+        this.view.markupScale = d3.scaleLinear().domain(markupDomain);
+        this.view.sizeScale = d3.scaleLinear().domain(sizeDomain);
+
+        if (this.selectedAttribute.kind === 'continuous') { 
+            this.view.otherScale = d3.scaleLinear().domain(otherDomain);
+        }
+        else if (this.selectedAttribute.kind === 'ordinal') {
+            this.view.otherScale = d3.scalePoint().domain(otherDomain).padding(1);
         }
     }
 
