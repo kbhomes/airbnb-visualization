@@ -78,8 +78,28 @@ div {
   padding: 0;
 }
 
-#options {
+#filters {
   border-bottom: 1px solid #ccc;
+}
+
+.filter-neighborhoods {
+  padding: 0;
+  margin: 10px;
+}
+
+.filter-neighborhoods div {
+  font-size: 12px;
+  padding: 5px 8px 5px 5px;
+  background: #d8d8d8;
+  cursor: pointer;
+  float: left;
+  margin: 3px;;
+}
+
+.filter-neighborhoods div:before {
+  content: 'ｘ';
+  color: #777;
+  padding-right: 5px;
 }
 
 #details #price, #rating, #common_amenities, #common_words {
