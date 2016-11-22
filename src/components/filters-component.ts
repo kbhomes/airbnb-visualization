@@ -17,22 +17,9 @@ export class FiltersComponent extends BaseComponent {
         this.view = {};
     }
 
-    public onLoad(data: LoadEventData) {
-        super.onLoad(data);
-        this.render();
-    }
-
     public onSelect(selection: SelectEventData) {
         super.onSelect(selection);
         this.render();
-    }
-
-    public onHighlight(highlight: HighlightEventData) {
-        super.onHighlight(highlight);
-    }
-
-    public onFilter(filter: FilterEventData) {
-        super.onFilter(filter);
     }
 
     public resize() {

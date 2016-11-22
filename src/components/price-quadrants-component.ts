@@ -159,66 +159,22 @@ export class PriceQuadrantsComponent extends BaseComponent {
     public onSelect(selection: SelectEventData) {
         super.onSelect(selection);
 
-        let selectedListings = this.selection.listings || [];
-        let selectedNeighborhoods = this.selection.neighborhoods || [];
-
         if (this.selectedLevel === 'Neighborhoods') {
-            this.view.neighborhoodCircles.attr('fill', function(d) {
-                // Don't change selected neighborhoods
-                if (selectedNeighborhoods.indexOf(d) !== -1) {
-                    return 'rgba(255, 100, 100, 0.5)';
-                }
-                else {
-                    return 'rgba(50, 50, 100, 0.5)';
-                }
-            });
+            this.view.neighborhoodCircles.attr('fill', d => this.getNeighborhoodCircleFill(d));
         }
         else {
-            this.view.listingCircles.attr('fill', function(d) {
-                // Don't change selected listings
-                if (selectedListings.indexOf(d) !== -1) {
-                    return 'rgba(255, 100, 100, 0.5)';
-                }
-                else {
-                    return 'rgba(50, 50, 100, 0.5)';
-                }
-            });
+            this.view.listingCircles.attr('fill', d => this.getListingCircleFill(d));
         }
     }
 
     public onHighlight(highlight: HighlightEventData) {
         super.onHighlight(highlight);
 
-        let selectedListings = this.selection.listings || [];
-        let selectedNeighborhoods = this.selection.neighborhoods || [];
-
         if (this.selectedLevel === 'Neighborhoods') {
-            this.view.neighborhoodCircles.attr('fill', function(d) {
-                // Don't change selected neighborhoods
-                if (selectedNeighborhoods.indexOf(d) !== -1) {
-                    return d3.select(this).attr('fill');
-                }
-                else {
-                    if (highlight.neighborhood === d) 
-                        return 'rgba(255, 100, 100, 0.5)';
-                    else
-                        return 'rgba(50, 50, 100, 0.5)';
-                }
-            });
+            this.view.neighborhoodCircles.attr('fill', d => this.getNeighborhoodCircleFill(d));
         }
         else {
-            this.view.listingCircles.attr('fill', function(d) {
-                // Don't change selected listings
-                if (selectedListings.indexOf(d) !== -1) {
-                    return d3.select(this).attr('fill');
-                }
-                else {
-                    if (highlight.listing === d || highlight.neighborhood === d.neighborhood) 
-                        return 'rgba(255, 100, 100, 0.5)';
-                    else
-                        return 'rgba(50, 50, 100, 0.5)';
-                }
-            });
+            this.view.listingCircles.attr('fill', d => this.getListingCircleFill(d));
         }
     }
 
@@ -228,6 +184,37 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
     public resize() {
 
+    }
+
+    private getNeighborhoodCircleFill(neighborhood: Neighborhood) : string {
+        let selectedNeighborhoods = this.selection.neighborhoods || [];
+        let highlightedNeighborhood = this.highlight.neighborhood;
+
+        if (selectedNeighborhoods.indexOf(neighborhood) !== -1) {
+            return 'rgba(255, 100, 100, 0.5)';
+        }
+        else {
+            if (neighborhood === highlightedNeighborhood) 
+                return 'rgba(255, 100, 100, 0.5)';
+            else
+                return 'rgba(50, 50, 100, 0.5)';
+        }
+    }
+
+    private getListingCircleFill(listing: Listing) : string {
+        let selectedNeighborhoods = this.selection.neighborhoods || [];
+        let selectedListings = this.selection.listings || [];
+        let highlightedListing = this.highlight.listing;
+        
+        if (selectedListings.indexOf(listing) !== -1 || selectedNeighborhoods.indexOf(listing.neighborhood) !== -1) {
+            return 'rgba(255, 100, 100, 0.5)';
+        }
+        else {
+            if (this.highlight.listing === listing || this.highlight.neighborhood === listing.neighborhood) 
+                return 'rgba(255, 100, 100, 0.5)';
+            else
+                return 'rgba(50, 50, 100, 0.5)';
+        }
     }
 
     public render() {
@@ -291,7 +278,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
                 .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d)))
                 .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d)))
                 .attr('r', d => this.view.sizeScale(Attribute.price.neighborhoodAccessor(d)))
-                .attr('fill', 'rgba(50, 50, 100, 0.5)')
+                .attr('fill', d => this.getNeighborhoodCircleFill(d))
         }
         else if (this.selectedLevel === 'Listings') {
             let circleSelection = this.view.svg
@@ -317,7 +304,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
                 .attr('cx', d => this.view.otherScale(this.selectedAttribute.accessor(d)))
                 .attr('cy', d => this.view.markupScale(Attribute.markup.accessor(d)))
                 .attr('r', d => this.view.sizeScale(Attribute.price.accessor(d)))
-                .attr('fill', 'rgba(50, 50, 100, 0.5)')
+                .attr('fill', d => this.getListingCircleFill(d))
         }
     }
 } 
