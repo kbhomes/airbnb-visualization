@@ -338,6 +338,8 @@ export class PriceQuadrantsComponent extends BaseComponent {
             };
 
             if (this.view.listingCircles && this.view.neighborhoodCircles) {
+                updateTransition.duration(100);
+                
                 this.view.listingCircles
                     .style('pointer-events', 'auto')
                     .transition(updateTransition)
