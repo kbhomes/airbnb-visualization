@@ -46,8 +46,8 @@ export class PriceQuadrantsComponent extends BaseComponent {
             .attr('height', height);
         
         this.attributeMap = [];
-        this.attributeMap.push(Attribute.rating);
         this.attributeMap.push(Attribute.price);
+        this.attributeMap.push(Attribute.rating);
         this.attributeMap.push(Attribute.cancellationPolicy);
 
         // Select the rating attribute by default
@@ -56,10 +56,15 @@ export class PriceQuadrantsComponent extends BaseComponent {
     }
 
     private updateScales() {
+        let width = this.element.clientWidth;
+        let height = this.element.clientHeight;
+        let innerPadding = d3.Padding.add(this.view.padding, new d3.Padding(0, 40, 40, 0));
+
         let markupDomain: any;
         let sizeDomain: any;
         let otherDomain: any;
 
+        // Determine the domains of the scales
         if (this.selectedLevel === 'Neighborhoods') {
             let data = this.neighborhoods;
             markupDomain = Attribute.markup.neighborhoodDomain(data);
@@ -74,6 +79,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
             otherDomain = this.selectedAttribute.listingDomain(data);
         }
 
+        // Update the domains of the scales
         this.view.markupScale = d3.scaleLinear().domain(markupDomain);
         this.view.sizeScale = d3.scaleLinear().domain(sizeDomain);
 
@@ -83,6 +89,11 @@ export class PriceQuadrantsComponent extends BaseComponent {
         else if (this.selectedAttribute.kind === 'ordinal') {
             this.view.otherScale = d3.scalePoint().domain(otherDomain).padding(1);
         }
+
+        // Update the ranges of the scales
+        this.view.markupScale.range([innerPadding.height(height) + innerPadding.top, innerPadding.top]);
+        this.view.otherScale.range([innerPadding.left, innerPadding.left + innerPadding.width(width)]);
+        this.view.sizeScale.range([5, 30]);
     }
 
     public onLoad(data: LoadEventData) {
@@ -90,9 +101,6 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
         this.listings = Array.from(this.data.listings.values());
         this.neighborhoods = Array.from(this.data.neighborhoods.values());
-
-        // Setup scales for usage in the render method
-        this.updateScales();
 
         // Create the axis elements
         this.view.svg.append('g').attr('class', 'markup-axis');
@@ -138,18 +146,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
         levelSelect.on('change', () => {
             let index: number = levelSelect.property('selectedIndex');
             let level = levelOptions.filter((d,i) => i === index).datum();
-
-            // Update the scales for this level and re-render
             this.selectedLevel = level;
-            this.updateScales();
-
-            // Remove all the elements in the selections
-            if (this.view.neighborhoodCircles)
-                this.view.neighborhoodCircles.remove();
-
-            if (this.view.listingCircles)
-                this.view.listingCircles.remove();
-
             this.render();
         });
 
@@ -226,9 +223,9 @@ export class PriceQuadrantsComponent extends BaseComponent {
         // Create the padding for the scatter plot itself
         let innerPadding = d3.Padding.add(this.view.padding, new d3.Padding(0, 40, 40, 0));
 
-        this.view.markupScale.range([innerPadding.height(height) + innerPadding.top, innerPadding.top]);
-        this.view.otherScale.range([innerPadding.left, innerPadding.left + innerPadding.width(width)]);
-        this.view.sizeScale.range([5, 30]);
+        this.updateScales();
+
+        let updateTransition = d3.transition(null).duration(1000);
 
         let markupAxis = d3.axisLeft(this.view.markupScale);
         let otherAxis = d3.axisBottom(this.view.otherScale);
@@ -236,10 +233,12 @@ export class PriceQuadrantsComponent extends BaseComponent {
         // Draw the axes
         this.view.svg.select('g.markup-axis')
             .style('transform', innerPadding.translateX(0))
+            .transition(updateTransition)
             .call(markupAxis);
 
         this.view.svg.select('g.other-axis')
             .style('transform', innerPadding.translateY(innerPadding.height(height)))
+            .transition(updateTransition)
             .call(otherAxis);
 
         // Draw axis labels
@@ -255,56 +254,113 @@ export class PriceQuadrantsComponent extends BaseComponent {
         // Draw the items
         // TODO: Remove all this dumb duplication when you're not tired
         if (this.selectedLevel === 'Neighborhoods') {
-            let circleSelection = this.view.svg
-            .selectAll('circle')
-                .data(this.neighborhoods);
+            let neighborhoodsTransitionActions = () => {
+                let circleSelection = this.view.svg
+                    .selectAll('circle.neighborhood')
+                        .data(this.neighborhoods);
 
-            let circleEnter = circleSelection.enter()
-                .append('circle')
-                .on('mouseenter', d => this.dispatchNeighborhoodHighlight(d, true))
-                .on('mouseleave', d => this.dispatchNeighborhoodHighlight(d, false))
-                .on('click', d => this.dispatchNeighborhoodSelection(d));
+                let circleEnter = circleSelection.enter()
+                    .append('circle')
+                    .attr('class', 'neighborhood')
+                    .attr('opacity', 0)
+                    .on('mouseenter', d => this.dispatchNeighborhoodHighlight(d, true))
+                    .on('mouseleave', d => this.dispatchNeighborhoodHighlight(d, false))
+                    .on('click', d => this.dispatchNeighborhoodSelection(d));
 
-            this.view.neighborhoodCircles = circleSelection.merge(circleEnter);
-            this.view.neighborhoodCircles
-                .transition()
-                .duration(1000)
-                .attr('opacity', d => {
-                    if (isNaN(this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d))))
-                        return 0;
-                    else
-                        return 1;
-                })
-                .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d)))
-                .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d)))
-                .attr('r', d => this.view.sizeScale(Attribute.price.neighborhoodAccessor(d)))
-                .attr('fill', d => this.getNeighborhoodCircleFill(d))
+                this.view.neighborhoodCircles = circleSelection.merge(circleEnter);
+                this.view.neighborhoodCircles
+                    .transition()
+                    .duration(1000)
+                    .attr('opacity', 1)
+                    .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d)))
+                    .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d)))
+                    .attr('r', d => this.view.sizeScale(Attribute.price.neighborhoodAccessor(d)))
+                    .attr('fill', d => this.getNeighborhoodCircleFill(d));
+            }
+
+            if (this.view.neighborhoodCircles && this.view.listingCircles) {
+                this.view.listingCircles
+                    .style('pointer-events', 'none')
+                  .transition(updateTransition)
+                    .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d.neighborhood)))
+                    .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d.neighborhood)))
+                  .transition()
+                    .attr('r', d => this.view.sizeScale(Attribute.price.neighborhoodAccessor(d.neighborhood)))
+                    .attr('opacity', 0);
+
+                this.view.neighborhoodCircles
+                    .style('pointer-events', 'auto')
+                    .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d)))
+                    .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d)))
+                    .attr('r', d => this.view.sizeScale(Attribute.price.neighborhoodAccessor(d)))
+                  .transition(updateTransition)
+                  .transition()
+                    .duration(1000)
+                    .attr('opacity', 1);
+
+                updateTransition.on('end', neighborhoodsTransitionActions);
+            }
+            else if (this.view.listingCircles) {
+                this.view.listingCircles
+                    .style('pointer-events', 'none')
+                  .transition(updateTransition)
+                    .attr('opacity', 0);
+                    
+                updateTransition.on('end', neighborhoodsTransitionActions);
+            }
+            else {
+                neighborhoodsTransitionActions();
+            }
         }
         else if (this.selectedLevel === 'Listings') {
-            let circleSelection = this.view.svg
-                .selectAll('circle')
-                    .data(this.listings);
+            let listingsTransitionActions = () => {
+                let circleSelection = this.view.svg
+                    .selectAll('circle.listing')
+                        .data(this.listings);
 
-            let circleEnter = circleSelection.enter()
-                .append('circle')
-                .on('mouseenter', d => this.dispatchListingHighlight(d, true))
-                .on('mouseleave', d => this.dispatchListingHighlight(d, false))
-                .on('click', d => this.dispatchListingSelection(d));
+                let circleEnter = circleSelection.enter()
+                  .append('circle')
+                    .attr('class', 'listing')
+                    .attr('opacity', 0)
+                    .on('mouseenter', d => this.dispatchListingHighlight(d, true))
+                    .on('mouseleave', d => this.dispatchListingHighlight(d, false))
+                    .on('click', d => this.dispatchListingSelection(d));
 
-            this.view.listingCircles = circleSelection.merge(circleEnter);
-            this.view.listingCircles
-                .transition()
-                .duration(1000)
-                .attr('opacity', d => {
-                    if (isNaN(this.view.otherScale(this.selectedAttribute.accessor(d))))
-                        return 0;
-                    else
-                        return 1;
-                })
-                .attr('cx', d => this.view.otherScale(this.selectedAttribute.accessor(d)))
-                .attr('cy', d => this.view.markupScale(Attribute.markup.accessor(d)))
-                .attr('r', d => this.view.sizeScale(Attribute.price.accessor(d)))
-                .attr('fill', d => this.getListingCircleFill(d))
+                this.view.listingCircles = circleSelection.merge(circleEnter);
+                this.view.listingCircles
+                  .transition()
+                    .duration(1000)
+                    .attr('opacity', 1)
+                    .attr('cx', d => this.view.otherScale(this.selectedAttribute.accessor(d)))
+                    .attr('cy', d => this.view.markupScale(Attribute.markup.accessor(d)))
+                    .attr('r', d => this.view.sizeScale(Attribute.price.accessor(d)))
+                    .attr('fill', d => this.getListingCircleFill(d))
+            };
+
+            if (this.view.listingCircles && this.view.neighborhoodCircles) {
+                this.view.listingCircles
+                    .style('pointer-events', 'auto')
+                    .transition(updateTransition)
+                    .attr('opacity', 1);
+
+                this.view.neighborhoodCircles
+                    .style('pointer-events', 'none')
+                    .transition(updateTransition)
+                    .attr('opacity', 0);
+
+                updateTransition.on('end', listingsTransitionActions);
+            }
+            else if (this.view.neighborhoodCircles) {
+                this.view.neighborhoodCircles
+                    .style('pointer-events', 'none')
+                    .transition(updateTransition)
+                    .attr('opacity', 0);
+
+                updateTransition.on('end', listingsTransitionActions);
+            }
+            else {
+                listingsTransitionActions();
+            }
         }
     }
 } 
