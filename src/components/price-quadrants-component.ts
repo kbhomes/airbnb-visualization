@@ -158,25 +158,66 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
     public onSelect(selection: SelectEventData) {
         super.onSelect(selection);
+
+        let selectedListings = this.selection.listings || [];
+        let selectedNeighborhoods = this.selection.neighborhoods || [];
+
+        if (this.selectedLevel === 'Neighborhoods') {
+            this.view.neighborhoodCircles.attr('fill', function(d) {
+                // Don't change selected neighborhoods
+                if (selectedNeighborhoods.indexOf(d) !== -1) {
+                    return 'rgba(255, 100, 100, 0.5)';
+                }
+                else {
+                    return 'rgba(50, 50, 100, 0.5)';
+                }
+            });
+        }
+        else {
+            this.view.listingCircles.attr('fill', function(d) {
+                // Don't change selected listings
+                if (selectedListings.indexOf(d) !== -1) {
+                    return 'rgba(255, 100, 100, 0.5)';
+                }
+                else {
+                    return 'rgba(50, 50, 100, 0.5)';
+                }
+            });
+        }
     }
 
     public onHighlight(highlight: HighlightEventData) {
         super.onHighlight(highlight);
 
+        let selectedListings = this.selection.listings || [];
+        let selectedNeighborhoods = this.selection.neighborhoods || [];
+
         if (this.selectedLevel === 'Neighborhoods') {
-            this.view.neighborhoodCircles.attr('fill', d => {
-                if (highlight.neighborhood === d) 
-                    return 'rgba(255, 100, 100, 0.5)';
-                else
-                    return 'rgba(50, 50, 100, 0.5)';
+            this.view.neighborhoodCircles.attr('fill', function(d) {
+                // Don't change selected neighborhoods
+                if (selectedNeighborhoods.indexOf(d) !== -1) {
+                    return d3.select(this).attr('fill');
+                }
+                else {
+                    if (highlight.neighborhood === d) 
+                        return 'rgba(255, 100, 100, 0.5)';
+                    else
+                        return 'rgba(50, 50, 100, 0.5)';
+                }
             });
         }
         else {
-            this.view.listingCircles.attr('fill', d => {
-                if (highlight.listing === d || highlight.neighborhood === d.neighborhood) 
-                    return 'rgba(255, 100, 100, 0.5)';
-                else
-                    return 'rgba(50, 50, 100, 0.5)';
+            this.view.listingCircles.attr('fill', function(d) {
+                // Don't change selected listings
+                if (selectedListings.indexOf(d) !== -1) {
+                    return d3.select(this).attr('fill');
+                }
+                else {
+                    if (highlight.listing === d || highlight.neighborhood === d.neighborhood) 
+                        return 'rgba(255, 100, 100, 0.5)';
+                    else
+                        return 'rgba(50, 50, 100, 0.5)';
+                }
             });
         }
     }
@@ -232,29 +273,10 @@ export class PriceQuadrantsComponent extends BaseComponent {
                 .data(this.neighborhoods);
 
             let circleEnter = circleSelection.enter()
-            .append('circle')
-                .on('mouseenter', function(d) {
-                    // Dispatch a highlight event for this neighborhood
-                    self.dispatcher.call(DispatchEvent.Highlight, this, {
-                        neighborhood: d,
-                        listing: undefined
-                    } as HighlightEventData);
-
-                    // Scale up the particular neighborhood. 
-                    let sel = d3.select(this);
-                    sel.moveToFront();
-                    sel.style('fill', 'rgba(255, 100, 100, 0.5)');
-                })
-                .on('mouseleave', function(d) {
-                    // Dispatch an empty highlight event
-                    self.dispatcher.call(DispatchEvent.Highlight, this, {
-                        neighborhood: undefined,
-                        listing: undefined
-                    } as HighlightEventData);
-
-                    let sel = d3.select(this);
-                    sel.style('fill', 'rgba(50, 50, 100, 0.5)');
-                });
+                .append('circle')
+                .on('mouseenter', d => this.dispatchNeighborhoodHighlight(d, true))
+                .on('mouseleave', d => this.dispatchNeighborhoodHighlight(d, false))
+                .on('click', d => this.dispatchNeighborhoodSelection(d));
 
             this.view.neighborhoodCircles = circleSelection.merge(circleEnter);
             this.view.neighborhoodCircles
@@ -278,28 +300,9 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
             let circleEnter = circleSelection.enter()
                 .append('circle')
-                .on('mouseenter', function(d) {
-                    // Dispatch a highlight event for this neighborhood
-                    self.dispatcher.call(DispatchEvent.Highlight, this, {
-                        neighborhood: undefined,
-                        listing: d
-                    } as HighlightEventData);
-
-                    // Scale up the particular neighborhood. 
-                    let sel = d3.select(this);
-                    sel.moveToFront();
-                    sel.style('fill', 'rgba(255, 100, 100, 0.5)');
-                })
-                .on('mouseleave', function(d) {
-                    // Dispatch an empty highlight event
-                    self.dispatcher.call(DispatchEvent.Highlight, this, {
-                        neighborhood: undefined,
-                        listing: undefined
-                    } as HighlightEventData);
-
-                    let sel = d3.select(this);
-                    sel.style('fill', 'rgba(50, 50, 100, 0.5)');
-                });
+                .on('mouseenter', d => this.dispatchListingHighlight(d, true))
+                .on('mouseleave', d => this.dispatchListingHighlight(d, false))
+                .on('click', d => this.dispatchListingSelection(d));
 
             this.view.listingCircles = circleSelection.merge(circleEnter);
             this.view.listingCircles

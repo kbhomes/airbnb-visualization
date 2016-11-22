@@ -1,5 +1,6 @@
 import * as d3 from '../d3';
 import * as dispatch from '../data/dispatch';
+import { Neighborhood, Listing } from '../data/listing';
 
 export abstract class BaseComponent {
     protected element: Element;
@@ -33,10 +34,7 @@ export abstract class BaseComponent {
 
         return function(args: any) {
             // In this function, 'this' is the sender of the dispatch call
-            // Only forward the call if the sender is a different component
-            if (self !== this) {
-                handler.call(self, args);
-            }
+            handler.call(self, args);
         }
     }
 
@@ -46,6 +44,70 @@ export abstract class BaseComponent {
 
     private getComponentEventName(event: string) : string {
         return event + '.' + this.getComponentName();
+    }
+
+    protected dispatchListingHighlight(listing: Listing, highlight: boolean) {
+        this.dispatcher.call(dispatch.DispatchEvent.Highlight, this, {
+            neighborhood: undefined,
+            listing: (highlight ? listing : undefined)
+        } as dispatch.HighlightEventData);
+    }
+
+    protected dispatchNeighborhoodHighlight(neighborhood: Neighborhood, highlight: boolean) {
+        this.dispatcher.call(dispatch.DispatchEvent.Highlight, this, {
+            neighborhood: (highlight ? neighborhood : undefined),
+            listing: undefined
+        } as dispatch.HighlightEventData);
+    }
+
+    protected dispatchListingSelection(listing: Listing) {
+        // Check whether to add or remove this listing from the selection
+        if (this.selection.listings && this.selection.listings.indexOf(listing) !== -1) {
+            // Listing is already selected, so send out a selection event with this deselected
+            let selectedIndex = this.selection.listings.indexOf(listing);
+            let selectedListings = this.selection.listings.slice();
+            selectedListings.splice(selectedIndex, 1);
+
+            this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
+                neighborhoods: undefined,
+                listings: selectedListings
+            } as dispatch.SelectEventData);
+        }
+        else {
+            // Listing is not already selected, so send out a selection event with this selected
+            let selectedListings = (this.selection.listings || []).slice();
+            selectedListings.push(listing);
+
+            this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
+                neighborhoods: undefined,
+                listings: selectedListings
+            } as dispatch.SelectEventData);
+        }
+    }
+
+    protected dispatchNeighborhoodSelection(neighborhood: Neighborhood) {
+        // Check whether to add or remove this neighborhood from the selection
+        if (this.selection.neighborhoods && this.selection.neighborhoods.indexOf(neighborhood) !== -1) {
+            // Neighborhood is already selected, so send out a selection event with this deselected
+            let selectedIndex = this.selection.neighborhoods.indexOf(neighborhood);
+            let selectedNeighborhoods = this.selection.neighborhoods.slice();
+            selectedNeighborhoods.splice(selectedIndex, 1);
+
+            this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
+                neighborhoods: selectedNeighborhoods,
+                listings: undefined
+            } as dispatch.SelectEventData);
+        }
+        else {
+            // Neighborhood is not already selected, so send out a selection event with this selected
+            let selectedNeighborhoods = (this.selection.neighborhoods || []).slice();
+            selectedNeighborhoods.push(neighborhood);
+
+            this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
+                neighborhoods: selectedNeighborhoods,
+                listings: undefined
+            } as dispatch.SelectEventData);
+        }
     }
 
     public onLoad(data: dispatch.LoadEventData) : void {
