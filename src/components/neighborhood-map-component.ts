@@ -164,7 +164,6 @@ export class NeighborhoodMapComponent extends BaseComponent {
                     .style('transform', `translate(0px, 0px) scale(1.0)`)
                     .on('end', () => sel.moveToBack());
             });
-
                 //label each neighborhood
                 //TODO: tidy label up 
                 var label = this.view.svg.selectAll("text")

@@ -85,7 +85,7 @@ export class ListingBarsComponent extends BaseComponent {
         let barWidth = 1; //width / this.data.listings.size;
 
         // Create the y-axis's scale
-        let priceY = d3.scaleLinear()
+        let priceY = d3.scaleLog()
             .range([0, height])
             .domain(d3.extent(this.sortedListings, l => l.prices.airbnb.daily));
 
@@ -101,6 +101,10 @@ export class ListingBarsComponent extends BaseComponent {
             .attr('class', 'bar-price')
             .attr('fill', 'steelblue')
             .attr('y', d => height - priceY(d.prices.airbnb.daily))
+            .attr('x', function(d,i){
+
+                return i * barWidth;
+            })
             .attr('height', d => priceY(d.prices.airbnb.daily))
             .attr('width', barWidth);
 
