@@ -82,7 +82,7 @@ export class ListingBarsComponent extends BaseComponent {
         let padding = 10;
         let width = this.element.clientWidth;
         let height = Math.floor(this.element.clientHeight / 2 - 2*padding);
-        let barWidth = 1; //width / this.data.listings.size;
+        let barWidth = 5; //width / this.data.listings.size;
 
         // Create the y-axis's scale
         let priceY = d3.scaleLog()
@@ -102,7 +102,6 @@ export class ListingBarsComponent extends BaseComponent {
             .attr('fill', 'steelblue')
             .attr('y', d => height - priceY(d.prices.airbnb.daily))
             .attr('x', function(d,i){
-
                 return i * barWidth;
             })
             .attr('height', d => priceY(d.prices.airbnb.daily))
