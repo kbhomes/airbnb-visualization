@@ -162,6 +162,18 @@ export class NeighborhoodMapComponent extends BaseComponent {
                     .style('fill', self.shadeOfGreen(self.data.neighborhoods.get(d.properties.neighborho)))
                     .style('transform', `translate(0px, 0px) scale(1.0)`)
                     .on('end', () => sel.moveToBack());
+            }).on('click', function(d){
+
+                let sel = d3.select(this);
+                 sel.transition()
+                    .style('fill', 'rgb(255,29,35)');
+                    
+                let selectedNeighborhood =  self.data.neighborhoods.get(d.properties.neighborho)
+                self.dispatchNeighborhoodSelection(selectedNeighborhood);
+
+                
+
+                    console.log('RED')
             });
                 //label each neighborhood
                 //TODO: tidy label up 
