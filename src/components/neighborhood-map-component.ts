@@ -130,10 +130,11 @@ export class NeighborhoodMapComponent extends BaseComponent {
             .style('stroke', '#FFFFFF')
             .on('mouseenter', function(d) {
                 // Dispatch a highlight event for this neighborhood
-                self.dispatcher.call(DispatchEvent.Highlight, this, {
-                    neighborhood: self.data.neighborhoods.get(d.properties.neighborho),
-                    listing: undefined
-                } as HighlightEventData);
+
+                let selectedNeighborhood =  self.data.neighborhoods.get(d.properties.neighborho)
+                self.dispatchNeighborhoodHighlight(selectedNeighborhood,true);
+
+  
                 let sel = d3.select(this);
                 // Scale up the particular neighborhood. 
                 sel.moveToFront();
@@ -153,10 +154,8 @@ export class NeighborhoodMapComponent extends BaseComponent {
             })
             .on('mouseleave', function(d) {
                 // Dispatch an empty highlight event
-                self.dispatcher.call(DispatchEvent.Highlight, this, {
-                    neighborhood: undefined,
-                    listing: undefined
-                } as HighlightEventData);
+               let selectedNeighborhood =  self.data.neighborhoods.get(d.properties.neighborho)
+                self.dispatchNeighborhoodHighlight(selectedNeighborhood,false);
 
                 let sel = d3.select(this);
                 sel.transition()
