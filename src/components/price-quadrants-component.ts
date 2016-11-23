@@ -140,7 +140,8 @@ export class PriceQuadrantsComponent extends BaseComponent {
         let levelOptionsSelection = levelSelect.selectAll('option').data<'Neighborhoods'|'Listings'>(['Neighborhoods', 'Listings']);
         let levelOptionsEnter = levelOptionsSelection.enter()
           .append('option')
-            .text(d => d);
+            .text(d => d)
+            .attr('selected', d => d === this.selectedLevel ? true : undefined);
         let levelOptions = levelOptionsSelection.merge(levelOptionsEnter);
 
         levelSelect.on('change', () => {
@@ -263,6 +264,9 @@ export class PriceQuadrantsComponent extends BaseComponent {
                     .append('circle')
                     .attr('class', 'neighborhood')
                     .attr('opacity', 0)
+                    .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d)))
+                    .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d)))
+                    .attr('r', d => this.view.sizeScale(Attribute.price.neighborhoodAccessor(d)))
                     .on('mouseenter', d => this.dispatchNeighborhoodHighlight(d, true))
                     .on('mouseleave', d => this.dispatchNeighborhoodHighlight(d, false))
                     .on('click', d => this.dispatchNeighborhoodSelection(d));
@@ -322,6 +326,9 @@ export class PriceQuadrantsComponent extends BaseComponent {
                   .append('circle')
                     .attr('class', 'listing')
                     .attr('opacity', 0)
+                    .attr('cx', d => this.view.otherScale(this.selectedAttribute.accessor(d)))
+                    .attr('cy', d => this.view.markupScale(Attribute.markup.accessor(d)))
+                    .attr('r', d => this.view.sizeScale(Attribute.price.accessor(d)))
                     .on('mouseenter', d => this.dispatchListingHighlight(d, true))
                     .on('mouseleave', d => this.dispatchListingHighlight(d, false))
                     .on('click', d => this.dispatchListingSelection(d));

@@ -21,7 +21,7 @@ export module Attribute {
 
     export var price: Attribute = {
         name: 'Monthly Price Per Bedroom', 
-        accessor: l => l.prices.airbnb.daily, 
+        accessor: l => l.prices.airbnb.monthly_per_bedroom, 
         neighborhoodAccessor: n => d3.median(n.listings, l => l.prices.airbnb.monthly_per_bedroom),
         kind: 'continuous'
     };
