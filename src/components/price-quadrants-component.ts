@@ -13,18 +13,23 @@ export class PriceQuadrantsComponent extends BaseComponent {
     private attributeMap: Attribute[];
     private selectedAttribute: Attribute;
     private selectedLevel: 'Neighborhoods' | 'Listings';
+    private quadrantNames: [string, string, string, string];
 
     private view: {
-        overlay?: d3.Selection<d3.BaseType, {}, d3.BaseType, {}>;
-        svg?: d3.Selection<d3.BaseType, {}, d3.BaseType, {}>;
+        overlay?: d3.DatalessSelection;
+        svg?: d3.DatalessSelection;
         padding?: d3.Padding;
         
         markupScale?: d3.ScaleLinear<number, number>;
         otherScale?: d3.GenericScale<any, any>; //d3.ScaleLinear<number, number> | d3.ScalePoint<string>;
         sizeScale?: d3.ScaleLinear<number, number>;
 
-        neighborhoodCircles?: d3.Selection<d3.BaseType, Neighborhood, d3.BaseType, {}>;
-        listingCircles?: d3.Selection<d3.BaseType, Listing, d3.BaseType, {}>;
+        quadrantLineHorizontal?: d3.DatalessSelection;
+        quadrantLineVertical?: d3.DatalessSelection;
+        quadrantLabels?: d3.DataSelection<string>;
+
+        neighborhoodCircles?: d3.DataSelection<Neighborhood>;
+        listingCircles?: d3.DataSelection<Listing>;
     }
 
     public constructor(selector: string, dispatcher: Dispatch) {
@@ -47,12 +52,95 @@ export class PriceQuadrantsComponent extends BaseComponent {
         
         this.attributeMap = [];
         this.attributeMap.push(Attribute.price);
+        this.attributeMap.push(Attribute.monthlyPrice);
         this.attributeMap.push(Attribute.rating);
         this.attributeMap.push(Attribute.cancellationPolicy);
+
+        // Select the default quadrant names
+        this.quadrantNames = [
+            'Overpriced',
+            'Nice & Pricey', 
+            'Cheap For A Reason', 
+            'Overlooked'
+        ];
 
         // Select the rating attribute by default
         this.selectedAttribute = this.attributeMap[0];
         this.selectedLevel = 'Neighborhoods';
+    }
+
+    private initializeQuadrants() {
+        let quadrantsArea = this.view.svg
+            .append('g').attr('class', 'quadrant-area');
+
+        this.view.quadrantLineHorizontal = quadrantsArea
+            .append('g').attr('class', 'quadrant-lines quadrant-horizontal')
+            .append('line');
+
+        this.view.quadrantLineVertical = quadrantsArea
+            .append('g').attr('class', 'quadrant-lines quadrant-vertical')
+            .append('line');
+
+        let quadrantLabelsSelection = quadrantsArea
+          .append('g').attr('class', 'quadrant-labels')
+          .selectAll('text')
+            .data(this.quadrantNames);
+        let quadrantLabelsEnter = quadrantLabelsSelection.enter()
+            .append('text')
+            .text(d => d);
+        this.view.quadrantLabels = quadrantLabelsSelection.merge(quadrantLabelsEnter);
+    }
+
+    private initializeAxes() {
+        // Create the axis elements
+        this.view.svg.append('g').attr('class', 'markup-axis');
+        this.view.svg.append('g').attr('class', 'other-axis');
+        this.view.svg
+            .append('g').attr('class', 'axis-label markup-axis-label')
+            .append('text').text('Markup').style('transform', 'rotate(-90deg)');
+            
+        let attributeSelect = this.view.overlay
+            .append('div').attr('class', 'axis-label other-axis-label')
+            .append('select');
+        
+        let attributeOptionsSelection = attributeSelect.selectAll('option').data(this.attributeMap);
+        let attributeOptionsEnter = attributeOptionsSelection.enter()
+          .append('option')
+            .text(d => d.name)
+            .attr('selected', d => d === this.selectedAttribute ? true : undefined);
+        let attributeOptions = attributeOptionsSelection.merge(attributeOptionsEnter);
+
+        attributeSelect.on('change', () => {
+            let index: number = attributeSelect.property('selectedIndex');
+            let attribute: Attribute = attributeOptions.filter((d,i) => i == index).datum();
+
+            // Update the scales for this attribute and re-render
+            this.selectedAttribute = attribute;
+            this.updateScales();
+            this.render();
+        });
+    }
+
+    private initializeLevelSelect() {
+        let levelSelect = this.view.overlay
+          .append('div')
+            .style('right', `${this.view.padding.right}px`)
+          .append('select')
+            .attr('class', 'level-select');
+            
+        let levelOptionsSelection = levelSelect.selectAll('option').data<'Neighborhoods'|'Listings'>(['Neighborhoods', 'Listings']);
+        let levelOptionsEnter = levelOptionsSelection.enter()
+          .append('option')
+            .text(d => d)
+            .attr('selected', d => d === this.selectedLevel ? true : undefined);
+        let levelOptions = levelOptionsSelection.merge(levelOptionsEnter);
+
+        levelSelect.on('change', () => {
+            let index: number = levelSelect.property('selectedIndex');
+            let level = levelOptions.filter((d,i) => i === index).datum();
+            this.selectedLevel = level;
+            this.render();
+        });
     }
 
     private updateScales() {
@@ -102,54 +190,9 @@ export class PriceQuadrantsComponent extends BaseComponent {
         this.listings = Array.from(this.data.listings.values());
         this.neighborhoods = Array.from(this.data.neighborhoods.values());
 
-        // Create the axis elements
-        this.view.svg.append('g').attr('class', 'markup-axis');
-        this.view.svg.append('g').attr('class', 'other-axis');
-
-        this.view.svg
-            .append('g').attr('class', 'axis-label markup-axis-label')
-            .append('text').text('Markup').style('transform', 'rotate(-90deg)');
-
-        let attributeSelect = this.view.overlay
-            .append('div').attr('class', 'axis-label other-axis-label')
-            .append('select');
-        
-        let attributeOptionsSelection = attributeSelect.selectAll('option').data(this.attributeMap);
-        let attributeOptionsEnter = attributeOptionsSelection.enter()
-          .append('option')
-            .text(d => d.name)
-            .attr('selected', d => d === this.selectedAttribute ? true : undefined);
-        let attributeOptions = attributeOptionsSelection.merge(attributeOptionsEnter);
-
-        attributeSelect.on('change', () => {
-            let index: number = attributeSelect.property('selectedIndex');
-            let attribute: Attribute = attributeOptions.filter((d,i) => i == index).datum();
-
-            // Update the scales for this attribute and re-render
-            this.selectedAttribute = attribute;
-            this.updateScales();
-            this.render();
-        });
-
-        let levelSelect = this.view.overlay
-          .append('div')
-            .style('right', `${this.view.padding.right}px`)
-          .append('select')
-            .attr('class', 'level-select');
-            
-        let levelOptionsSelection = levelSelect.selectAll('option').data<'Neighborhoods'|'Listings'>(['Neighborhoods', 'Listings']);
-        let levelOptionsEnter = levelOptionsSelection.enter()
-          .append('option')
-            .text(d => d)
-            .attr('selected', d => d === this.selectedLevel ? true : undefined);
-        let levelOptions = levelOptionsSelection.merge(levelOptionsEnter);
-
-        levelSelect.on('change', () => {
-            let index: number = levelSelect.property('selectedIndex');
-            let level = levelOptions.filter((d,i) => i === index).datum();
-            this.selectedLevel = level;
-            this.render();
-        });
+        this.initializeQuadrants();
+        this.initializeAxes(); 
+        this.initializeLevelSelect();
 
         this.render();
     }
@@ -215,6 +258,43 @@ export class PriceQuadrantsComponent extends BaseComponent {
         }
     }
 
+    private drawQuadrants(width: number, height: number, transition = d3.transition(null)) {
+        // TODO: determine how these quadrants will be placed
+        let quadrantSplitX = width/2;
+        let quadrantSplitY = height/2;
+        let padding = 5;
+
+        this.view.quadrantLineHorizontal
+            .attr('x1', 0)
+            .attr('x2',  width)
+          .transition(transition)
+            .attr('y1', quadrantSplitY)
+            .attr('y2', quadrantSplitY);
+
+        this.view.quadrantLineVertical
+            .attr('y1', 0)
+            .attr('y2', height)
+          .transition(transition)
+            .attr('x1', quadrantSplitX)
+            .attr('x2', quadrantSplitX);
+
+        this.view.quadrantLabels
+            .attr('x', (d,i) => {
+                // Indices 0 and 2 are on the left quadrants
+                // Indices 1 and 3 are on the right quadrants
+                return padding + ((i === 0 || i === 2) ? 0 : quadrantSplitX);
+            })
+            .attr('y', (d,i) => {
+                // Indices 0 and 1 are on the top quadrants
+                // Indices 2 and 3 are on the bottom quadrants
+                return padding + ((i === 0 || i === 1) ? 0 : quadrantSplitY);
+            });
+    }
+
+    private drawNeighborhoods() {
+        
+    }
+
     public render() {
         let self = this;
 
@@ -245,6 +325,12 @@ export class PriceQuadrantsComponent extends BaseComponent {
         // Draw axis labels
         this.view.svg.select('g.markup-axis-label')
             .style('transform', `translate(${this.view.padding.left}px, ${innerPadding.centerY(height)}px)`);
+
+        // Draw the quadrant lines and labels
+        this.view.svg.select('g.quadrant-area')
+            .style('transform', innerPadding.translate(0,0))
+            .transition(updateTransition);
+        this.drawQuadrants(innerPadding.width(width), innerPadding.height(height), updateTransition);
         
         this.view.overlay
           .select('div.other-axis-label')

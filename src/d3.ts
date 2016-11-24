@@ -39,6 +39,9 @@ d3Selection.selection.prototype.moveToBack = function() {
     });
 };
 
+export type DataSelection<Datum> = d3Selection.Selection<d3Selection.BaseType, Datum, d3Selection.BaseType, {}>;
+export type DatalessSelection = DataSelection<{}>; 
+
 export interface GenericScale<Domain, Range> {
     (x: Domain): Range;
     domain(): Array<Domain>;

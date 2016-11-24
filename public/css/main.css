@@ -73,6 +73,18 @@ div {
   border-right: 1px solid #ccc;
 }
 
+.quadrant-lines line {
+  stroke-width: 1px;
+  stroke: #ccc;
+}
+
+.quadrant-labels text {
+    alignment-baseline: hanging;
+    font-size: 12px;
+    fill: #888;
+    text-transform: uppercase;
+}
+
 #panel-right {
   max-width: 350px;
   padding: 0;
