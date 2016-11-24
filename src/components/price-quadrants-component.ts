@@ -291,8 +291,120 @@ export class PriceQuadrantsComponent extends BaseComponent {
             });
     }
 
-    private drawNeighborhoods() {
-        
+    private drawNeighborhoods(transition = d3.transition(null)) {
+        let neighborhoodsTransitionActions = () => {
+            let circleSelection = this.view.svg
+                .selectAll('circle.neighborhood')
+                    .data(this.neighborhoods);
+
+            let circleEnter = circleSelection.enter()
+                .append('circle')
+                .attr('class', 'neighborhood')
+                .attr('opacity', 0)
+                .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d)))
+                .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d)))
+                .attr('r', d => this.view.sizeScale(Attribute.price.neighborhoodAccessor(d)))
+                .on('mouseenter', d => this.dispatchNeighborhoodHighlight(d, true))
+                .on('mouseleave', d => this.dispatchNeighborhoodHighlight(d, false))
+                .on('click', d => this.dispatchNeighborhoodSelection(d));
+
+            this.view.neighborhoodCircles = circleSelection.merge(circleEnter);
+            this.view.neighborhoodCircles
+              .transition().duration(1000)
+                .attr('opacity', 1)
+                .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d)))
+                .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d)))
+                .attr('r', d => this.view.sizeScale(Attribute.price.neighborhoodAccessor(d)))
+                .attr('fill', d => this.getNeighborhoodCircleFill(d));
+        }
+
+        if (this.view.neighborhoodCircles && this.view.listingCircles) {
+            this.view.listingCircles
+                .style('pointer-events', 'none')
+              .transition(transition)
+                .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d.neighborhood)))
+                .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d.neighborhood)))
+              .transition()
+                .attr('r', d => this.view.sizeScale(Attribute.price.neighborhoodAccessor(d.neighborhood)))
+                .attr('opacity', 0);
+
+            this.view.neighborhoodCircles
+                .style('pointer-events', 'auto')
+                .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d)))
+                .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d)))
+                .attr('r', d => this.view.sizeScale(Attribute.price.neighborhoodAccessor(d)))
+              .transition(transition)
+              .transition().duration(1000)
+                .attr('opacity', 1);
+
+            transition.on('end', neighborhoodsTransitionActions);
+        }
+        else if (this.view.listingCircles) {
+            this.view.listingCircles
+                .style('pointer-events', 'none')
+              .transition(transition)
+                .attr('opacity', 0);
+                
+            transition.on('end', neighborhoodsTransitionActions);
+        }
+        else {
+            neighborhoodsTransitionActions();
+        }
+    }
+
+    private drawListings(transition = d3.transition(null)) {
+        let listingsTransitionActions = () => {
+            let circleSelection = this.view.svg
+                .selectAll('circle.listing')
+                    .data(this.listings);
+
+            let circleEnter = circleSelection.enter()
+                .append('circle')
+                .attr('class', 'listing')
+                .attr('opacity', 0)
+                .attr('cx', d => this.view.otherScale(this.selectedAttribute.accessor(d)))
+                .attr('cy', d => this.view.markupScale(Attribute.markup.accessor(d)))
+                .attr('r', d => this.view.sizeScale(Attribute.price.accessor(d)))
+                .on('mouseenter', d => this.dispatchListingHighlight(d, true))
+                .on('mouseleave', d => this.dispatchListingHighlight(d, false))
+                .on('click', d => this.dispatchListingSelection(d));
+
+            this.view.listingCircles = circleSelection.merge(circleEnter);
+            this.view.listingCircles
+              .transition().duration(1000)
+                .attr('opacity', 1)
+                .attr('cx', d => this.view.otherScale(this.selectedAttribute.accessor(d)))
+                .attr('cy', d => this.view.markupScale(Attribute.markup.accessor(d)))
+                .attr('r', d => this.view.sizeScale(Attribute.price.accessor(d)))
+                .attr('fill', d => this.getListingCircleFill(d))
+        };
+
+        if (this.view.listingCircles && this.view.neighborhoodCircles) {
+            transition.duration(100);
+            
+            this.view.listingCircles
+                .style('pointer-events', 'auto')
+              .transition(transition)
+                .attr('opacity', 1);
+
+            this.view.neighborhoodCircles
+                .style('pointer-events', 'none')
+              .transition(transition)
+                .attr('opacity', 0);
+
+            transition.on('end', listingsTransitionActions);
+        }
+        else if (this.view.neighborhoodCircles) {
+            this.view.neighborhoodCircles
+                .style('pointer-events', 'none')
+              .transition(transition)
+                .attr('opacity', 0);
+
+            transition.on('end', listingsTransitionActions);
+        }
+        else {
+            listingsTransitionActions();
+        }
     }
 
     public render() {
@@ -327,9 +439,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
             .style('transform', `translate(${this.view.padding.left}px, ${innerPadding.centerY(height)}px)`);
 
         // Draw the quadrant lines and labels
-        this.view.svg.select('g.quadrant-area')
-            .style('transform', innerPadding.translate(0,0))
-            .transition(updateTransition);
+        this.view.svg.select('g.quadrant-area').style('transform', innerPadding.translate(0,0));
         this.drawQuadrants(innerPadding.width(width), innerPadding.height(height), updateTransition);
         
         this.view.overlay
@@ -341,121 +451,10 @@ export class PriceQuadrantsComponent extends BaseComponent {
         // Draw the items
         // TODO: Remove all this dumb duplication when you're not tired
         if (this.selectedLevel === 'Neighborhoods') {
-            let neighborhoodsTransitionActions = () => {
-                let circleSelection = this.view.svg
-                    .selectAll('circle.neighborhood')
-                        .data(this.neighborhoods);
-
-                let circleEnter = circleSelection.enter()
-                    .append('circle')
-                    .attr('class', 'neighborhood')
-                    .attr('opacity', 0)
-                    .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d)))
-                    .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d)))
-                    .attr('r', d => this.view.sizeScale(Attribute.price.neighborhoodAccessor(d)))
-                    .on('mouseenter', d => this.dispatchNeighborhoodHighlight(d, true))
-                    .on('mouseleave', d => this.dispatchNeighborhoodHighlight(d, false))
-                    .on('click', d => this.dispatchNeighborhoodSelection(d));
-
-                this.view.neighborhoodCircles = circleSelection.merge(circleEnter);
-                this.view.neighborhoodCircles
-                    .transition()
-                    .duration(1000)
-                    .attr('opacity', 1)
-                    .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d)))
-                    .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d)))
-                    .attr('r', d => this.view.sizeScale(Attribute.price.neighborhoodAccessor(d)))
-                    .attr('fill', d => this.getNeighborhoodCircleFill(d));
-            }
-
-            if (this.view.neighborhoodCircles && this.view.listingCircles) {
-                this.view.listingCircles
-                    .style('pointer-events', 'none')
-                  .transition(updateTransition)
-                    .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d.neighborhood)))
-                    .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d.neighborhood)))
-                  .transition()
-                    .attr('r', d => this.view.sizeScale(Attribute.price.neighborhoodAccessor(d.neighborhood)))
-                    .attr('opacity', 0);
-
-                this.view.neighborhoodCircles
-                    .style('pointer-events', 'auto')
-                    .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d)))
-                    .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d)))
-                    .attr('r', d => this.view.sizeScale(Attribute.price.neighborhoodAccessor(d)))
-                  .transition(updateTransition)
-                  .transition()
-                    .duration(1000)
-                    .attr('opacity', 1);
-
-                updateTransition.on('end', neighborhoodsTransitionActions);
-            }
-            else if (this.view.listingCircles) {
-                this.view.listingCircles
-                    .style('pointer-events', 'none')
-                  .transition(updateTransition)
-                    .attr('opacity', 0);
-                    
-                updateTransition.on('end', neighborhoodsTransitionActions);
-            }
-            else {
-                neighborhoodsTransitionActions();
-            }
+            this.drawNeighborhoods(updateTransition);
         }
         else if (this.selectedLevel === 'Listings') {
-            let listingsTransitionActions = () => {
-                let circleSelection = this.view.svg
-                    .selectAll('circle.listing')
-                        .data(this.listings);
-
-                let circleEnter = circleSelection.enter()
-                  .append('circle')
-                    .attr('class', 'listing')
-                    .attr('opacity', 0)
-                    .attr('cx', d => this.view.otherScale(this.selectedAttribute.accessor(d)))
-                    .attr('cy', d => this.view.markupScale(Attribute.markup.accessor(d)))
-                    .attr('r', d => this.view.sizeScale(Attribute.price.accessor(d)))
-                    .on('mouseenter', d => this.dispatchListingHighlight(d, true))
-                    .on('mouseleave', d => this.dispatchListingHighlight(d, false))
-                    .on('click', d => this.dispatchListingSelection(d));
-
-                this.view.listingCircles = circleSelection.merge(circleEnter);
-                this.view.listingCircles
-                  .transition()
-                    .duration(1000)
-                    .attr('opacity', 1)
-                    .attr('cx', d => this.view.otherScale(this.selectedAttribute.accessor(d)))
-                    .attr('cy', d => this.view.markupScale(Attribute.markup.accessor(d)))
-                    .attr('r', d => this.view.sizeScale(Attribute.price.accessor(d)))
-                    .attr('fill', d => this.getListingCircleFill(d))
-            };
-
-            if (this.view.listingCircles && this.view.neighborhoodCircles) {
-                updateTransition.duration(100);
-                
-                this.view.listingCircles
-                    .style('pointer-events', 'auto')
-                    .transition(updateTransition)
-                    .attr('opacity', 1);
-
-                this.view.neighborhoodCircles
-                    .style('pointer-events', 'none')
-                    .transition(updateTransition)
-                    .attr('opacity', 0);
-
-                updateTransition.on('end', listingsTransitionActions);
-            }
-            else if (this.view.neighborhoodCircles) {
-                this.view.neighborhoodCircles
-                    .style('pointer-events', 'none')
-                    .transition(updateTransition)
-                    .attr('opacity', 0);
-
-                updateTransition.on('end', listingsTransitionActions);
-            }
-            else {
-                listingsTransitionActions();
-            }
+            this.drawListings(updateTransition);
         }
     }
 } 
