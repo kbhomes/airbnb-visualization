@@ -20,6 +20,13 @@ export module Attribute {
     };
 
     export var price: Attribute = {
+        name: 'Daily Price', 
+        accessor: l => l.prices.airbnb.daily, 
+        neighborhoodAccessor: n => d3.median(n.listings, l => l.prices.airbnb.daily),
+        kind: 'continuous'
+    };
+
+    export var monthlyPrice: Attribute = {
         name: 'Monthly Price Per Bedroom', 
         accessor: l => l.prices.airbnb.monthly_per_bedroom, 
         neighborhoodAccessor: n => d3.median(n.listings, l => l.prices.airbnb.monthly_per_bedroom),
@@ -43,7 +50,7 @@ export module Attribute {
     };
 
     // Set default domain accessors
-    for (let attr of [rating, price, markup]) {
+    for (let attr of [rating, price, monthlyPrice, markup]) {
         attr.listingDomain = (data) => d3.extent(data, d => attr.accessor(d));
         attr.neighborhoodDomain = (data) => d3.extent(data, d => attr.neighborhoodAccessor(d));
     }
