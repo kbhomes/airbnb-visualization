@@ -34,16 +34,28 @@ export class Application {
 
     private initializeBlocks(listings: Map<Listing.IDType, Listing>) {
         // Initialize the price block ranges
-        let ranges = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000];
-        let priceBlocks: Block[] = [];
-        let listingBlocks: Block[] = [];
+        let priceRanges = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000];
+        let markupRanges = [-100, 0, 50, 100, 150, 200, 250, 300, 400, 500];
 
-        for (let i = 0; i < ranges.length; i++) {
+        let priceBlocks: Block[] = [];
+        let markupBlocks: Block[] = [];
+
+        for (let i = 0; i < priceRanges.length; i++) {
             priceBlocks.push({
                 type: "price",
                 number: i,
-                minimum: ranges[i],
-                maximum: (i === ranges.length - 1) ? NaN : ranges[i+1],
+                minimum: priceRanges[i],
+                maximum: (i === priceRanges.length - 1) ? NaN : priceRanges[i+1],
+                listings: []
+            });
+        }
+
+        for (let i = 0; i < markupRanges.length; i++) {
+            markupBlocks.push({
+                type: "markup",
+                number: i,
+                minimum: markupRanges[i],
+                maximum: (i === markupRanges.length - 1) ? NaN : markupRanges[i+1],
                 listings: []
             });
         }
@@ -51,8 +63,9 @@ export class Application {
         // Initialize the blocks for the listings
         for (let listing of Array.from(listings.values())) {
             let price = listing.prices.airbnb.daily;
+            let markup = listing.prices.markup_percentage;
 
-            // Find the right price block for this listing
+            // Find the right price and markup block for this listing
             for (let block of priceBlocks) {
                 if (Block.contains(block, listing)) {
                     block.listings.push(listing);
@@ -60,15 +73,28 @@ export class Application {
                     continue;
                 }
             }
+
+            for (let block of markupBlocks) {
+                if (Block.contains(block, listing)) {
+                    block.listings.push(listing);
+                    listing.markupBlock = block;
+                    continue;
+                }
+            }
         }
 
-        // Update the price blocks with information about where they start relative to one another
+        // Update the price and markup blocks with information about where they start relative to one another
         priceBlocks.reduce((accumulator, block) => {
             block.listingsStartIndex = accumulator;
             return accumulator + block.listings.length;
         }, 0);
 
-        return [priceBlocks, listingBlocks];
+        markupBlocks.reduce((accumulator, block) => {
+            block.listingsStartIndex = accumulator;
+            return accumulator + block.listings.length;
+        }, 0);
+
+        return [priceBlocks, markupBlocks];
     }
 
     private loadData() {

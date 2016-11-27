@@ -13,6 +13,7 @@ export class ListingBlocksComponent extends BaseComponent {
         markupBlockGroups?: d3.Selection<d3.BaseType, Block, d3.BaseType, {}>;
 
         priceColorScale?: d3.ScaleSequential<string>;
+        markupColorScale?: d3.ScaleSequential<string>;
     }
 
     public constructor(selector: string, dispatcher: Dispatch) {
@@ -29,6 +30,7 @@ export class ListingBlocksComponent extends BaseComponent {
             .attr('height', height);
 
         this.view.priceColorScale = d3.scaleSequential(d3.interpolateReds);
+        this.view.markupColorScale = d3.scaleSequential(d3.interpolateReds);
     }
 
     public onLoad(data: LoadEventData) {
@@ -56,7 +58,8 @@ export class ListingBlocksComponent extends BaseComponent {
     }
 
     private updateColors() {
-        let counts = Array<number>(this.data.priceBlocks.length).fill(0);
+        let priceCounts = Array<number>(this.data.priceBlocks.length).fill(0);
+        let markupCounts = Array<number>(this.data.markupBlocks.length).fill(0);
         let neighborhoods = this.selection.neighborhoods || [];
 
         if (neighborhoods.length === 0 && this.highlight.neighborhood) {
@@ -66,7 +69,8 @@ export class ListingBlocksComponent extends BaseComponent {
         // Loop through each listing in the neighborhoods and find the block it belongs to
         for (let neighborhood of neighborhoods) {
             for (let listing of neighborhood.listings) {
-                counts[listing.priceBlock.number] += 1;
+                priceCounts[listing.priceBlock.number] += 1;
+                markupCounts[listing.markupBlock.number] += 1;
             }
         }
 
@@ -74,13 +78,26 @@ export class ListingBlocksComponent extends BaseComponent {
         let blockFill = (block: Block) => {
             if (neighborhoods.length === 0)
                 return 'white';
-            else 
-                return this.view.priceColorScale(counts[block.number]);
+            else {
+                if (block.type === 'price') {
+                    return this.view.priceColorScale(priceCounts[block.number]);
+                } 
+                else {
+                    return this.view.markupColorScale(markupCounts[block.number]);
+                }
+            }
         }
 
         // Highlight the neighborhoods in the blocks
-        this.view.priceColorScale.domain(d3.extent(counts));
+        this.view.priceColorScale.domain(d3.extent(priceCounts));
+        this.view.markupColorScale.domain(d3.extent(markupCounts));
+
         this.view.priceBlockGroups
+            .transition().duration(500)
+            .select('rect.block-rect')
+            .attr('fill', blockFill);
+
+        this.view.markupBlockGroups
             .transition().duration(500)
             .select('rect.block-rect')
             .attr('fill', blockFill);
@@ -105,6 +122,17 @@ export class ListingBlocksComponent extends BaseComponent {
             .attr('x', padding)
             .attr('y', height/6 + height/6);
 
+        let markupBlockSectionLabel = this.view.svg.select('text.markup-block-label');
+        if (markupBlockSectionLabel.empty()) {
+            markupBlockSectionLabel = this.view.svg.append('text')
+                .attr('class', 'markup-block-label')
+                .style('font-size', '10px')
+                .text('Markup:');
+        }
+        markupBlockSectionLabel
+            .attr('x', padding)
+            .attr('y', height/2 + height/6 + padding);
+
         let blockHeight = height / 3;
         let blockWidth = (block: Block) => {
             return Math.max(width * block.listings.length / this.data.listings.size - padding, 1);
@@ -113,9 +141,17 @@ export class ListingBlocksComponent extends BaseComponent {
             return sectionLabelWidth + padding + width * block.listingsStartIndex / this.data.listings.size;
         };
         let blockLabel = (block: Block) => {
-            let label = '$' + block.minimum.toFixed(0);
+            let label = block.minimum.toFixed(0);
             if (isNaN(block.maximum))
                 label += '+';
+
+            if (block.type === 'price') {
+                label = '$' + label;
+            }
+            else {
+                label += '%';
+            }
+
             return label;
         };
 
@@ -128,7 +164,7 @@ export class ListingBlocksComponent extends BaseComponent {
         priceBlocksEnter.append('text').attr('class', 'block-label');
 
         this.view.priceBlockGroups = priceBlocksSelection.merge(priceBlocksEnter);
-        this.view.priceBlockGroups.style('transform', d => `translate(${blockX(d)}px, 0)`);
+        this.view.priceBlockGroups.style('transform', d => `translate(${blockX(d)}px, ${-padding}px)`);
         this.view.priceBlockGroups
           .select('rect.block-rect')
             .attr('height', blockHeight)
@@ -140,7 +176,34 @@ export class ListingBlocksComponent extends BaseComponent {
         this.view.priceBlockGroups
           .select('text.block-label')
             .attr('x', d => blockWidth(d) / 2)
-            .attr('y', height/12)
+            .attr('y', height/12 + height/24)
+            .text(blockLabel)
+            .style('text-anchor', 'middle')
+            .style('font-size', '10px');
+
+
+        let markupBlocksSelection = this.view.svg
+          .selectAll('g.markup-block')
+            .data(this.data.markupBlocks);
+
+        let markupBlocksEnter = markupBlocksSelection.enter().append('g').attr('class', 'markup-block');
+        markupBlocksEnter.append('rect').attr('class', 'block-rect');
+        markupBlocksEnter.append('text').attr('class', 'block-label');
+
+        this.view.markupBlockGroups = markupBlocksSelection.merge(markupBlocksEnter);
+        this.view.markupBlockGroups.style('transform', d => `translate(${blockX(d)}px, ${padding + height/2}px)`);
+        this.view.markupBlockGroups
+          .select('rect.block-rect')
+            .attr('height', blockHeight)
+            .attr('width', blockWidth)
+            .attr('y', 0)
+            .attr('fill', 'white')
+            .style('stroke', '#888')
+            .style('stroke-width', 1);
+        this.view.markupBlockGroups
+          .select('text.block-label')
+            .attr('x', d => blockWidth(d) / 2)
+            .attr('y', height/2 - height/12)
             .text(blockLabel)
             .style('text-anchor', 'middle')
             .style('font-size', '10px');
