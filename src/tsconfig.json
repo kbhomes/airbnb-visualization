@@ -21,6 +21,7 @@
             "d3-random", 
             "d3-request", 
             "d3-scale", 
+            "d3-scale-chromatic",
             "d3-selection", 
             "d3-time", 
             "d3-timer", 

@@ -52,7 +52,7 @@ export class ListingBlocksComponent extends BaseComponent {
 
             // Find the right price block for this listing
             for (let block of this.priceBlocks) {
-                if (block.minimum <= price && (isNaN(block.maximum) || price < block.maximum)) {
+                if (Block.contains(block, listing)) {
                     block.listings.push(listing);
                     continue;
                 }
@@ -79,6 +79,32 @@ export class ListingBlocksComponent extends BaseComponent {
 
     public onHighlight(highlight: HighlightEventData) {
         super.onHighlight(highlight);
+
+        if (highlight.neighborhood) {
+            let counts = Array<number>(this.priceBlocks.length).fill(0);
+
+            // Loop through each listing in the neighborhood and find the block it belongs to
+            for (let listing of highlight.neighborhood.listings) {
+                for (let i = 0; i < this.priceBlocks.length; i++) {
+                    let block = this.priceBlocks[i];
+
+                    if (Block.contains(block, listing)) {
+                        counts[i] += 1;
+                        break;
+                    }
+                }
+            }
+
+            // Highlight the neighborhoods in the blocks
+            let scaleRed = d3.scaleSequential(d3.interpolateReds).domain(d3.extent(counts));
+            this.view.priceBlockGroups
+              .transition().duration(500)
+              .select('rect.block-rect')
+                .attr('fill', (d,i) => scaleRed(counts[i]));
+        }
+        else {
+
+        }
     }
 
     public onFilter(filter: FilterEventData) {
@@ -127,7 +153,7 @@ export class ListingBlocksComponent extends BaseComponent {
             .attr('height', blockHeight)
             .attr('width', blockWidth)
             .attr('y', height/6)
-            .style('fill', '#e8e8e8')
+            .attr('fill', '#e8e8e8')
             .style('stroke', 'black')
             .style('stroke-width', 1);
         this.view.priceBlockGroups

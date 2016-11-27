@@ -13,6 +13,7 @@ export * from 'd3-queue';
 export * from 'd3-random';
 export * from 'd3-request';
 export * from 'd3-scale';
+export * from 'd3-scale-chromatic';
 export * from 'd3-selection';
 export * from 'd3-time';
 export * from 'd3-timer';
