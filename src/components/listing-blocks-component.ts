@@ -29,8 +29,12 @@ export class ListingBlocksComponent extends BaseComponent {
             .attr('width', width)
             .attr('height', height);
 
-        this.view.priceColorScale = d3.scaleSequential(d3.interpolateReds);
-        this.view.markupColorScale = d3.scaleSequential(d3.interpolateReds);
+        this.view.priceColorScale = d3.scaleSequential(this.interpolateRed);
+        this.view.markupColorScale = d3.scaleSequential(this.interpolateRed);
+    }
+
+    private interpolateRed(t: number) : string {
+        return d3.hsl(0.0, 1.0, 1.0 - t/2) + '';
     }
 
     public onLoad(data: LoadEventData) {
