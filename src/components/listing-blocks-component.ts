@@ -45,33 +45,13 @@ export class ListingBlocksComponent extends BaseComponent {
     public onSelect(selection: SelectEventData) {
         super.onSelect(selection);
         this.updateColors();
-
-        // If any price blocks are selected, draw those listings
-        let selectedPriceBlocks = selection.priceBlocks || [];
-        let selectedMarkupBlocks = selection.markupBlocks || [];
-
-        for (let block of this.data.priceBlocks) {
-            if (selectedPriceBlocks.indexOf(block) !== -1) {
-                this.drawListingsWithinBlock(block);
-            }
-            else {
-                this.hideListingsWithinBlock(block);
-            }
-        }
-
-        for (let block of this.data.markupBlocks) {
-            if (selectedMarkupBlocks.indexOf(block) !== -1) {
-                this.drawListingsWithinBlock(block);
-            }
-            else {
-                this.hideListingsWithinBlock(block);
-            }
-        }
+        this.updateListings();
     }
 
     public onHighlight(highlight: HighlightEventData) {
         super.onHighlight(highlight);
         this.updateColors();
+        this.updateListings();
     }
 
     public onFilter(filter: FilterEventData) {
@@ -81,6 +61,50 @@ export class ListingBlocksComponent extends BaseComponent {
 
     public resize() {
 
+    }
+
+    private updateListings() {
+        // If any price blocks are selected, draw those listings
+        let selectedPriceBlocks = this.selection.priceBlocks || [];
+        let selectedMarkupBlocks = this.selection.markupBlocks || [];
+
+        if (selectedPriceBlocks.length !== 0 || selectedMarkupBlocks.length !== 0) {
+            for (let block of this.data.priceBlocks) {
+                if (selectedPriceBlocks.indexOf(block) !== -1) {
+                    this.drawListingsWithinBlock(block);
+                }
+                else {
+                    this.hideListingsWithinBlock(block);
+                }
+            }
+
+            for (let block of this.data.markupBlocks) {
+                if (selectedMarkupBlocks.indexOf(block) !== -1) {
+                    this.drawListingsWithinBlock(block);
+                }
+                else {
+                    this.hideListingsWithinBlock(block);
+                }
+            }
+        }
+        // // If only a single listing is selected or highlighted, show them individually in the blocks
+        // else if (this.selection.listings && this.selection.listings.length === 1) {
+        //     let listing = this.selection.listings[0];
+        //     this.drawListingsWithinBlock(listing.priceBlock, listing);
+        //     this.drawListingsWithinBlock(listing.markupBlock, listing);
+        //     this.hideListingsWithinAllOtherBlocks(listing.priceBlock);
+        //     this.hideListingsWithinAllOtherBlocks(listing.markupBlock);
+        // }
+        // else if (this.highlight.listing) {
+        //     let listing = this.highlight.listing;
+        //     this.drawListingsWithinBlock(listing.priceBlock, listing);
+        //     this.drawListingsWithinBlock(listing.markupBlock, listing);
+        //     this.hideListingsWithinAllOtherBlocks(listing.priceBlock);
+        //     this.hideListingsWithinAllOtherBlocks(listing.markupBlock);
+        // }
+        else {
+            this.hideListingsWithinAllBlocks();
+        }
     }
 
     private updateColors() {
@@ -96,16 +120,20 @@ export class ListingBlocksComponent extends BaseComponent {
             }
         }
         else if (this.selection.priceBlocks) {
-            // Add listing in the selected blocks
+            // Add each listing in the selected blocks
             for (let block of this.selection.priceBlocks) {
                 Array.prototype.push.apply(listings, block.listings);
             }
         }
         else if (this.selection.markupBlocks) {
-            // Add listing in the selected blocks
+            // Add each listing in the selected blocks
             for (let block of this.selection.markupBlocks) {
                 Array.prototype.push.apply(listings, block.listings);
             }
+        }
+        else if (this.selection.listings && this.selection.listings.length > 1) {
+            // Add each selected listing
+            Array.prototype.push.apply(listings, this.selection.listings);
         }
         else if (this.highlight.neighborhood) {
             // Add each listing in the highlighted neighborhood
@@ -164,6 +192,22 @@ export class ListingBlocksComponent extends BaseComponent {
             .attr('pointer-events', 'none')
           .transition().duration(200)
             .attr('opacity', 0)
+    }
+
+    private hideListingsWithinAllOtherBlocks(block: Block) {
+        let allBlocks = (block.type === 'price') ? this.data.priceBlocks : this.data.markupBlocks;
+        for (let other of allBlocks) {
+            if (block !== other)
+                this.hideListingsWithinBlock(other);
+        }
+    }
+
+    private hideListingsWithinAllBlocks() {
+        for (let block of this.data.priceBlocks)
+            this.hideListingsWithinBlock(block);
+
+        for (let block of this.data.markupBlocks) 
+            this.hideListingsWithinBlock(block);
     }
 
     private drawListingsWithinBlock(block: Block, highlightedListing?: Listing) {
