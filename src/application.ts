@@ -11,7 +11,7 @@ export class Application {
 
     // Components
     private mapComponent: components.NeighborhoodMapComponent;
-    private barsComponent: components.ListingBarsComponent;
+    private blocksComponent: components.ListingBlocksComponent;
     private quadrantsComponent: components.PriceQuadrantsComponent;
     private detailComponent: components.DetailComponent;
     private filtersComponent: components.FiltersComponent;
@@ -22,7 +22,7 @@ export class Application {
 
         // Initialize components
         this.mapComponent = new components.NeighborhoodMapComponent('#map .content', this.dispatcher);
-        this.barsComponent = new components.ListingBarsComponent('#listing-bars .content', this.dispatcher);
+        this.blocksComponent = new components.ListingBlocksComponent('#listing-blocks .content', this.dispatcher);
         this.quadrantsComponent = new components.PriceQuadrantsComponent('#quadrants .content', this.dispatcher);
         this.detailComponent = new components.DetailComponent('#details .content', this.dispatcher);
         this.filtersComponent = new components.FiltersComponent('#filters .content', this.dispatcher);
