@@ -134,7 +134,7 @@ export class ListingBlocksComponent extends BaseComponent {
             .attr('height', blockHeight)
             .attr('width', blockWidth)
             .attr('y', height/6)
-            .attr('fill', '#e8e8e8')
+            .attr('fill', 'white')
             .style('stroke', '#888')
             .style('stroke-width', 1);
         this.view.priceBlockGroups
