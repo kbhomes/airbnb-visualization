@@ -11,6 +11,8 @@ export class ListingBlocksComponent extends BaseComponent {
         svg?: d3.Selection<d3.BaseType, {}, d3.BaseType, {}>;
         priceBlockGroups?: d3.Selection<d3.BaseType, Block, d3.BaseType, {}>;
         markupBlockGroups?: d3.Selection<d3.BaseType, Block, d3.BaseType, {}>;
+
+        priceColorScale?: d3.ScaleSequential<string>;
     }
 
     public constructor(selector: string, dispatcher: Dispatch) {
@@ -25,6 +27,8 @@ export class ListingBlocksComponent extends BaseComponent {
             .attr('class', 'chart')
             .attr('width', width)
             .attr('height', height);
+
+        this.view.priceColorScale = d3.scaleSequential(d3.interpolateReds);
     }
 
     public onLoad(data: LoadEventData) {
@@ -34,29 +38,12 @@ export class ListingBlocksComponent extends BaseComponent {
 
     public onSelect(selection: SelectEventData) {
         super.onSelect(selection);
+        this.updateColors();
     }
 
     public onHighlight(highlight: HighlightEventData) {
         super.onHighlight(highlight);
-
-        if (highlight.neighborhood) {
-            let counts = Array<number>(this.data.priceBlocks.length).fill(0);
-
-            // Loop through each listing in the neighborhood and find the block it belongs to
-            for (let listing of highlight.neighborhood.listings) {
-                counts[listing.priceBlock.number] += 1;
-            }
-
-            // Highlight the neighborhoods in the blocks
-            let scaleRed = d3.scaleSequential(d3.interpolateReds).domain(d3.extent(counts));
-            this.view.priceBlockGroups
-              .transition().duration(500)
-              .select('rect.block-rect')
-                .attr('fill', (d,i) => scaleRed(counts[i]));
-        }
-        else {
-
-        }
+        this.updateColors();
     }
 
     public onFilter(filter: FilterEventData) {
@@ -68,13 +55,55 @@ export class ListingBlocksComponent extends BaseComponent {
 
     }
 
+    private updateColors() {
+        let counts = Array<number>(this.data.priceBlocks.length).fill(0);
+        let neighborhoods = this.selection.neighborhoods || [];
+
+        if (neighborhoods.length === 0 && this.highlight.neighborhood) {
+            neighborhoods = [this.highlight.neighborhood];
+        }
+
+        // Loop through each listing in the neighborhoods and find the block it belongs to
+        for (let neighborhood of neighborhoods) {
+            for (let listing of neighborhood.listings) {
+                counts[listing.priceBlock.number] += 1;
+            }
+        }
+
+        // Create the fill color function
+        let blockFill = (block: Block) => {
+            if (neighborhoods.length === 0)
+                return 'white';
+            else 
+                return this.view.priceColorScale(counts[block.number]);
+        }
+
+        // Highlight the neighborhoods in the blocks
+        this.view.priceColorScale.domain(d3.extent(counts));
+        this.view.priceBlockGroups
+            .transition().duration(500)
+            .select('rect.block-rect')
+            .attr('fill', blockFill);
+    }
+
     public render() {
         let self = this;
 
         let padding = 5;
-        let sectionLabelWidth = 100;
+        let sectionLabelWidth = 50;
         let width = this.element.clientWidth - sectionLabelWidth;
         let height = this.element.clientHeight;
+
+        let priceBlockSectionLabel = this.view.svg.select('text.price-block-label');
+        if (priceBlockSectionLabel.empty()) {
+            priceBlockSectionLabel = this.view.svg.append('text')
+                .attr('class', 'price-block-label')
+                .style('font-size', '10px')
+                .text('Price:');
+        }
+        priceBlockSectionLabel
+            .attr('x', padding)
+            .attr('y', height/6 + height/6);
 
         let blockHeight = height / 3;
         let blockWidth = (block: Block) => {
@@ -106,7 +135,7 @@ export class ListingBlocksComponent extends BaseComponent {
             .attr('width', blockWidth)
             .attr('y', height/6)
             .attr('fill', '#e8e8e8')
-            .style('stroke', 'black')
+            .style('stroke', '#888')
             .style('stroke-width', 1);
         this.view.priceBlockGroups
           .select('text.block-label')
