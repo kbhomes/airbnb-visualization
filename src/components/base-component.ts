@@ -1,6 +1,7 @@
 import * as d3 from '../d3';
 import * as dispatch from '../data/dispatch';
 import { Neighborhood, Listing } from '../data/listing';
+import { Block } from '../data/block';
 
 export abstract class BaseComponent {
     protected element: Element;
@@ -24,7 +25,7 @@ export abstract class BaseComponent {
         this.dispatcher.on(this.getComponentEventName(dispatch.DispatchEvent.Filter), this.eventBind(this.onFilter));
 
         // Set up empty events
-        this.selection = { neighborhoods: undefined, listings: undefined };
+        this.selection = { neighborhoods: undefined, listings: undefined, priceBlocks: undefined, markupBlocks: undefined };
         this.highlight = { neighborhood: undefined, listing: undefined };
         this.filter = { filter: false };
     }
@@ -68,9 +69,14 @@ export abstract class BaseComponent {
             let selectedListings = this.selection.listings.slice();
             selectedListings.splice(selectedIndex, 1);
 
+            if (selectedListings.length === 0)
+                selectedListings = undefined;
+
             this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
                 neighborhoods: undefined,
-                listings: selectedListings
+                listings: selectedListings,
+                priceBlocks: undefined,
+                markupBlocks: undefined
             } as dispatch.SelectEventData);
         }
         else {
@@ -80,7 +86,9 @@ export abstract class BaseComponent {
 
             this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
                 neighborhoods: undefined,
-                listings: selectedListings
+                listings: selectedListings,
+                priceBlocks: undefined,
+                markupBlocks: undefined
             } as dispatch.SelectEventData);
         }
     }
@@ -93,9 +101,14 @@ export abstract class BaseComponent {
             let selectedNeighborhoods = this.selection.neighborhoods.slice();
             selectedNeighborhoods.splice(selectedIndex, 1);
 
+            if (selectedNeighborhoods.length === 0)
+                selectedNeighborhoods = undefined;
+
             this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
                 neighborhoods: selectedNeighborhoods,
-                listings: undefined
+                listings: undefined,
+                priceBlocks: undefined,
+                markupBlocks: undefined
             } as dispatch.SelectEventData);
         }
         else {
@@ -105,8 +118,75 @@ export abstract class BaseComponent {
 
             this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
                 neighborhoods: selectedNeighborhoods,
-                listings: undefined
+                listings: undefined,
+                priceBlocks: undefined,
+                markupBlocks: undefined
             } as dispatch.SelectEventData);
+        }
+    }
+
+    protected dispatchBlockSelection(block: Block) {
+        if (block.type === 'price') {
+            // Check whether to add or remove this price block from the selection
+            if (this.selection.priceBlocks && this.selection.priceBlocks.indexOf(block) !== -1) {
+                // Block is already selected, so send out a selection event with this deselected
+                let selectedIndex = this.selection.priceBlocks.indexOf(block);
+                let selectedPriceBlocks = this.selection.priceBlocks.slice();
+                selectedPriceBlocks.splice(selectedIndex, 1);
+
+                if (selectedPriceBlocks.length === 0)
+                    selectedPriceBlocks = undefined;
+
+                this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
+                    neighborhoods: undefined,
+                    listings: undefined,
+                    priceBlocks: selectedPriceBlocks,
+                    markupBlocks: undefined
+                } as dispatch.SelectEventData);
+            }
+            else {
+                // Neighborhood is not already selected, so send out a selection event with this selected
+                let selectedPriceBlocks = (this.selection.priceBlocks || []).slice();
+                selectedPriceBlocks.push(block);
+
+                this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
+                    neighborhoods: undefined,
+                    listings: undefined,
+                    priceBlocks: selectedPriceBlocks,
+                    markupBlocks: undefined
+                } as dispatch.SelectEventData);
+            }
+        }
+        else {
+            // Check whether to add or remove this markup block from the selection
+            if (this.selection.markupBlocks && this.selection.markupBlocks.indexOf(block) !== -1) {
+                // Block is already selected, so send out a selection event with this deselected
+                let selectedIndex = this.selection.markupBlocks.indexOf(block);
+                let selectedMarkupBlocks = this.selection.markupBlocks.slice();
+                selectedMarkupBlocks.splice(selectedIndex, 1);
+
+                if (selectedMarkupBlocks.length === 0)
+                    selectedMarkupBlocks = undefined;
+
+                this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
+                    neighborhoods: undefined,
+                    listings: undefined,
+                    priceBlocks: undefined,
+                    markupBlocks: selectedMarkupBlocks
+                } as dispatch.SelectEventData);
+            }
+            else {
+                // Neighborhood is not already selected, so send out a selection event with this selected
+                let selectedMarkupBlocks = (this.selection.markupBlocks || []).slice();
+                selectedMarkupBlocks.push(block);
+
+                this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
+                    neighborhoods: undefined,
+                    listings: undefined,
+                    priceBlocks: undefined,
+                    markupBlocks: selectedMarkupBlocks
+                } as dispatch.SelectEventData);
+            }
         }
     }
 

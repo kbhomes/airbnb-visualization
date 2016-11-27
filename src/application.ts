@@ -94,6 +94,15 @@ export class Application {
             return accumulator + block.listings.length;
         }, 0);
 
+        // Sort the listings within each block
+        for (let block of priceBlocks) {
+            block.listings.sort((a,b) => a.prices.airbnb.daily - b.prices.airbnb.daily);
+        }
+
+        for (let block of markupBlocks) {
+            block.listings.sort((a,b) => a.prices.markup_percentage - b.prices.markup_percentage);
+        }
+
         return [priceBlocks, markupBlocks];
     }
 

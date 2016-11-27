@@ -22,4 +22,13 @@ export module Block {
 
         return block.minimum <= value && (isNaN(block.maximum) || value < block.maximum);
     }
+
+    export function value(block: Block, listing: Listing) : number {
+        if (block.type === "price") {
+            return listing.prices.airbnb.daily;
+        }
+        else {
+            return listing.prices.markup_percentage;
+        }
+    }
 }

@@ -23,6 +23,8 @@ export interface LoadEventData {
 export interface SelectEventData {
     neighborhoods: Neighborhood[];
     listings: Listing[];
+    priceBlocks: Block[];
+    markupBlocks: Block[];
 }
 
 export interface HighlightEventData {
@@ -44,8 +46,10 @@ export interface FilterEventData {
 // Select:
 //      - neighborhoods: array of neighborhood names
 //      - listings: array of listing ids
+//      - priceBlocks: array of price blocks that are selected
+//      - markupBlocks: array of markup blocks that are selected
 //
-// (either neighborhoods, or listings, or none)
+// (either neighborhoods, or listings, or price blocks, or markup blocks, or none)
 
 // Highlight:
 //      - neighborhood: neighborhood name

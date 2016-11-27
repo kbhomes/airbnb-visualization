@@ -8,9 +8,9 @@ import { Block } from '../data/block';
 export class ListingBlocksComponent extends BaseComponent {
     
     private view: {
-        svg?: d3.Selection<d3.BaseType, {}, d3.BaseType, {}>;
-        priceBlockGroups?: d3.Selection<d3.BaseType, Block, d3.BaseType, {}>;
-        markupBlockGroups?: d3.Selection<d3.BaseType, Block, d3.BaseType, {}>;
+        svg?: d3.DatalessSelection;
+        priceBlockGroups?: d3.DataSelection<Block>;
+        markupBlockGroups?: d3.DataSelection<Block>;
 
         priceColorScale?: d3.ScaleSequential<string>;
         markupColorScale?: d3.ScaleSequential<string>;
@@ -45,6 +45,28 @@ export class ListingBlocksComponent extends BaseComponent {
     public onSelect(selection: SelectEventData) {
         super.onSelect(selection);
         this.updateColors();
+
+        // If any price blocks are selected, draw those listings
+        let selectedPriceBlocks = selection.priceBlocks || [];
+        let selectedMarkupBlocks = selection.markupBlocks || [];
+
+        for (let block of this.data.priceBlocks) {
+            if (selectedPriceBlocks.indexOf(block) !== -1) {
+                this.drawListingsWithinBlock(block);
+            }
+            else {
+                this.hideListingsWithinBlock(block);
+            }
+        }
+
+        for (let block of this.data.markupBlocks) {
+            if (selectedMarkupBlocks.indexOf(block) !== -1) {
+                this.drawListingsWithinBlock(block);
+            }
+            else {
+                this.hideListingsWithinBlock(block);
+            }
+        }
     }
 
     public onHighlight(highlight: HighlightEventData) {
@@ -64,30 +86,58 @@ export class ListingBlocksComponent extends BaseComponent {
     private updateColors() {
         let priceCounts = Array<number>(this.data.priceBlocks.length).fill(0);
         let markupCounts = Array<number>(this.data.markupBlocks.length).fill(0);
-        let neighborhoods = this.selection.neighborhoods || [];
 
-        if (neighborhoods.length === 0 && this.highlight.neighborhood) {
-            neighborhoods = [this.highlight.neighborhood];
+        let listings: Listing[] = [];
+
+        if (this.selection.neighborhoods) {
+            // Add each listing in the neighborhoods
+            for (let neighborhood of this.selection.neighborhoods) {
+                Array.prototype.push.apply(listings, neighborhood.listings);
+            }
+        }
+        else if (this.selection.priceBlocks) {
+            // Add listing in the selected blocks
+            for (let block of this.selection.priceBlocks) {
+                Array.prototype.push.apply(listings, block.listings);
+            }
+        }
+        else if (this.selection.markupBlocks) {
+            // Add listing in the selected blocks
+            for (let block of this.selection.markupBlocks) {
+                Array.prototype.push.apply(listings, block.listings);
+            }
+        }
+        else if (this.highlight.neighborhood) {
+            // Add each listing in the highlighted neighborhood
+            Array.prototype.push.apply(listings, this.highlight.neighborhood.listings);
         }
 
-        // Loop through each listing in the neighborhoods and find the block it belongs to
-        for (let neighborhood of neighborhoods) {
-            for (let listing of neighborhood.listings) {
-                priceCounts[listing.priceBlock.number] += 1;
-                markupCounts[listing.markupBlock.number] += 1;
-            }
+        // Update the counts for our given listings
+        for (let listing of listings) {
+            priceCounts[listing.priceBlock.number] += 1;
+            markupCounts[listing.markupBlock.number] += 1;
         }
 
         // Create the fill color function
         let blockFill = (block: Block) => {
-            if (neighborhoods.length === 0)
+            if (listings.length === 0)
                 return 'white';
             else {
                 if (block.type === 'price') {
-                    return this.view.priceColorScale(priceCounts[block.number]);
+                    if (this.selection.priceBlocks) {
+                        return 'white';
+                    }
+                    else {
+                        return this.view.priceColorScale(priceCounts[block.number]);
+                    }
                 } 
                 else {
-                    return this.view.markupColorScale(markupCounts[block.number]);
+                    if (this.selection.markupBlocks) {
+                        return 'white';
+                    }
+                    else {
+                        return this.view.markupColorScale(markupCounts[block.number]);
+                    }
                 }
             }
         }
@@ -105,6 +155,96 @@ export class ListingBlocksComponent extends BaseComponent {
             .transition().duration(500)
             .select('rect.block-rect')
             .attr('fill', blockFill);
+    }
+
+    private hideListingsWithinBlock(block: Block) {
+        let allGroups = (block.type === 'price') ? this.view.priceBlockGroups : this.view.markupBlockGroups;
+        allGroups.filter(d => d.number === block.number)
+          .selectAll('rect.listing-bar')
+            .attr('pointer-events', 'none')
+          .transition().duration(200)
+            .attr('opacity', 0)
+    }
+
+    private drawListingsWithinBlock(block: Block, highlightedListing?: Listing) {
+        let allGroups = (block.type === 'price') ? this.view.priceBlockGroups : this.view.markupBlockGroups;
+        let otherGroups = (block.type === 'price') ? this.view.markupBlockGroups : this.view.priceBlockGroups;
+        let otherBlockKey = (block.type === 'price') ? 'markupBlock' : 'priceBlock';
+
+        let blockGroup = allGroups.filter(d => d.number === block.number);
+        let blockRect = blockGroup.select('rect.block-rect');
+
+        let height = parseFloat(blockRect.attr('height'));
+        let width = parseFloat(blockRect.attr('width'));
+        let x = parseFloat(blockRect.attr('x'));
+        let y = parseFloat(blockRect.attr('y'));
+
+        // Create the height scale for this block
+        let minimum = block.minimum;
+        let maximum = isNaN(block.maximum) ? d3.max(block.listings, l => Block.value(block, l)) : block.maximum;
+        let scaleHeight = d3.scaleLinear()
+            .domain([minimum, maximum])
+            .range([height * 0.1, height]);
+        let barWidth = width / block.listings.length;
+
+        let barFill = (listing: Listing, highlight: Listing) => {
+            if (highlight === undefined) {
+                return 'red';
+            }
+            else {
+                if (listing === highlight) {
+                    return 'red';
+                }
+                else { 
+                    return '#ccc';
+                }
+            }
+        };
+
+        let debouncedUpdateColor = (() => {
+            let timeout = 0;
+            let wait = 100;
+            let self = this;
+
+            return function(cancel = false) {
+                clearTimeout(timeout);
+
+                if (!cancel)
+                    timeout = setTimeout(() => self.updateColors(), wait);
+            };
+        })();
+
+        let listingBarsSelection = blockGroup
+          .selectAll('rect.listing-bar')
+            .data(block.listings);
+        
+        let listingBarsEnter = listingBarsSelection.enter()
+          .append('rect')
+            .attr('class', 'listing-bar')
+            .attr('fill', d => barFill(d, highlightedListing))
+            .attr('width', barWidth)
+            .attr('x', (d,i) => i * barWidth)
+            .attr('height', d => scaleHeight(Block.value(block, d)))
+            .attr('y', d => y + (height - scaleHeight(Block.value(block, d))))
+            .on('mouseenter', l => {
+                otherGroups.selectAll('rect.listing-bar').attr('fill', (d:Listing) => barFill(d, l)); 
+                this.drawListingsWithinBlock(l[otherBlockKey], l);
+                debouncedUpdateColor(true);
+                allGroups.selectAll('rect.listing-bar').attr('fill', (d:Listing) => barFill(d, l)); 
+                otherGroups.selectAll('rect.block-rect').attr('fill', 'white');
+            })
+            .on('mouseleave', l => {
+                allGroups.selectAll('rect.listing-bar').attr('fill', (d:Listing) => barFill(d, undefined)); 
+                this.hideListingsWithinBlock(l[otherBlockKey]);
+                debouncedUpdateColor();
+            });
+
+        let listingBarsUpdate = listingBarsSelection.merge(listingBarsEnter);
+        listingBarsUpdate
+            .attr('pointer-events', 'auto')
+          .transition().duration(200)
+            .attr('opacity', 1)
+            .attr('fill', d => barFill(d, highlightedListing));
     }
 
     public render() {
@@ -164,8 +304,11 @@ export class ListingBlocksComponent extends BaseComponent {
             .data(this.data.priceBlocks);
 
         let priceBlocksEnter = priceBlocksSelection.enter().append('g').attr('class', 'price-block');
-        priceBlocksEnter.append('rect').attr('class', 'block-rect');
         priceBlocksEnter.append('text').attr('class', 'block-label');
+        priceBlocksEnter
+          .append('rect')
+            .attr('class', 'block-rect')
+            .on('click', d => this.dispatchBlockSelection(d));
 
         this.view.priceBlockGroups = priceBlocksSelection.merge(priceBlocksEnter);
         this.view.priceBlockGroups.style('transform', d => `translate(${blockX(d)}px, ${-padding}px)`);
@@ -191,8 +334,10 @@ export class ListingBlocksComponent extends BaseComponent {
             .data(this.data.markupBlocks);
 
         let markupBlocksEnter = markupBlocksSelection.enter().append('g').attr('class', 'markup-block');
-        markupBlocksEnter.append('rect').attr('class', 'block-rect');
         markupBlocksEnter.append('text').attr('class', 'block-label');
+        markupBlocksEnter.append('rect')
+            .attr('class', 'block-rect')
+            .on('click', d => this.dispatchBlockSelection(d));
 
         this.view.markupBlockGroups = markupBlocksSelection.merge(markupBlocksEnter);
         this.view.markupBlockGroups.style('transform', d => `translate(${blockX(d)}px, ${padding + height/2}px)`);
