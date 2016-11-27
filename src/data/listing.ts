@@ -1,4 +1,5 @@
 import * as d3 from '../d3';
+import { Block } from './Block';
 
 export module Listing {
     export type IDType = number;
@@ -8,6 +9,8 @@ export module Listing {
             name: row['name'],
             description: row['description'],
             neighborhood: neighborhood,
+            priceBlock: undefined,
+            markupBlock: undefined,
             amenities: row['amenities'],
             cancellation_policy: row['cancellation_policy'],
             reviews: {
@@ -48,6 +51,8 @@ export interface Listing {
     name: string;
     description: string;
     neighborhood: Neighborhood;
+    priceBlock: Block;
+    markupBlock: Block;
     amenities: string;
     cancellation_policy: string;
     reviews: {

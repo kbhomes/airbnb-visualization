@@ -2,6 +2,7 @@ import { Listing } from './listing';
 
 export interface Block {
     type: "price" | "markup";
+    number: number;
     minimum: number;
     maximum: number;
     listings: Listing[];

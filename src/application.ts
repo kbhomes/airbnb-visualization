@@ -3,6 +3,7 @@ import * as d3 from './d3';
 import { Dispatch, DispatchEvent, LoadEventData } from './data/dispatch';
 import { NeighborhoodGeoJSON } from './data/geojson';
 import { Listing, Neighborhood } from './data/listing';
+import { Block } from './data/block';
 
 import * as components from './components/';
 
@@ -29,6 +30,45 @@ export class Application {
 
         // Begin loading
         this.loadData();
+    }
+
+    private initializeBlocks(listings: Map<Listing.IDType, Listing>) {
+        // Initialize the price block ranges
+        let ranges = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000];
+        let priceBlocks: Block[] = [];
+        let listingBlocks: Block[] = [];
+
+        for (let i = 0; i < ranges.length; i++) {
+            priceBlocks.push({
+                type: "price",
+                number: i,
+                minimum: ranges[i],
+                maximum: (i === ranges.length - 1) ? NaN : ranges[i+1],
+                listings: []
+            });
+        }
+
+        // Initialize the blocks for the listings
+        for (let listing of Array.from(listings.values())) {
+            let price = listing.prices.airbnb.daily;
+
+            // Find the right price block for this listing
+            for (let block of priceBlocks) {
+                if (Block.contains(block, listing)) {
+                    block.listings.push(listing);
+                    listing.priceBlock = block;
+                    continue;
+                }
+            }
+        }
+
+        // Update the price blocks with information about where they start relative to one another
+        priceBlocks.reduce((accumulator, block) => {
+            block.listingsStartIndex = accumulator;
+            return accumulator + block.listings.length;
+        }, 0);
+
+        return [priceBlocks, listingBlocks];
     }
 
     private loadData() {
@@ -60,10 +100,15 @@ export class Application {
                         listings.set(listing.id, listing);
                     }
 
+                    // Process the blocks
+                    let [priceBlocks, markupBlocks] = this.initializeBlocks(listings);
+
                     let loadData: LoadEventData = {
                         geo: geo,
                         neighborhoods: neighborhoods,
-                        listings: listings
+                        listings: listings,
+                        priceBlocks: priceBlocks,
+                        markupBlocks: markupBlocks
                     };
 
                     this.dispatcher.call(DispatchEvent.Load, undefined, loadData)

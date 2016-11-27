@@ -13,18 +13,12 @@ export class ListingBlocksComponent extends BaseComponent {
         markupBlockGroups?: d3.Selection<d3.BaseType, Block, d3.BaseType, {}>;
     }
 
-    private priceBlocks: Block[];
-    private markupBlocks: Block[];
-
     public constructor(selector: string, dispatcher: Dispatch) {
         super(selector, dispatcher);
 
         // Initialize our canvas
         let width = this.element.clientWidth;
         let height = this.element.clientHeight;
-
-        this.priceBlocks = [];
-        this.markupBlocks = [];
 
         this.view = {};
         this.view.svg = d3.select(this.selector).append('svg')
@@ -33,43 +27,8 @@ export class ListingBlocksComponent extends BaseComponent {
             .attr('height', height);
     }
 
-    private initializeBlocks() {
-        // Initialize the price block ranges
-        let ranges = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000];
-
-        for (let i = 0; i < ranges.length; i++) {
-            this.priceBlocks.push({
-                type: "price",
-                minimum: ranges[i],
-                maximum: (i === ranges.length - 1) ? NaN : ranges[i+1],
-                listings: []
-            });
-        }
-
-        // Initialize the blocks for the listings
-        for (let listing of Array.from(this.data.listings.values())) {
-            let price = listing.prices.airbnb.daily;
-
-            // Find the right price block for this listing
-            for (let block of this.priceBlocks) {
-                if (Block.contains(block, listing)) {
-                    block.listings.push(listing);
-                    continue;
-                }
-            }
-        }
-
-        // Update the price blocks with information about where they start relative to one another
-        this.priceBlocks.reduce((accumulator, block) => {
-            block.listingsStartIndex = accumulator;
-            return accumulator + block.listings.length;
-        }, 0);
-    }
-
     public onLoad(data: LoadEventData) {
         super.onLoad(data);
-        
-        this.initializeBlocks();
         this.render();
     }
 
@@ -81,18 +40,11 @@ export class ListingBlocksComponent extends BaseComponent {
         super.onHighlight(highlight);
 
         if (highlight.neighborhood) {
-            let counts = Array<number>(this.priceBlocks.length).fill(0);
+            let counts = Array<number>(this.data.priceBlocks.length).fill(0);
 
             // Loop through each listing in the neighborhood and find the block it belongs to
             for (let listing of highlight.neighborhood.listings) {
-                for (let i = 0; i < this.priceBlocks.length; i++) {
-                    let block = this.priceBlocks[i];
-
-                    if (Block.contains(block, listing)) {
-                        counts[i] += 1;
-                        break;
-                    }
-                }
+                counts[listing.priceBlock.number] += 1;
             }
 
             // Highlight the neighborhoods in the blocks
@@ -140,7 +92,7 @@ export class ListingBlocksComponent extends BaseComponent {
 
         let priceBlocksSelection = this.view.svg
           .selectAll('g.price-block')
-            .data(this.priceBlocks);
+            .data(this.data.priceBlocks);
 
         let priceBlocksEnter = priceBlocksSelection.enter().append('g').attr('class', 'price-block');
         priceBlocksEnter.append('rect').attr('class', 'block-rect');
