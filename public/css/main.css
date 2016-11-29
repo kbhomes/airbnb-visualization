@@ -114,11 +114,15 @@ div {
   padding-right: 5px;
 }
 
-#details #price, #rating, #common_amenities, #common_words {
+#details #price, #rating, #common_amenities, #common_words, #amount {
   color:#ff1d23;
 }
 
 .chart .axis-label text {
   font: 12px sans-serif;
   text-anchor: middle;
+}
+
+p{
+      display: inline;
 }

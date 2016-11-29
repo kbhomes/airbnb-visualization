@@ -4,6 +4,7 @@ import { BaseComponent } from './base-component';
 import { Dispatch, DispatchEvent, LoadEventData, SelectEventData, HighlightEventData, FilterEventData } from '../data/dispatch';
 import { NeighborhoodGeoJSON, NeighborhoodGeoJSONFeature } from '../data/geojson';
 import { Attribute } from '../data/attribute';
+import { Listing, Neighborhood } from '../data/listing';
 export class NeighborhoodMapComponent extends BaseComponent {
 
     private view: {
@@ -32,11 +33,13 @@ export class NeighborhoodMapComponent extends BaseComponent {
 
     public onSelect(selection: SelectEventData) {
         super.onSelect(selection);
+            this.view.paths.attr('fill', d => this.getNeighborhoodRegion(this.data.neighborhoods.get(d.properties.neighborho)));
+        
     }
 
     public onHighlight(highlight: HighlightEventData) {
         super.onHighlight(highlight);
-
+            this.view.paths.attr('fill', d => this.getNeighborhoodRegion(this.data.neighborhoods.get(d.properties.neighborho)));
     }
 
     public onFilter(filter: FilterEventData) {
@@ -46,10 +49,29 @@ export class NeighborhoodMapComponent extends BaseComponent {
     public resize() {
 
     }
-//returns shade of green
-    public shadeOfGreen(neighborhood):string{
 
-        let average = this.getNeighborhoodPriceAverage(neighborhood)
+    private getNeighborhoodRegion(neighborhood:Neighborhood):string{
+        let selectedNeighborhoods = this.selection.neighborhoods || [];
+        let highlightedNeighborhood = this.highlight.neighborhood;
+        
+        if(neighborhood == undefined){
+            return 'grey'
+        }
+
+        if (selectedNeighborhoods.indexOf(neighborhood) !== -1 || neighborhood === highlightedNeighborhood ) {
+            return 'rgba(255, 100, 100, 0.5)';
+        }else {
+            return this.shadeOfGreen(neighborhood);
+        }
+    }
+
+//returns shade of green
+    public shadeOfGreen(neighborhood:Neighborhood):string{
+
+      
+        
+        let currentNeighborhood = this.data.neighborhoods.get(neighborhood.name); 
+        let average = Attribute.price.neighborhoodAccessor(currentNeighborhood);
 
         return this.getColor(average);
         
@@ -58,26 +80,28 @@ export class NeighborhoodMapComponent extends BaseComponent {
 //color scale: https://color.adobe.com/This-Green-color-theme-8084268/ for each green
     private getColor(averageNeighborhoodPrice):string{
 
-        if(averageNeighborhoodPrice>200 && averageNeighborhoodPrice<400 ){
-
+        if(averageNeighborhoodPrice>0 && averageNeighborhoodPrice<=199 ){
+            return 'rgb(150,255,150)';
+        }
+        if(averageNeighborhoodPrice>200 && averageNeighborhoodPrice<=300 ){
             return 'rgb(100,255,100)';
-        }else if(averageNeighborhoodPrice>401 && averageNeighborhoodPrice<600 ){
+        }else if(averageNeighborhoodPrice>301 && averageNeighborhoodPrice<=399 ){
             return 'rgb(80,225,80)';
-        }else if(averageNeighborhoodPrice>601 && averageNeighborhoodPrice<800){
+        }else if(averageNeighborhoodPrice>401 && averageNeighborhoodPrice<=600 ){
+            return 'rgb(80,225,80)';
+        }else if(averageNeighborhoodPrice>601 && averageNeighborhoodPrice<=800){
             return 'rgb(60,195,60)'
-        }else if(averageNeighborhoodPrice>801 && averageNeighborhoodPrice<1000){
+        }else if(averageNeighborhoodPrice>801 && averageNeighborhoodPrice<=1000){
             return 'rgb(40,165,40)'
-        }else if(averageNeighborhoodPrice>1001 && averageNeighborhoodPrice<1200){
+        }else if(averageNeighborhoodPrice>1001 && averageNeighborhoodPrice<=1200){
             return 'rgb(20,135,20)'
-        } else if(averageNeighborhoodPrice>1001 && averageNeighborhoodPrice<1200){
-            return 'rgb(10,105,00)'
-        }else if(averageNeighborhoodPrice>1201 && averageNeighborhoodPrice<1400){
+        } else if(averageNeighborhoodPrice>1201 && averageNeighborhoodPrice<=1400){
             return 'rgb(5,75,5)'
         }else if(averageNeighborhoodPrice>1401 && averageNeighborhoodPrice<1600){
             return 'rgb(0,45,0)'
         }
 
-        return 'rgb(12,200,30)';
+        return 'rgb(0,15,0)';
     }
 
     private getNeighborhoodAverages(){
@@ -120,12 +144,12 @@ export class NeighborhoodMapComponent extends BaseComponent {
             .attr('d', path)
             .attr('data-id', d => d.id)
             .attr('data-name', d => d.properties.neighborho)
-            .style('fill', function(d){
+            .attr('fill', function(d){
 
                 let neighborhood = self.data.neighborhoods.get(d.properties.neighborho);
                 //if the neighborhood exists
                 // return a color giving the price range
-                return (neighborhood != undefined) ? self.shadeOfGreen(neighborhood) : '#000000';
+                return (neighborhood != undefined) ? self.shadeOfGreen(neighborhood) : 'grey';
             })
             .style('stroke', '#FFFFFF')
             .on('mouseenter', function(d) {
@@ -149,7 +173,6 @@ export class NeighborhoodMapComponent extends BaseComponent {
                 let cy = box.y + box.height/2;
                 
                 sel.transition()
-                    .style('fill', 'rgb(255,29,35)')
                     .style('transform', `translate(-${(scale - 1) * cx}px, -${(scale - 1) * cy}px) scale(${scale})`);
             })
             .on('mouseleave', function(d) {
@@ -159,21 +182,16 @@ export class NeighborhoodMapComponent extends BaseComponent {
 
                 let sel = d3.select(this);
                 sel.transition()
-                    .style('fill', self.shadeOfGreen(self.data.neighborhoods.get(d.properties.neighborho)))
                     .style('transform', `translate(0px, 0px) scale(1.0)`)
                     .on('end', () => sel.moveToBack());
             }).on('click', function(d){
 
-                let sel = d3.select(this);
-                 sel.transition()
-                    .style('fill', 'rgb(255,29,35)');
                     
                 let selectedNeighborhood =  self.data.neighborhoods.get(d.properties.neighborho)
                 self.dispatchNeighborhoodSelection(selectedNeighborhood);
 
                 
 
-                    console.log('RED')
             });
                 //label each neighborhood
                 //TODO: tidy label up 
