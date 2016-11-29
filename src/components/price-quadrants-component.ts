@@ -167,17 +167,21 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
         // Get the drag boundaries, and offsets
         let offsetX = +this.view.dragArea.attr('data-offset-x');
-        let offsetY = +this.view.dragArea.attr('data-offset-x');
+        let offsetY = +this.view.dragArea.attr('data-offset-y');
         let width = +this.view.dragArea.select('rect.drag-backfill').attr('width');
         let height = +this.view.dragArea.select('rect.drag-backfill').attr('height')
         
         // Get the drag position
         let x0: number = Math.max(0, Math.min(width, d3.event.x));
         let y0: number = Math.max(0, Math.min(height, d3.event.y));
-        let startX = x0, startY = y0;
+
+        let rectLeft = 0; 
+        let rectTop = 0; 
+        let rectWidth = 0; 
+        let rectHeight = 0; 
 
         // Add a new path to the drag area
-        let linegen = d3.line().curve(d3.curveBasis);
+        // let linegen = d3.line().curve(d3.curveBasis);
         // let path = this.view.dragArea
         //     .append('path')
         //     .datum(d)
@@ -209,10 +213,10 @@ export class PriceQuadrantsComponent extends BaseComponent {
             // // Draw the path
             // path.attr('d', linegen);
 
-            let rectLeft = Math.min(startX, x1);
-            let rectTop = Math.min(startY, y1);
-            let rectWidth = Math.abs(x1 - startX);
-            let rectHeight = Math.abs(y1 - startY);
+            rectLeft = Math.min(x0, x1);
+            rectTop = Math.min(y0, y1);
+            rectWidth = Math.abs(x1 - x0);
+            rectHeight = Math.abs(y1 - y0);
             rect.attr('x', rectLeft)
                 .attr('y', rectTop)
                 .attr('width', rectWidth)
@@ -225,32 +229,30 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
             // Select the actual elements
             let svgNode: SVGSVGElement = <SVGSVGElement>this.view.svg.node();
-            // let pathNode: SVGSVGElement = <SVGSVGElement>path.node();
             let rectNode: SVGSVGElement = <SVGSVGElement>rect.node();
 
-            if (this.selectedLevel === 'Neighborhoods') {
-                this.view.neighborhoodCircles.each(function(d) {
-                    let svgRect = svgNode.createSVGRect();
-                    svgRect.x = +d3.select(this).attr('cx')// + offsetX;
-                    svgRect.y = +d3.select(this).attr('cy')// + offsetY;
-                    svgRect.width = svgRect.height = 1;
+            let selectionRect = svgNode.createSVGRect();
+            selectionRect.x = rectLeft + offsetX;
+            selectionRect.y = rectTop + offsetY;
+            selectionRect.width = rectWidth;
+            selectionRect.height = rectHeight;
+            let nodes = svgNode.getIntersectionList(selectionRect, null);
+            
+            for (let i = 0; i < nodes.length; i++) {
+                let data = nodes.item(i)['__data__'];
 
-                    if (svgNode.checkIntersection(rectNode, svgRect)) {
-                        self.dispatchNeighborhoodSelection(d);
-                    }
-                });
-            }
-            else {
-                this.view.listingCircles.each(function(d) {
-                    let svgRect = svgNode.createSVGRect();
-                    svgRect.x = +d3.select(this).attr('cx')// + offsetX;
-                    svgRect.y = +d3.select(this).attr('cy')// + offsetY;
-                    svgRect.width = svgRect.height = 1;
-
-                    if (svgNode.checkIntersection(rectNode, svgRect)) {
-                        self.dispatchListingSelection(d);
-                    }
-                });
+                // Useless node, continue
+                if (data === undefined || data === null) {
+                    continue;
+                }
+                else if (this.selectedLevel === 'Neighborhoods' && data['listings'] !== undefined) {
+                    // Neighborhood
+                    this.dispatchNeighborhoodSelection(<Neighborhood>data);
+                }
+                else if (this.selectedLevel === 'Listings' && data['neighborhood'] !== undefined) {
+                    // Listing
+                    this.dispatchListingSelection(<Listing>data);
+                }
             }
 
             // Remove the path from existence
