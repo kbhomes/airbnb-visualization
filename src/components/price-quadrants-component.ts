@@ -237,22 +237,44 @@ export class PriceQuadrantsComponent extends BaseComponent {
             selectionRect.width = rectWidth;
             selectionRect.height = rectHeight;
             let nodes = svgNode.getIntersectionList(selectionRect, null);
-            
-            for (let i = 0; i < nodes.length; i++) {
-                let data = nodes.item(i)['__data__'];
 
-                // Useless node, continue
-                if (data === undefined || data === null) {
-                    continue;
+            if (this.selectedLevel === 'Neighborhoods') {
+                let neighborhoods: Neighborhood[] = [];
+
+                for (let i = 0; i < nodes.length; i++) {
+                    let data = nodes.item(i)['__data__'];
+
+                    // Current selected node is a neighborhood
+                    if (data && data['listings'] !== undefined) {
+                        neighborhoods.push(data);
+                    }
                 }
-                else if (this.selectedLevel === 'Neighborhoods' && data['listings'] !== undefined) {
-                    // Neighborhood
-                    this.dispatchNeighborhoodSelection(<Neighborhood>data);
+
+                this.dispatcher.call(DispatchEvent.Select, this, {
+                    neighborhoods: neighborhoods,
+                    listings: undefined,
+                    priceBlocks: undefined,
+                    markupBlocks: undefined
+                } as SelectEventData);
+            }
+            else {
+                let listings: Listing[] = [];
+
+                for (let i = 0; i < nodes.length; i++) {
+                    let data = nodes.item(i)['__data__'];
+
+                    // Current selected node is a listing
+                    if (data && data['neighborhood'] !== undefined) {
+                        listings.push(data);
+                    }
                 }
-                else if (this.selectedLevel === 'Listings' && data['neighborhood'] !== undefined) {
-                    // Listing
-                    this.dispatchListingSelection(<Listing>data);
-                }
+
+                this.dispatcher.call(DispatchEvent.Select, this, {
+                    neighborhoods: undefined,
+                    listings: listings,
+                    priceBlocks: undefined,
+                    markupBlocks: undefined
+                } as SelectEventData);
             }
 
             // Remove the path from existence

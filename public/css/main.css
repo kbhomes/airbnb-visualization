@@ -109,6 +109,7 @@ div {
 
 .filter-description .reset {
   text-decoration: none;
+  cursor: point;
 }
 
 .filter-list {
