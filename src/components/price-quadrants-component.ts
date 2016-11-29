@@ -387,9 +387,15 @@ export class PriceQuadrantsComponent extends BaseComponent {
     private getListingCircleFill(listing: Listing) : string {
         let selectedNeighborhoods = this.selection.neighborhoods || [];
         let selectedListings = this.selection.listings || [];
+        let selectedPriceBlocks = this.selection.priceBlocks || [];
+        let selectedMarkupBlocks = this.selection.markupBlocks || [];
         let highlightedListing = this.highlight.listing;
         
-        if (selectedListings.indexOf(listing) !== -1 || selectedNeighborhoods.indexOf(listing.neighborhood) !== -1) {
+        if (selectedListings.indexOf(listing) !== -1 || 
+            selectedNeighborhoods.indexOf(listing.neighborhood) !== -1 ||
+            selectedPriceBlocks.indexOf(listing.priceBlock) !== -1 ||
+            selectedMarkupBlocks.indexOf(listing.markupBlock) !== -1
+        ) {
             return 'rgba(255, 100, 100, 0.5)';
         }
         else {
