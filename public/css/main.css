@@ -101,12 +101,22 @@ div {
   border-bottom: 1px solid #ccc;
 }
 
-.filter-neighborhoods {
+.filter-description {
+    margin: 10px;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.filter-description .reset {
+  text-decoration: none;
+}
+
+.filter-list {
   padding: 0;
   margin: 10px;
 }
 
-.filter-neighborhoods div {
+.filter-list div {
   font-size: 12px;
   padding: 5px 8px 5px 5px;
   background: #d8d8d8;
@@ -115,7 +125,7 @@ div {
   margin: 3px;;
 }
 
-.filter-neighborhoods div:before {
+.filter-list div:before {
   content: 'ｘ';
   color: #777;
   padding-right: 5px;
