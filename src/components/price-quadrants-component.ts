@@ -28,6 +28,8 @@ export class PriceQuadrantsComponent extends BaseComponent {
         quadrantLineVertical?: d3.DatalessSelection;
         quadrantLabels?: d3.DataSelection<string>;
 
+        dragArea?: d3.DatalessSelection;
+
         neighborhoodCircles?: d3.DataSelection<Neighborhood>;
         listingCircles?: d3.DataSelection<Listing>;
     }
@@ -143,6 +145,120 @@ export class PriceQuadrantsComponent extends BaseComponent {
         });
     }
 
+    private initializeDrag() {
+        this.view.dragArea = this.view.svg.append('g').attr('class', 'drag-area');
+        this.view.dragArea
+          .append('rect')
+            .attr('class', 'drag-backfill')
+            .attr('fill', 'transparent')
+            .style('cursor', 'crosshair')
+            .call(
+                d3.drag()
+                .subject(() => [[d3.event.x, d3.event.y], [d3.event.x, d3.event.y]])
+                .on('start', () => this.selectionDragStarted())
+            );
+    }
+
+    private selectionDragStarted() {
+        let self = this;
+
+        // Get the list of data positions of this path
+        let d: [number,number][] = d3.event.subject;
+
+        // Get the drag boundaries, and offsets
+        let offsetX = +this.view.dragArea.attr('data-offset-x');
+        let offsetY = +this.view.dragArea.attr('data-offset-x');
+        let width = +this.view.dragArea.select('rect.drag-backfill').attr('width');
+        let height = +this.view.dragArea.select('rect.drag-backfill').attr('height')
+        
+        // Get the drag position
+        let x0: number = Math.max(0, Math.min(width, d3.event.x));
+        let y0: number = Math.max(0, Math.min(height, d3.event.y));
+        let startX = x0, startY = y0;
+
+        // Add a new path to the drag area
+        let linegen = d3.line().curve(d3.curveBasis);
+        // let path = this.view.dragArea
+        //     .append('path')
+        //     .datum(d)
+        //     .attr('class', 'drag-selection');
+        
+        let rect = this.view.dragArea
+            .append('rect')
+            .attr('class', 'drag-selection');
+
+        d3.event
+        .on('drag', () => {
+            // console.log(d3.event);
+            let x1: number = Math.max(0, Math.min(width, d3.event.x));
+            let y1: number = Math.max(0, Math.min(height, d3.event.y));
+            // let dx = x1 - x0;
+            // let dy = y1 - y0;
+
+            // // If the distance is beyond a certain radius, add it as a new point;
+            // // Otherwise, update the most recent point
+            // if (dx*dx + dy*dy > 100) {
+            //     d.push([x1, y1]);
+            //     x0 = x1;
+            //     y0 = y1;
+            // }
+            // else {
+            //     d[d.length - 1] = [x1, y1];
+            // }
+
+            // // Draw the path
+            // path.attr('d', linegen);
+
+            let rectLeft = Math.min(startX, x1);
+            let rectTop = Math.min(startY, y1);
+            let rectWidth = Math.abs(x1 - startX);
+            let rectHeight = Math.abs(y1 - startY);
+            rect.attr('x', rectLeft)
+                .attr('y', rectTop)
+                .attr('width', rectWidth)
+                .attr('height', rectHeight);
+        })
+        .on('end', () => {
+            // // Close off the path
+            // d.push([d[0][0], d[0][1]]);
+            // path.attr('d', linegen);
+
+            // Select the actual elements
+            let svgNode: SVGSVGElement = <SVGSVGElement>this.view.svg.node();
+            // let pathNode: SVGSVGElement = <SVGSVGElement>path.node();
+            let rectNode: SVGSVGElement = <SVGSVGElement>rect.node();
+
+            if (this.selectedLevel === 'Neighborhoods') {
+                this.view.neighborhoodCircles.each(function(d) {
+                    let svgRect = svgNode.createSVGRect();
+                    svgRect.x = +d3.select(this).attr('cx')// + offsetX;
+                    svgRect.y = +d3.select(this).attr('cy')// + offsetY;
+                    svgRect.width = svgRect.height = 1;
+
+                    if (svgNode.checkIntersection(rectNode, svgRect)) {
+                        self.dispatchNeighborhoodSelection(d);
+                    }
+                });
+            }
+            else {
+                this.view.listingCircles.each(function(d) {
+                    let svgRect = svgNode.createSVGRect();
+                    svgRect.x = +d3.select(this).attr('cx')// + offsetX;
+                    svgRect.y = +d3.select(this).attr('cy')// + offsetY;
+                    svgRect.width = svgRect.height = 1;
+
+                    if (svgNode.checkIntersection(rectNode, svgRect)) {
+                        self.dispatchListingSelection(d);
+                    }
+                });
+            }
+
+            // Remove the path from existence
+            // path.remove();
+            rect.remove();
+        });
+    }
+
     private updateScales() {
         let width = this.element.clientWidth;
         let height = this.element.clientHeight;
@@ -193,6 +309,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
         this.initializeQuadrants();
         this.initializeAxes(); 
         this.initializeLevelSelect();
+        this.initializeDrag();
 
         this.render();
     }
@@ -277,6 +394,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
           .transition(transition)
             .attr('x1', quadrantSplitX)
             .attr('x2', quadrantSplitX);
+            
 
         this.view.quadrantLabels
             .attr('x', (d,i) => {
@@ -441,6 +559,15 @@ export class PriceQuadrantsComponent extends BaseComponent {
         // Draw the quadrant lines and labels
         this.view.svg.select('g.quadrant-area').style('transform', innerPadding.translate(0,0));
         this.drawQuadrants(innerPadding.width(width), innerPadding.height(height), updateTransition);
+
+        // Update the drag area
+        this.view.dragArea
+            .style('transform', innerPadding.translate(0,0))
+            .attr('data-offset-x', innerPadding.left)
+            .attr('data-offset-y', innerPadding.top)
+          .select('rect')
+            .attr('width', innerPadding.width(width))
+            .attr('height', innerPadding.height(height));
         
         this.view.overlay
           .select('div.other-axis-label')

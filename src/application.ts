@@ -22,10 +22,10 @@ export class Application {
         this.dispatcher = d3.dispatch(DispatchEvent.Load, DispatchEvent.Select, DispatchEvent.Highlight, DispatchEvent.Filter);
 
         // Initialize components
-        this.mapComponent = new components.NeighborhoodMapComponent('#map .content', this.dispatcher);
-        this.blocksComponent = new components.ListingBlocksComponent('#listing-blocks .content', this.dispatcher);
+        // this.mapComponent = new components.NeighborhoodMapComponent('#map .content', this.dispatcher);
+        // this.blocksComponent = new components.ListingBlocksComponent('#listing-blocks .content', this.dispatcher);
         this.quadrantsComponent = new components.PriceQuadrantsComponent('#quadrants .content', this.dispatcher);
-        this.detailComponent = new components.DetailComponent('#details .content', this.dispatcher);
+        // this.detailComponent = new components.DetailComponent('#details .content', this.dispatcher);
         this.filtersComponent = new components.FiltersComponent('#filters .content', this.dispatcher);
 
         // Begin loading

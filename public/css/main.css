@@ -79,10 +79,17 @@ div {
 }
 
 .quadrant-labels text {
-    alignment-baseline: hanging;
-    font-size: 12px;
-    fill: #888;
-    text-transform: uppercase;
+  alignment-baseline: hanging;
+  font-size: 12px;
+  fill: #888;
+  text-transform: uppercase;
+}
+
+.drag-selection {
+  fill: rgba(255, 100, 100, 0.02);
+  stroke: rgba(0, 0, 0, 0.8);
+  stroke-width: 1;
+  stroke-dasharray: 5, 5;
 }
 
 #panel-right {
