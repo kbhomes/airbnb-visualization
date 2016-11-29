@@ -321,6 +321,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
         if (this.selectedLevel === 'Neighborhoods') {
             this.view.neighborhoodCircles.attr('fill', d => this.getNeighborhoodCircleFill(d));
+            
         }
         else {
             this.view.listingCircles.attr('fill', d => this.getListingCircleFill(d));

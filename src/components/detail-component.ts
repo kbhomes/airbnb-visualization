@@ -13,9 +13,10 @@ export class DetailComponent extends BaseComponent {
         private numberOfListings = d3.select('#amount');
         private levelSelect = d3.select('.level-select');
         private selectedLevel: 'Neighborhoods' | 'Listings';
-        private totalNumberOfSelectedListings = 0.0
-        private totalNumberOfSelectedRatings = 0.0
-        private totalNumberOfSelectedPrices = 0.0
+        private totalNumberOfSelectedNeighborhoodListings = 0.0
+        private averageNumberOfSelectedNeighborhoodRatings = 0.0
+        private averageNumberOfSelectedPrices = 0.0
+        private 
         
         
 
@@ -39,9 +40,72 @@ export class DetailComponent extends BaseComponent {
     public onSelect(selection: SelectEventData) {
         super.onSelect(selection);
         let neighborhoods = selection.neighborhoods
+        let listings =  selection.listings
+
+        //for neighborhoods
         this.averageOfSelectedNeighborhoodPrices(neighborhoods);
         this.averageOfSelectedNeighborhoodRatings(neighborhoods);
         this.totalNumberOfListings(neighborhoods);
+
+        //for lsitings
+        this.averageOfSelectedListingPrices(listings);
+        this.averageOfSelectedListingRatings(listings);
+        this.totalSelectedListings(listings);
+    }
+
+    public averageOfSelectedListingPrices(listings:Listing[]){
+
+         var counter = 0.0
+
+        if(listings == undefined){
+            return;
+        }
+
+        for(var hood in listings){
+            let listing =  listings[hood]
+            counter += listing.prices.airbnb.daily
+        }
+        
+        this.averageNumberOfSelectedPrices = counter
+
+        let average = Math.round(counter/listings.length);
+
+         this.price.text(average).attr('fill','#ff1d23')
+
+    }
+    public averageOfSelectedListingRatings(listings:Listing[]){
+          var counter = 0.0
+
+        if(listings == undefined){
+            return;
+        }
+
+        for(var hood in listings){
+            let listing =  listings[hood]
+            let rating = listing.reviews.rating
+            if(!isNaN(rating)){
+                counter += rating
+            }
+        }
+
+        this.averageNumberOfSelectedNeighborhoodRatings = counter;
+
+        let average = Math.round(this.averageNumberOfSelectedNeighborhoodRatings/listings.length);
+
+         this.rating.text(average).attr('fill','#ff1d23')
+    }
+    public totalSelectedListings(listings:Listing[]){
+
+        var counter = 0.0
+        
+        if(listings == undefined){
+            return;
+        }
+
+        for(var hood in listings){
+             counter++;   
+        }
+        this.numberOfListings.text(counter).attr('fill','#ff1d23');
     }
 
     public averageOfSelectedNeighborhoodPrices(neighborhoods:Neighborhood[]){
@@ -57,7 +121,7 @@ export class DetailComponent extends BaseComponent {
             counter += Attribute.price.neighborhoodAccessor(neighborhood); 
         }
         
-        this.totalNumberOfSelectedPrices = counter
+        this.averageNumberOfSelectedPrices = counter
 
         let average = Math.round(counter/neighborhoods.length);
 
@@ -80,9 +144,9 @@ export class DetailComponent extends BaseComponent {
             }
         }
 
-        this.totalNumberOfSelectedRatings = counter;
+        this.averageNumberOfSelectedNeighborhoodRatings = counter;
 
-        let average = Math.round(this.totalNumberOfSelectedRatings/neighborhoods.length);
+        let average = Math.round(this.averageNumberOfSelectedNeighborhoodRatings/neighborhoods.length);
 
          this.rating.text(average).attr('fill','#ff1d23')
 
@@ -102,7 +166,7 @@ export class DetailComponent extends BaseComponent {
             
         }
 
-            this.totalNumberOfSelectedListings = counter
+            this.totalNumberOfSelectedNeighborhoodListings = counter
 
             this.numberOfListings.text(counter).attr('fill','#ff1d23');
 
