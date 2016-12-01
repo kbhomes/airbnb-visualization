@@ -2,6 +2,19 @@ import * as d3 from '../d3';
 import { Block } from './Block';
 
 export module Listing {
+    // Parse the amenities into an array for the given amenities string
+    function parseAmenities(amenities: string): string[] {
+        return amenities
+            .match(/{(.*?)}/)[1]
+            .split(',')
+            .map(l => {
+                if (l.charAt(0) === '"') 
+                    return l.substring(1, l.length - 1);
+                else 
+                    return l;
+            });
+    }
+
     export type IDType = number;
     export function parseCSVRow(row: d3.DSVRowString, neighborhood: Neighborhood) : Listing {
         return {
@@ -11,7 +24,7 @@ export module Listing {
             neighborhood: neighborhood,
             priceBlock: undefined,
             markupBlock: undefined,
-            amenities: row['amenities'],
+            amenities: parseAmenities(row['amenities']),
             cancellation_policy: row['cancellation_policy'],
             reviews: {
                 number: +(row['number_of_reviews']),
@@ -53,7 +66,7 @@ export interface Listing {
     neighborhood: Neighborhood;
     priceBlock: Block;
     markupBlock: Block;
-    amenities: string;
+    amenities: string[];
     cancellation_policy: string;
     reviews: {
         number: number;

@@ -151,8 +151,13 @@ div {
   vertical-align: top;
 }
 
+.detail .detail-name .detail-name-subinfo {
+  font-weight: normal;
+  text-transform: none;
+}
+
 #detail-amenities .detail-value {
   display: inline-block;
   width: 150px;
-  height: 150px;
+  height: 200px;
 }
