@@ -4,232 +4,114 @@ import { BaseComponent } from './base-component';
 import { Dispatch, DispatchEvent, LoadEventData, SelectEventData, HighlightEventData, FilterEventData } from '../data/dispatch';
 import { NeighborhoodGeoJSON, NeighborhoodGeoJSONFeature } from '../data/geojson';
 import { Listing, Neighborhood } from '../data/listing';
+import { Block } from '../data/block';
 import { Attribute } from '../data/attribute';
 
 export class DetailComponent extends BaseComponent {
 
-        private price = d3.select('#price');
-        private rating = d3.select('#rating');
-        private numberOfListings = d3.select('#amount');
-        private levelSelect = d3.select('.level-select');
-        private selectedLevel: 'Neighborhoods' | 'Listings';
-        private totalNumberOfSelectedNeighborhoodListings = 0.0
-        private averageNumberOfSelectedNeighborhoodRatings = 0.0
-        private averageNumberOfSelectedPrices = 0.0
-        private 
-        
-        
-
     private view: {
-        svg?: d3.Selection<d3.BaseType, {}, d3.BaseType, {}>;
-        paths?: d3.Selection<d3.BaseType, NeighborhoodGeoJSONFeature, d3.BaseType, {}>;
+        moneyFormat?: (n:number) => string;
+
+        listingCountDetail?: d3.DatalessSelection;
+        medianPriceDetail?: d3.DatalessSelection;
+        medianRatingDetail?: d3.DatalessSelection;
     }
+
+    private listings: Listing[];
 
     public constructor(selector: string, dispatcher: Dispatch) {
         super(selector, dispatcher);
 
-         this.selectedLevel = 'Neighborhoods';
-     
+        this.view = {};
+        this.view.moneyFormat = d3.format('$.2f');
+        this.view.listingCountDetail = d3.select(this.element).select('#detail-listing-count .detail-value');
+        this.view.medianPriceDetail = d3.select(this.element).select('#detail-median-price .detail-value');
+        this.view.medianRatingDetail = d3.select(this.element).select('#detail-median-rating .detail-value');
     }
 
     public onLoad(data: LoadEventData) {
         super.onLoad(data);
-        this.render();
+
+        // Create the flat array copy of all the listings
+        this.listings = Array.from(this.data.listings.values());
+
+        // Render the default details 
+        this.renderAllDetails();
     }
 
     public onSelect(selection: SelectEventData) {
         super.onSelect(selection);
-        let neighborhoods = selection.neighborhoods
-        let listings =  selection.listings
 
-        //for neighborhoods
-        this.averageOfSelectedNeighborhoodPrices(neighborhoods);
-        this.averageOfSelectedNeighborhoodRatings(neighborhoods);
-        this.totalNumberOfListings(neighborhoods);
-
-        //for lsitings
-        this.averageOfSelectedListingPrices(listings);
-        this.averageOfSelectedListingRatings(listings);
-        this.totalSelectedListings(listings);
-    }
-
-    public averageOfSelectedListingPrices(listings:Listing[]){
-
-         var counter = 0.0
-
-        if(listings == undefined){
-            return;
+        if (this.selection.neighborhoods && this.selection.neighborhoods.length) {
+            this.renderNeighborhoodDetails(this.selection.neighborhoods);
         }
-
-        for(var hood in listings){
-            let listing =  listings[hood]
-            counter += listing.prices.airbnb.daily
+        else if (this.selection.listings && this.selection.listings.length) {
+            this.renderListingDetails(this.selection.listings);
         }
-        
-        this.averageNumberOfSelectedPrices = counter
-
-        let average = Math.round(counter/listings.length);
-
-         this.price.text(average).attr('fill','#ff1d23')
-
-    }
-    public averageOfSelectedListingRatings(listings:Listing[]){
-          var counter = 0.0
-
-        if(listings == undefined){
-            return;
+        else if (this.selection.priceBlocks && this.selection.priceBlocks.length) {
+            this.renderBlockDetails(this.selection.priceBlocks);
         }
-
-        for(var hood in listings){
-            let listing =  listings[hood]
-            let rating = listing.reviews.rating
-            if(!isNaN(rating)){
-                counter += rating
-            }
+        else if (this.selection.markupBlocks && this.selection.markupBlocks.length) {
+            this.renderBlockDetails(this.selection.markupBlocks);
         }
-
-        this.averageNumberOfSelectedNeighborhoodRatings = counter;
-
-        let average = Math.round(this.averageNumberOfSelectedNeighborhoodRatings/listings.length);
-
-         this.rating.text(average).attr('fill','#ff1d23')
-    }
-    public totalSelectedListings(listings:Listing[]){
-
-        var counter = 0.0
-        
-        if(listings == undefined){
-            return;
+        else {
+            // Nothing was selected, so render the default details
+            this.renderAllDetails();
         }
-
-        for(var hood in listings){
-             counter++;   
-        }
-        this.numberOfListings.text(counter).attr('fill','#ff1d23');
-    }
-
-    public averageOfSelectedNeighborhoodPrices(neighborhoods:Neighborhood[]){
-
-        var counter = 0.0
-
-        if(neighborhoods == undefined){
-            return;
-        }
-
-        for(var hood in neighborhoods){
-            let neighborhood =  neighborhoods[hood]
-            counter += Attribute.price.neighborhoodAccessor(neighborhood); 
-        }
-        
-        this.averageNumberOfSelectedPrices = counter
-
-        let average = Math.round(counter/neighborhoods.length);
-
-         this.price.text(average).attr('fill','#ff1d23')
-    }
-
-    public averageOfSelectedNeighborhoodRatings(neighborhoods:Neighborhood[]):number{
-
-         var counter = 0.0
-
-        if(neighborhoods == undefined){
-            return;
-        }
-
-        for(var hood in neighborhoods){
-            let neighborhood =  neighborhoods[hood]
-            let rating = Attribute.rating.neighborhoodAccessor(neighborhood); 
-            if(!isNaN(rating)){
-                counter += rating
-            }
-        }
-
-        this.averageNumberOfSelectedNeighborhoodRatings = counter;
-
-        let average = Math.round(this.averageNumberOfSelectedNeighborhoodRatings/neighborhoods.length);
-
-         this.rating.text(average).attr('fill','#ff1d23')
-
-    }
-
-    public totalNumberOfListings(neighborhoods:Neighborhood[]){
-
-        var counter = 0.0
-        
-        if(neighborhoods == undefined){
-            return;
-        }
-
-        for(var hood in neighborhoods){
-            let neighborhood =  neighborhoods[hood]
-             counter += neighborhood.listings.length
-            
-        }
-
-            this.totalNumberOfSelectedNeighborhoodListings = counter
-
-            this.numberOfListings.text(counter).attr('fill','#ff1d23');
-
-    }
-
-    public onHighlight(highlight: HighlightEventData) {
-        super.onHighlight(highlight);
-
-        let selectedNeighborhoods = this.selection.neighborhoods
-        let highlightedNeighborhood = this.highlight.neighborhood
-        let highlightedListing = this.highlight.listing
-
-        if(highlightedNeighborhood != undefined){
-            //get highlighted neighborhood
-            let neighborhood = this.data.neighborhoods.get(this.highlight.neighborhood.name);
-            
-            //number of listings
-            let number_of_listings = neighborhood.listings.length
-            this.numberOfListings.text(number_of_listings).attr('fill','#ff1d23');
-
-            //average_price
-            let average_price = Attribute.price.neighborhoodAccessor(neighborhood)
-            this.price.text(average_price).attr('fill','#ff1d23'); 
-
-            //average_rating
-            let average_rating = Math.round(Attribute.rating.neighborhoodAccessor(neighborhood));
-            this.rating.text(average_rating).attr('fill','#ff1d23'); 
-            
-        }
-
-
-        if(this.highlight.listing != undefined){
-            //get highlighted case
-            let listing = this.highlight.listing
-
-            //number of listings message
-            numberOfListings.text("Select neighborhood to view").attr('fill','#ff1d23');
-
-            
-            //listing price
-            let listing_price = Attribute.price.accessor(listing)
-            price.text(listing_price).attr('fill','#ff1d23'); 
-
-            //listing rating
-            let listing_rating = Math.round(Attribute.rating.accessor(listing));
-            rating.text(listing_rating).attr('fill','#ff1d23'); 
-        }
-
     }
 
     public onFilter(filter: FilterEventData) {
         super.onFilter(filter);
     }
 
+    private renderAllDetails() {
+        // Render details for all our listings
+        this.renderListingDetails(this.listings);
+    }
+
+    private renderNeighborhoodDetails(neighborhoods: Neighborhood[]) {
+        // Merge all the listings together from these neighborhoods
+        let listings = neighborhoods.reduce((all: Listing[], n: Neighborhood) => all.concat(n.listings), []);
+
+        // Render details for the listings from these neighborhoods
+        this.renderListingDetails(listings);
+    }
+
+    private renderBlockDetails(blocks: Block[]) {
+        // Merge all the listings together from these blocks
+        let listings = blocks.reduce((all: Listing[], b: Block) => all.concat(b.listings), []);
+
+        // Render details for the listings from these blocks
+        this.renderListingDetails(listings);
+    }
+
+    private renderListingDetails(listings: Listing[]) {
+        // The number of listings is the count of all combined listings
+        this.view.listingCountDetail.text(
+            listings.length
+        );
+
+        // The median price of all listings
+        this.view.medianPriceDetail.text(
+            this.view.moneyFormat(
+                d3.median(listings, l => Attribute.price.accessor(l))
+            )
+        );
+
+        // The median rating of all listings that do have valid rating scores
+        this.view.medianRatingDetail.text(
+            d3.median(
+                listings.filter(l => !isNaN(l.reviews.rating)), 
+                l => Attribute.rating.accessor(l)
+            )
+        );
+    }
+
     public resize() {
 
     }
 
-
-
     public render() {
         let self = this;
-
-      
     }
 } 
