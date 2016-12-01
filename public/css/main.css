@@ -99,6 +99,7 @@ div {
 
 #filters {
   border-bottom: 1px solid #ccc;
+  flex: 3;
 }
 
 .filter-description {
@@ -137,6 +138,10 @@ div {
   text-anchor: middle;
 }
 
+#details {
+  flex: 5;
+}
+
 #details .detail {
   font-size: 12px;
   margin: 10px;
@@ -159,5 +164,8 @@ div {
 #detail-amenities .detail-value {
   display: inline-block;
   width: 150px;
-  height: 200px;
+}
+
+#detail-listing-link {
+  display: none;
 }

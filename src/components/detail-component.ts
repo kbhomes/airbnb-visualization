@@ -15,6 +15,7 @@ export class DetailComponent extends BaseComponent {
         listingCountDetail?: d3.DatalessSelection;
         medianPriceDetail?: d3.DatalessSelection;
         medianRatingDetail?: d3.DatalessSelection;
+        listingLinkDetail?: d3.DatalessSelection;
 
         amenitiesColorScale?: d3.ScaleSequential<string>;
         amenitiesSVG?: d3.DatalessSelection;
@@ -22,6 +23,7 @@ export class DetailComponent extends BaseComponent {
         amenitiesHoverDetails?: d3.DatalessSelection;
     }
 
+    private airbnbUrl = 'https://www.airbnb.com/rooms/';
     private listings: Listing[];
     private amenitiesMap: Map<string, number>;
 
@@ -33,6 +35,7 @@ export class DetailComponent extends BaseComponent {
         this.view.listingCountDetail = d3.select(this.element).select('#detail-listing-count .detail-value');
         this.view.medianPriceDetail = d3.select(this.element).select('#detail-median-price .detail-value');
         this.view.medianRatingDetail = d3.select(this.element).select('#detail-median-rating .detail-value');
+        this.view.listingLinkDetail = d3.select(this.element).select('#detail-listing-link');
         
         this.view.amenitiesColorScale = d3.scaleSequential(d3.interpolateGreens);
         this.view.amenitiesSVG = d3.select(this.element)
@@ -40,7 +43,7 @@ export class DetailComponent extends BaseComponent {
           .append('svg')
             .attr('class', 'amenities-grid')
             .attr('width', 150)
-            .attr('height', 200);
+            .attr('height', 160);
         this.view.amenitiesHoverDetails = d3.select(this.element).select('#detail-amenities .detail-name .detail-name-subinfo');
     }
 
@@ -117,7 +120,7 @@ export class DetailComponent extends BaseComponent {
         // Render details for the listings from these neighborhoods
         this.renderListingDetails(listings);
     }
-
+    
     private renderBlockDetails(blocks: Block[]) {
         // Merge all the listings together from these blocks
         let listings = blocks.reduce((all: Listing[], b: Block) => all.concat(b.listings), []);
@@ -140,12 +143,27 @@ export class DetailComponent extends BaseComponent {
         );
 
         // The median rating of all listings that do have valid rating scores
-        this.view.medianRatingDetail.text(
-            d3.median(
-                listings.filter(l => !isNaN(l.reviews.rating)), 
-                l => Attribute.rating.accessor(l)
-            )
-        );
+        let listingsWithRatings = listings.filter(l => !isNaN(l.reviews.rating));
+        if (listingsWithRatings.length > 0) {
+            this.view.medianRatingDetail.text(d3.median(listingsWithRatings, l => Attribute.rating.accessor(l)));
+        }
+        else {
+            this.view.medianRatingDetail.text('N/A');
+        }
+
+        // The link to the listing if there is only one selected
+        if (listings.length === 1) {
+            this.view.listingLinkDetail
+                .style('display', 'block')
+              .select('a.detail-value')
+                .attr('href', this.airbnbUrl + listings[0].id);
+        }
+        else {
+            this.view.listingLinkDetail
+                .style('display', 'none')
+              .select('a.detail-value')
+                .attr('href', '');
+        }
 
         // Render the amenities grid
         this.renderAmenities(listings);
