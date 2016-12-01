@@ -11,12 +11,13 @@ export class DetailComponent extends BaseComponent {
         private price = d3.select('#price');
         private rating = d3.select('#rating');
         private numberOfListings = d3.select('#amount');
+        private linkToListing = d3.select('#link');
         private levelSelect = d3.select('.level-select');
         private selectedLevel: 'Neighborhoods' | 'Listings';
         private totalNumberOfSelectedNeighborhoodListings = 0.0
         private averageNumberOfSelectedNeighborhoodRatings = 0.0
         private averageNumberOfSelectedPrices = 0.0
-        private 
+        private airbnbUrl = 'https://www.airbnb.com/rooms/'
         
         
 
@@ -42,15 +43,14 @@ export class DetailComponent extends BaseComponent {
         let neighborhoods = selection.neighborhoods
         let listings =  selection.listings
 
-        //for neighborhoods
+        //remove link to url
         this.averageOfSelectedNeighborhoodPrices(neighborhoods);
         this.averageOfSelectedNeighborhoodRatings(neighborhoods);
         this.totalNumberOfListings(neighborhoods);
 
-        //for lsitings
-        this.averageOfSelectedListingPrices(listings);
-        this.averageOfSelectedListingRatings(listings);
-        this.totalSelectedListings(listings);
+       
+    
+        
     }
 
     public averageOfSelectedListingPrices(listings:Listing[]){
@@ -91,8 +91,11 @@ export class DetailComponent extends BaseComponent {
         this.averageNumberOfSelectedNeighborhoodRatings = counter;
 
         let average = Math.round(this.averageNumberOfSelectedNeighborhoodRatings/listings.length);
-
-         this.rating.text(average).attr('fill','#ff1d23')
+        if(!isNaN(average)){
+             this.rating.text(average).attr('fill','#ff1d23')
+        }else{
+             this.rating.text('N/A').attr('fill','#ff1d23')
+        }
     }
     public totalSelectedListings(listings:Listing[]){
 
@@ -109,7 +112,6 @@ export class DetailComponent extends BaseComponent {
     }
 
     public averageOfSelectedNeighborhoodPrices(neighborhoods:Neighborhood[]){
-
         var counter = 0.0
 
         if(neighborhoods == undefined){
@@ -178,8 +180,13 @@ export class DetailComponent extends BaseComponent {
         let selectedNeighborhoods = this.selection.neighborhoods
         let highlightedNeighborhood = this.highlight.neighborhood
         let highlightedListing = this.highlight.listing
+        let listing = this.highlight.listing
+        let listingUrl = this.airbnbUrl+ listing.id
 
         if(highlightedNeighborhood != undefined){
+
+            d3.select('#price_title').text('Median Price:');
+            d3.select('#rating_title').text('Median Rating:');
             //get highlighted neighborhood
             let neighborhood = this.data.neighborhoods.get(this.highlight.neighborhood.name);
             
@@ -194,25 +201,36 @@ export class DetailComponent extends BaseComponent {
             //average_rating
             let average_rating = Math.round(Attribute.rating.neighborhoodAccessor(neighborhood));
             this.rating.text(average_rating).attr('fill','#ff1d23'); 
+
+            this.linkToListing.text(null);    
             
         }
 
-
         if(this.highlight.listing != undefined){
-            //get highlighted case
-            let listing = this.highlight.listing
+          
+            d3.select('#price_title').text('Price:');
+            d3.select('#rating_title').text('Rating:');
 
             //number of listings message
-            numberOfListings.text("Select neighborhood to view").attr('fill','#ff1d23');
+            this.numberOfListings.text("Select neighborhood to view").attr('fill','#ff1d23');
 
             
             //listing price
             let listing_price = Attribute.price.accessor(listing)
-            price.text(listing_price).attr('fill','#ff1d23'); 
+            this.price.text(listing_price).attr('fill','#ff1d23'); 
 
             //listing rating
             let listing_rating = Math.round(Attribute.rating.accessor(listing));
-            rating.text(listing_rating).attr('fill','#ff1d23'); 
+            this.rating.text(listing_rating).attr('fill','#ff1d23'); 
+
+
+            // Clear Text
+            this.linkToListing.style('visibility','visible');
+           
+            this.linkToListing.text(null);               
+            this.linkToListing.attr('href',listingUrl).append("p").text("View Listing");
+
+            
         }
 
     }
