@@ -81,27 +81,21 @@ export class NeighborhoodMapComponent extends BaseComponent {
     private getColor(averageNeighborhoodPrice):string{
 
         if(averageNeighborhoodPrice>0 && averageNeighborhoodPrice<=199 ){
-            return 'rgb(150,255,150)';
+            return 'rgb(126,229,108)';
         }
         if(averageNeighborhoodPrice>200 && averageNeighborhoodPrice<=300 ){
-            return 'rgb(100,255,100)';
+            return 'rgb(54,186,69)';
         }else if(averageNeighborhoodPrice>301 && averageNeighborhoodPrice<=399 ){
-            return 'rgb(80,225,80)';
+            return 'rgb(20,117,52)';
         }else if(averageNeighborhoodPrice>401 && averageNeighborhoodPrice<=600 ){
             return 'rgb(80,225,80)';
-        }else if(averageNeighborhoodPrice>601 && averageNeighborhoodPrice<=800){
-            return 'rgb(60,195,60)'
-        }else if(averageNeighborhoodPrice>801 && averageNeighborhoodPrice<=1000){
-            return 'rgb(40,165,40)'
-        }else if(averageNeighborhoodPrice>1001 && averageNeighborhoodPrice<=1200){
-            return 'rgb(20,135,20)'
-        } else if(averageNeighborhoodPrice>1201 && averageNeighborhoodPrice<=1400){
-            return 'rgb(5,75,5)'
+        }else if(averageNeighborhoodPrice>601 && averageNeighborhoodPrice<=1000){
+            return 'rgb(3,69,37)'
         }else if(averageNeighborhoodPrice>1401 && averageNeighborhoodPrice<1600){
-            return 'rgb(0,45,0)'
+            return 'rgb(20,117,52)';
         }
 
-        return 'rgb(0,15,0)';
+        return 'rgb(38,38,38)';
     }
 
     private getNeighborhoodAverages(){
