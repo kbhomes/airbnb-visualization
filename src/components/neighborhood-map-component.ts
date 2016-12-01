@@ -77,7 +77,7 @@ export class NeighborhoodMapComponent extends BaseComponent {
         
     }
 //return green based on price
-//color scale: https://color.adobe.com/This-Green-color-theme-8084268/ for each green
+//color scale: https://color.adobe.com/greens-color-theme-7334761/edit/?copy=true&base=2&rule=Custom&selected=4&name=Copy%20of%20greens&mode=hsv&rgbvalues=0,0.15,0.09999959999997828,0.013500000000000014,0.27,0.14602431599999785,0.07820000000000002,0.46,0.20546692119988363,0.21170000000000003,0.73,0.2721690243998254,0.49455095400014937,0.9,0.423&swatchOrder=0,1,2,3,4 for each green
     private getColor(averageNeighborhoodPrice):string{
 
         if(averageNeighborhoodPrice>0 && averageNeighborhoodPrice<=199 ){

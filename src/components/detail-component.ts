@@ -37,7 +37,7 @@ export class DetailComponent extends BaseComponent {
         this.view.medianRatingDetail = d3.select(this.element).select('#detail-median-rating .detail-value');
         this.view.listingLinkDetail = d3.select(this.element).select('#detail-listing-link');
         
-        this.view.amenitiesColorScale = d3.scaleSequential(d3.interpolateRainbow);
+        this.view.amenitiesColorScale = d3.scaleSequential(d3.interpolateGreens);
         this.view.amenitiesSVG = d3.select(this.element)
           .select('#detail-amenities .detail-value')
           .append('svg')
