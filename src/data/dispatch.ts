@@ -5,6 +5,56 @@ import { Listing, Neighborhood } from './listing';
 import { Block } from './block';
 
 export type Dispatch = d3.Dispatch<any>;
+export module Dispatch {
+    export function isEmptySelection(selection: SelectEventData) {
+        return (
+            selection.neighborhoods.length === 0 &&
+            selection.listings.length === 0 &&
+            selection.priceBlocks.length === 0 &&
+            selection.markupBlocks.length === 0 &&
+            selection.amenities.length === 0
+        );
+    }
+
+    export function emptySelection() : SelectEventData {
+        return {
+            neighborhoods: [],
+            listings: [],
+            priceBlocks: [],
+            markupBlocks: [],
+            amenities: []
+        };
+    }
+
+    export function cloneSelection(selection: SelectEventData) {
+        let cloned: SelectEventData = {
+            neighborhoods: [],
+            listings: [],
+            priceBlocks: [],
+            markupBlocks: [],
+            amenities: []
+        };
+
+        if (selection.neighborhoods)
+            cloned.neighborhoods = selection.neighborhoods.slice();
+
+        if (selection.listings)
+            cloned.listings = selection.listings.slice();
+
+        if (selection.priceBlocks)
+            cloned.priceBlocks = selection.priceBlocks.slice();
+
+        if (selection.markupBlocks)
+            cloned.markupBlocks = selection.markupBlocks.slice();
+
+        if (selection.amenities)
+            cloned.amenities = selection.amenities.slice();
+
+        return cloned;
+    }
+}
+
+
 export const DispatchEvent = {
     Load: 'load',
     Select: 'select',

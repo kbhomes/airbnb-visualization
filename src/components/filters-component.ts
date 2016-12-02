@@ -23,12 +23,7 @@ export class FiltersComponent extends BaseComponent {
         this.view = {};
         this.view.description = d3.select(this.element).select('.filter-description');
         this.view.description.select('.reset').on('click', () => {
-            this.dispatcher.call(DispatchEvent.Select, this, {
-                neighborhoods: undefined,
-                listings: undefined,
-                priceBlocks: undefined,
-                markupBlocks: undefined
-            } as SelectEventData);
+            this.dispatcher.call(DispatchEvent.Select, this, Dispatch.emptySelection());
         });
     }  
 
@@ -187,39 +182,44 @@ export class FiltersComponent extends BaseComponent {
             return label;
         };
 
-        if (this.selection.neighborhoods && this.selection.neighborhoods.length) {
+        if (this.selection.neighborhoods.length) {
             this.view.description
                 .style('display', 'block')
               .select('.count')
                 .text(pluralize(this.selection.neighborhoods.length, 'neighborhood'));
         }
-        else if (this.selection.listings && this.selection.listings.length) {
+        
+        if (this.selection.listings.length) {
             this.view.description
                 .style('display', 'block')
               .select('.count')
                 .text(pluralize(this.selection.listings.length, 'listing'));
         }
-        else if (this.selection.priceBlocks && this.selection.priceBlocks.length) {
+        
+        if (this.selection.priceBlocks.length) {
             this.view.description
                 .style('display', 'block')
               .select('.count')
                 .text(pluralize(this.selection.priceBlocks.length, 'price block'));
         }
-        else if (this.selection.markupBlocks && this.selection.markupBlocks.length) {
+        
+        if (this.selection.markupBlocks.length) {
             this.view.description
                 .style('display', 'block')
               .select('.count')
                 .text(pluralize(this.selection.markupBlocks.length, 'markup block'));
         }
-        else if (this.selection.amenities && this.selection.amenities.length) {
+        
+        if (this.selection.amenities.length) {
             this.view.description
                 .style('display', 'block')
               .select('.count')
                 .text(pluralize(this.selection.amenities.length, 'amenity'));
         }
-        else {
-            this.view.description.style('display', 'none');
-        }
+
+        // else {
+        //     this.view.description.style('display', 'none');
+        // }
     }
 
     public render() {

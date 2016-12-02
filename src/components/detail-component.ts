@@ -66,23 +66,9 @@ export class DetailComponent extends BaseComponent {
         // Highlight the selected amenities, if any
         this.view.amenitiesGrid.style('stroke-width', ([amenity, count]) => this.getAmenityStrokeWidth(amenity));
 
-        if (this.selection.neighborhoods && this.selection.neighborhoods.length) {
-            this.renderNeighborhoodDetails(this.selection.neighborhoods);
-        }
-        else if (this.selection.listings && this.selection.listings.length) {
-            this.renderListingDetails(this.selection.listings);
-        }
-        else if (this.selection.priceBlocks && this.selection.priceBlocks.length) {
-            this.renderBlockDetails(this.selection.priceBlocks);
-        }
-        else if (this.selection.markupBlocks && this.selection.markupBlocks.length) {
-            this.renderBlockDetails(this.selection.markupBlocks);
-        }
-        else if (this.selection.amenities && this.selection.amenities.length) {
-            let listings = this.listings.filter(l => {
-                return this.selection.amenities.every(amenity => l.amenities.indexOf(amenity) !== -1)
-            });
-            this.renderListingDetails(listings);
+        // Keep track of all the listings that are selected
+        if (this.allSelectedListings.length) {
+            this.renderListingDetails(this.allSelectedListings);
         }
         else {
             // Nothing was selected, so render the default details
@@ -97,22 +83,6 @@ export class DetailComponent extends BaseComponent {
     private renderAllDetails() {
         // Render details for all our listings
         this.renderListingDetails(this.listings);
-    }
-
-    private renderNeighborhoodDetails(neighborhoods: Neighborhood[]) {
-        // Merge all the listings together from these neighborhoods
-        let listings = neighborhoods.reduce((all: Listing[], n: Neighborhood) => all.concat(n.listings), []);
-
-        // Render details for the listings from these neighborhoods
-        this.renderListingDetails(listings);
-    }
-    
-    private renderBlockDetails(blocks: Block[]) {
-        // Merge all the listings together from these blocks
-        let listings = blocks.reduce((all: Listing[], b: Block) => all.concat(b.listings), []);
-
-        // Render details for the listings from these blocks
-        this.renderListingDetails(listings);
     }
 
     private renderListingDetails(listings: Listing[]) {
@@ -236,7 +206,7 @@ export class DetailComponent extends BaseComponent {
     }
 
     private getAmenityStrokeWidth(amenity: string, hover: boolean = false) {
-        if (this.selection.amenities && this.selection.amenities.indexOf(amenity) !== -1) {
+        if (this.selection.amenities.indexOf(amenity) !== -1) {
             return 1;
         }
         else {

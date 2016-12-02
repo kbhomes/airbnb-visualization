@@ -13,6 +13,8 @@ export abstract class BaseComponent {
     protected highlight: dispatch.HighlightEventData;
     protected filter: dispatch.FilterEventData;
 
+    protected allSelectedListings: Listing[];
+
     public constructor(selector: string, dispatcher: dispatch.Dispatch) {
         this.element = document.querySelector(selector);
         this.selector = selector;
@@ -25,9 +27,11 @@ export abstract class BaseComponent {
         this.dispatcher.on(this.getComponentEventName(dispatch.DispatchEvent.Filter), this.eventBind(this.onFilter));
 
         // Set up empty events
-        this.selection = { neighborhoods: undefined, listings: undefined, priceBlocks: undefined, markupBlocks: undefined, amenities: undefined };
+        this.selection = dispatch.Dispatch.emptySelection();
         this.highlight = { neighborhood: undefined, listing: undefined };
         this.filter = { filter: false };
+
+        this.allSelectedListings = [];
     }
 
     private eventBind(handler: Function) {
@@ -47,6 +51,48 @@ export abstract class BaseComponent {
         return event + '.' + this.getComponentName();
     }
 
+    private computeAllSelectedListings() {
+        this.allSelectedListings = [];
+
+        if (dispatch.Dispatch.isEmptySelection(this.selection)) {
+            return;
+        }
+
+        for (let listing of Array.from(this.data.listings.values())) {
+            // Don't add listings not in a selected neighborhood
+            if (this.selection.neighborhoods.length) {
+                if (this.selection.neighborhoods.indexOf(listing.neighborhood) === -1)
+                    continue;
+            }
+
+            // Don't add listings not in the selected listings
+            if (this.selection.listings.length) {
+                if (this.selection.listings.indexOf(listing) === -1)
+                    continue;
+            }
+
+            // Don't add listings not in a selected price block
+            if (this.selection.priceBlocks.length) {
+                if (this.selection.priceBlocks.indexOf(listing.priceBlock) === -1)
+                    continue;
+            }
+
+            // Don't add listings not in a selected markup block
+            if (this.selection.markupBlocks.length) {
+                if (this.selection.markupBlocks.indexOf(listing.markupBlock) === -1)
+                    continue;
+            }
+
+            // Don't add listings what don't have the selected amenities
+            if (this.selection.amenities.length) {
+                if (!this.selection.amenities.every(amenity => listing.amenities.indexOf(amenity) !== -1))
+                    continue;
+            }
+
+            this.allSelectedListings.push(listing);
+        }
+    }
+
     protected dispatchListingHighlight(listing: Listing, highlight: boolean) {
         this.dispatcher.call(dispatch.DispatchEvent.Highlight, this, {
             neighborhood: undefined,
@@ -61,222 +107,138 @@ export abstract class BaseComponent {
         } as dispatch.HighlightEventData);
     }
 
-    protected dispatchListingSelection(listing: Listing, newSelection: boolean) {
-        if (newSelection) {
-            this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
-                neighborhoods: undefined,
-                listings: [listing],
-                priceBlocks: undefined,
-                markupBlocks: undefined,
-                amenities: undefined
-            } as dispatch.SelectEventData);
+    protected dispatchListingSelection(listing: Listing, createNewSelection: boolean) {
+        if (createNewSelection) {
+            let sel = dispatch.Dispatch.emptySelection();
+            sel.listings.push(listing);
+
+            this.dispatcher.call(dispatch.DispatchEvent.Select, this, sel);
         }
         else {
             // Check whether to add or remove this listing from the selection
-            if (this.selection.listings && this.selection.listings.indexOf(listing) !== -1) {
+            if (this.selection.listings.indexOf(listing) !== -1) {
                 // Listing is already selected, so send out a selection event with this deselected
-                let selectedIndex = this.selection.listings.indexOf(listing);
-                let selectedListings = this.selection.listings.slice();
-                selectedListings.splice(selectedIndex, 1);
+                let sel = dispatch.Dispatch.cloneSelection(this.selection);
+                let selectedIndex = sel.listings.indexOf(listing);
+                sel.listings.splice(selectedIndex, 1);
 
-                if (selectedListings.length === 0)
-                    selectedListings = undefined;
-
-                this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
-                    neighborhoods: undefined,
-                    listings: selectedListings,
-                    priceBlocks: undefined,
-                    markupBlocks: undefined,
-                    amenities: undefined
-                } as dispatch.SelectEventData);
+                this.dispatcher.call(dispatch.DispatchEvent.Select, this, sel);
             }
             else {
                 // Listing is not already selected, so send out a selection event with this selected
-                let selectedListings = (this.selection.listings || []).slice();
-                selectedListings.push(listing);
+                let sel = dispatch.Dispatch.cloneSelection(this.selection);
+                sel.listings.push(listing);
 
-                this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
-                    neighborhoods: undefined,
-                    listings: selectedListings,
-                    priceBlocks: undefined,
-                    markupBlocks: undefined,
-                    amenities: undefined
-                } as dispatch.SelectEventData);
+                this.dispatcher.call(dispatch.DispatchEvent.Select, this, sel);
             }
         }
     }
 
-    protected dispatchNeighborhoodSelection(neighborhood: Neighborhood, newSelection: boolean) {
-        if (newSelection) {
-            this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
-                neighborhoods: [neighborhood],
-                listings: undefined,
-                priceBlocks: undefined,
-                markupBlocks: undefined,
-                amenities: undefined
-            } as dispatch.SelectEventData);
+    protected dispatchNeighborhoodSelection(neighborhood: Neighborhood, createNewSelection: boolean) {
+        if (createNewSelection) {
+            let sel = dispatch.Dispatch.emptySelection();
+            sel.neighborhoods.push(neighborhood);
+
+            this.dispatcher.call(dispatch.DispatchEvent.Select, this, sel);
         }
         else {
             // Check whether to add or remove this neighborhood from the selection
-            if (this.selection.neighborhoods && this.selection.neighborhoods.indexOf(neighborhood) !== -1) {
+            if (this.selection.neighborhoods.indexOf(neighborhood) !== -1) {
                 // Neighborhood is already selected, so send out a selection event with this deselected
-                let selectedIndex = this.selection.neighborhoods.indexOf(neighborhood);
-                let selectedNeighborhoods = this.selection.neighborhoods.slice();
-                selectedNeighborhoods.splice(selectedIndex, 1);
-
-                if (selectedNeighborhoods.length === 0)
-                    selectedNeighborhoods = undefined;
-
-                this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
-                    neighborhoods: selectedNeighborhoods,
-                    listings: undefined,
-                    priceBlocks: undefined,
-                    markupBlocks: undefined
-                } as dispatch.SelectEventData);
+                let sel = dispatch.Dispatch.cloneSelection(this.selection);
+                let selectedIndex = sel.neighborhoods.indexOf(neighborhood);
+                sel.neighborhoods.splice(selectedIndex, 1);
+                
+                this.dispatcher.call(dispatch.DispatchEvent.Select, this,sel);
             }
             else {
                 // Neighborhood is not already selected, so send out a selection event with this selected
-                let selectedNeighborhoods = (this.selection.neighborhoods || []).slice();
-                selectedNeighborhoods.push(neighborhood);
+                let sel = dispatch.Dispatch.cloneSelection(this.selection);                
+                sel.neighborhoods.push(neighborhood);
 
-                this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
-                    neighborhoods: selectedNeighborhoods,
-                    listings: undefined,
-                    priceBlocks: undefined,
-                    markupBlocks: undefined
-                } as dispatch.SelectEventData);
+                this.dispatcher.call(dispatch.DispatchEvent.Select, this, sel);
             }
         }
     }
 
-    protected dispatchBlockSelection(block: Block, newSelection: boolean) {
+    protected dispatchBlockSelection(block: Block, createNewSelection: boolean) {
         if (block.type === 'price') {
-            if (newSelection) {
-                this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
-                    neighborhoods: undefined,
-                    listings: undefined,
-                    priceBlocks: [block],
-                    markupBlocks: undefined,
-                    amenities: undefined
-                } as dispatch.SelectEventData);
+            if (createNewSelection) {
+                let sel = dispatch.Dispatch.emptySelection();
+                sel.priceBlocks.push(block);
+
+                this.dispatcher.call(dispatch.DispatchEvent.Select, this, sel);
             }
             else {
                 // Check whether to add or remove this price block from the selection
-                if (this.selection.priceBlocks && this.selection.priceBlocks.indexOf(block) !== -1) {
+                if (this.selection.priceBlocks.indexOf(block) !== -1) {
                     // Block is already selected, so send out a selection event with this deselected
+                    let sel = dispatch.Dispatch.cloneSelection(this.selection);
                     let selectedIndex = this.selection.priceBlocks.indexOf(block);
-                    let selectedPriceBlocks = this.selection.priceBlocks.slice();
-                    selectedPriceBlocks.splice(selectedIndex, 1);
-
-                    if (selectedPriceBlocks.length === 0)
-                        selectedPriceBlocks = undefined;
-
-                    this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
-                        neighborhoods: undefined,
-                        listings: undefined,
-                        priceBlocks: selectedPriceBlocks,
-                        markupBlocks: undefined
-                    } as dispatch.SelectEventData);
+                    sel.priceBlocks.splice(selectedIndex, 1);
+                    
+                    this.dispatcher.call(dispatch.DispatchEvent.Select, this, sel);
                 }
                 else {
                     // Neighborhood is not already selected, so send out a selection event with this selected
-                    let selectedPriceBlocks = (this.selection.priceBlocks || []).slice();
-                    selectedPriceBlocks.push(block);
+                    let sel = dispatch.Dispatch.cloneSelection(this.selection);
+                    sel.priceBlocks.push(block);
 
-                    this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
-                        neighborhoods: undefined,
-                        listings: undefined,
-                        priceBlocks: selectedPriceBlocks,
-                        markupBlocks: undefined
-                    } as dispatch.SelectEventData);
+                    this.dispatcher.call(dispatch.DispatchEvent.Select, this, sel);
                 }
             }
         }
         else {
-            if (newSelection) {
-                this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
-                    neighborhoods: undefined,
-                    listings: undefined,
-                    priceBlocks: undefined,
-                    markupBlocks: [block],
-                    amenities: undefined
-                } as dispatch.SelectEventData);
+            if (createNewSelection) {
+                let sel = dispatch.Dispatch.emptySelection();
+                sel.markupBlocks.push(block);
+
+                this.dispatcher.call(dispatch.DispatchEvent.Select, this, sel);
             }
             else {
                 // Check whether to add or remove this markup block from the selection
-                if (this.selection.markupBlocks && this.selection.markupBlocks.indexOf(block) !== -1) {
+                if (this.selection.markupBlocks.indexOf(block) !== -1) {
                     // Block is already selected, so send out a selection event with this deselected
+                    let sel = dispatch.Dispatch.cloneSelection(this.selection);
                     let selectedIndex = this.selection.markupBlocks.indexOf(block);
-                    let selectedMarkupBlocks = this.selection.markupBlocks.slice();
-                    selectedMarkupBlocks.splice(selectedIndex, 1);
-
-                    if (selectedMarkupBlocks.length === 0)
-                        selectedMarkupBlocks = undefined;
-
-                    this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
-                        neighborhoods: undefined,
-                        listings: undefined,
-                        priceBlocks: undefined,
-                        markupBlocks: selectedMarkupBlocks
-                    } as dispatch.SelectEventData);
+                    sel.markupBlocks.splice(selectedIndex, 1);
+                    
+                    this.dispatcher.call(dispatch.DispatchEvent.Select, this, sel);
                 }
                 else {
                     // Neighborhood is not already selected, so send out a selection event with this selected
-                    let selectedMarkupBlocks = (this.selection.markupBlocks || []).slice();
-                    selectedMarkupBlocks.push(block);
+                    let sel = dispatch.Dispatch.cloneSelection(this.selection);
+                    sel.markupBlocks.push(block);
 
-                    this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
-                        neighborhoods: undefined,
-                        listings: undefined,
-                        priceBlocks: undefined,
-                        markupBlocks: selectedMarkupBlocks
-                    } as dispatch.SelectEventData);
+                    this.dispatcher.call(dispatch.DispatchEvent.Select, this, sel);
                 }
             }
         }
     }
 
-    protected dispatchAmenitySelection(amenity: string, newSelection: boolean) {
-        if (newSelection) {
-            this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
-                neighborhoods: undefined,
-                listings: undefined,
-                priceBlocks: undefined,
-                markupBlocks: undefined,
-                amenities: [amenity]
-            } as dispatch.SelectEventData);
+    protected dispatchAmenitySelection(amenity: string, createNewSelection: boolean) {
+        if (createNewSelection) {
+            let sel = dispatch.Dispatch.emptySelection();
+            sel.amenities.push(amenity);
+
+            this.dispatcher.call(dispatch.DispatchEvent.Select, this, sel);
         }
         else {
             // Check whether to add or remove this amenity from the selection
-            if (this.selection.amenities && this.selection.amenities.indexOf(amenity) !== -1) {
+            if (this.selection.amenities.indexOf(amenity) !== -1) {
                 // Amenity is already selected, so send out a selection event with this deselected
+                let sel = dispatch.Dispatch.cloneSelection(this.selection);
                 let selectedIndex = this.selection.amenities.indexOf(amenity);
-                let selectedAmenities = this.selection.amenities.slice();
-                selectedAmenities.splice(selectedIndex, 1);
+                sel.amenities.splice(selectedIndex, 1);
 
-                if (selectedAmenities.length === 0)
-                    selectedAmenities = undefined;
-
-                this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
-                    neighborhoods: undefined,
-                    listings: undefined,
-                    priceBlocks: undefined,
-                    markupBlocks: undefined,
-                    amenities: selectedAmenities
-                } as dispatch.SelectEventData);
+                this.dispatcher.call(dispatch.DispatchEvent.Select, this, sel);
             }
             else {
                 // Amenity is not already selected, so send out a selection event with this selected
-                let selectedAmenities = (this.selection.amenities || []).slice();
-                selectedAmenities.push(amenity);
+                let sel = dispatch.Dispatch.cloneSelection(this.selection);
+                sel.amenities.push(amenity);
 
-                this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
-                    neighborhoods: undefined,
-                    listings: undefined,
-                    priceBlocks: undefined,
-                    markupBlocks: undefined,
-                    amenities: selectedAmenities
-                } as dispatch.SelectEventData);
+                this.dispatcher.call(dispatch.DispatchEvent.Select, this, sel);
             }
         }
     }
@@ -285,29 +247,9 @@ export abstract class BaseComponent {
         this.data = data;
     }
 
-       //computes the average neighborhood price
-    public getNeighborhoodPriceAverage(neighborhood):number{
-
-        let sum  = 0;
-
-
-        if(neighborhood == undefined){
-            return 0;
-        }
-        let neighborhood_listings = neighborhood.listings;
-
-        for (var house in neighborhood_listings) {
-
-            sum += (+neighborhood_listings[house]['prices']['airbnb']['daily']);
-        }
-
-        let average = sum/neighborhood_listings.length;
-
-        return Math.round(average);
-    }
-
     public onSelect(selection: dispatch.SelectEventData) : void {
         this.selection = selection;
+        this.computeAllSelectedListings();
     }
 
     public onHighlight(highlight: dispatch.HighlightEventData) : void {

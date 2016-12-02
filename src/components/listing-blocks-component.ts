@@ -111,55 +111,26 @@ export class ListingBlocksComponent extends BaseComponent {
         let priceCounts = Array<number>(this.data.priceBlocks.length).fill(0);
         let markupCounts = Array<number>(this.data.markupBlocks.length).fill(0);
 
-        let listings: Listing[] = [];
+        let displayedListings = this.allSelectedListings;
 
-        if (this.selection.neighborhoods && this.selection.neighborhoods.length) {
-            // Add each listing in the neighborhoods
-            for (let neighborhood of this.selection.neighborhoods) {
-                Array.prototype.push.apply(listings, neighborhood.listings);
-            }
-        }
-        else if (this.selection.priceBlocks && this.selection.priceBlocks.length) {
-            // Add each listing in the selected blocks
-            for (let block of this.selection.priceBlocks) {
-                Array.prototype.push.apply(listings, block.listings);
-            }
-        }
-        else if (this.selection.markupBlocks && this.selection.markupBlocks.length) {
-            // Add each listing in the selected blocks
-            for (let block of this.selection.markupBlocks) {
-                Array.prototype.push.apply(listings, block.listings);
-            }
-        }
-        else if (this.selection.listings && this.selection.listings.length > 1) {
-            // Add each selected listing
-            Array.prototype.push.apply(listings, this.selection.listings);
-        }
-        else if (this.selection.amenities && this.selection.amenities.length) {
-            // Add the listings that have this amenity
-            let hasAmenities = Array.from(this.data.listings.values()).filter(l => {
-                return this.selection.amenities.every(amenity => l.amenities.indexOf(amenity) !== -1)
-            });
-            Array.prototype.push.apply(listings, hasAmenities);
-        }
-        else if (this.highlight.neighborhood) {
-            // Add each listing in the highlighted neighborhood
-            Array.prototype.push.apply(listings, this.highlight.neighborhood.listings);
+        if (displayedListings.length === 0) {
+            if (this.highlight.neighborhood)
+                displayedListings = this.highlight.neighborhood.listings;
         }
 
         // Update the counts for our given listings
-        for (let listing of listings) {
+        for (let listing of displayedListings) {
             priceCounts[listing.priceBlock.number] += 1;
             markupCounts[listing.markupBlock.number] += 1;
         }
 
         // Create the fill color function
         let blockFill = (block: Block) => {
-            if (listings.length === 0)
+            if (displayedListings.length === 0)
                 return 'white';
             else {
                 if (block.type === 'price') {
-                    if (this.selection.priceBlocks) {
+                    if (this.selection.priceBlocks.length) {
                         return 'white';
                     }
                     else {
@@ -167,7 +138,7 @@ export class ListingBlocksComponent extends BaseComponent {
                     }
                 } 
                 else {
-                    if (this.selection.markupBlocks) {
+                    if (this.selection.markupBlocks.length) {
                         return 'white';
                     }
                     else {

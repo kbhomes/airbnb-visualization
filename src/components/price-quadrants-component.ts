@@ -243,6 +243,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
             if (this.selectedLevel === 'Neighborhoods') {
                 let neighborhoods: Neighborhood[] = [];
+                let selection: SelectEventData;
 
                 for (let i = 0; i < nodes.length; i++) {
                     let data = nodes.item(i)['__data__'];
@@ -252,35 +253,27 @@ export class PriceQuadrantsComponent extends BaseComponent {
                         neighborhoods.push(data);
                     }
                 }
-
-                let selection: SelectEventData = {
-                    neighborhoods: (this.selection.neighborhoods || []).slice(),
-                    listings: undefined,
-                    priceBlocks: undefined,
-                    markupBlocks: undefined,
-                    amenities: undefined
-                };
-
+                
                 if (newSelection) {
                     // Overwrite the selection with the selected neighborhoods
+                    selection = Dispatch.emptySelection();
                     selection.neighborhoods = neighborhoods;
                 }
                 else {
                     // Add any newly selected neighborhoods to the selection
+                    selection = Dispatch.cloneSelection(this.selection);
+
                     for (let n of neighborhoods) {
                         if (selection.neighborhoods.indexOf(n) === -1)
                             selection.neighborhoods.push(n);
                     }
                 }
 
-                if (selection.neighborhoods.length === 0) {
-                    selection.neighborhoods = [];
-                }
-
                 this.dispatcher.call(DispatchEvent.Select, this, selection);
             }
             else {
                 let listings: Listing[] = [];
+                let selection: SelectEventData;
 
                 for (let i = 0; i < nodes.length; i++) {
                     let data = nodes.item(i)['__data__'];
@@ -291,28 +284,19 @@ export class PriceQuadrantsComponent extends BaseComponent {
                     }
                 }
 
-                let selection: SelectEventData = {
-                    neighborhoods: undefined,
-                    listings: (this.selection.listings || []).slice(),
-                    priceBlocks: undefined,
-                    markupBlocks: undefined,
-                    amenities: undefined
-                };
-
                 if (newSelection) {
                     // Overwrite the selection with the selected listings
+                    selection = Dispatch.emptySelection();
                     selection.listings = listings;
                 }
                 else {
                     // Add any newly selected listings to the selection
+                    selection = Dispatch.cloneSelection(this.selection);
+
                     for (let l of listings) {
                         if (selection.listings.indexOf(l) === -1)
                             selection.listings.push(l);
                     }
-                }
-
-                if (selection.listings.length === 0) {
-                    selection.listings = [];
                 }
 
                 this.dispatcher.call(DispatchEvent.Select, this, selection);
@@ -431,19 +415,10 @@ export class PriceQuadrantsComponent extends BaseComponent {
     }
 
     private getListingCircleFill(listing: Listing) : string {
-        let selectedNeighborhoods = this.selection.neighborhoods || [];
-        let selectedListings = this.selection.listings || [];
-        let selectedPriceBlocks = this.selection.priceBlocks || [];
-        let selectedMarkupBlocks = this.selection.markupBlocks || [];
-        let selectedAmenities = this.selection.amenities || [];
+        let selectedListings = this.allSelectedListings;
         let highlightedListing = this.highlight.listing;
         
-        if (selectedListings.indexOf(listing) !== -1 || 
-            selectedNeighborhoods.indexOf(listing.neighborhood) !== -1 ||
-            selectedPriceBlocks.indexOf(listing.priceBlock) !== -1 ||
-            selectedMarkupBlocks.indexOf(listing.markupBlock) !== -1 ||
-            (selectedAmenities.length && selectedAmenities.every(amenity => listing.amenities.indexOf(amenity) !== -1))
-        ) {
+        if (selectedListings.indexOf(listing) !== -1) {
             return 'rgba(255, 100, 100, 0.5)';
         }
         else {
