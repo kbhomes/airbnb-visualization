@@ -55,7 +55,7 @@ export class FiltersComponent extends BaseComponent {
             .text(d => d.name)
             .on('click', function(d) {
                 // Send out a deselection event for this neighborhood
-                self.dispatchNeighborhoodSelection(d);
+                self.dispatchNeighborhoodSelection(d, false);
             });
 
         let filterExit = filterSelection.exit().remove();
@@ -76,7 +76,7 @@ export class FiltersComponent extends BaseComponent {
             .text(d => d.name)
             .on('click', function(d) {
                 // Send out a deselection event for this listing
-                self.dispatchListingSelection(d);
+                self.dispatchListingSelection(d, false);
             });
 
         let filterExit = filterSelection.exit().remove();
@@ -108,7 +108,7 @@ export class FiltersComponent extends BaseComponent {
             })
             .on('click', function(d) {
                 // Send out a deselection event for this price block
-                self.dispatchBlockSelection(d);
+                self.dispatchBlockSelection(d, false);
             });
 
         let filterExit = filterSelection.exit().remove();
@@ -140,7 +140,7 @@ export class FiltersComponent extends BaseComponent {
             })
             .on('click', function(d) {
                 // Send out a deselection event for this markup block
-                self.dispatchBlockSelection(d);
+                self.dispatchBlockSelection(d, false);
             });
 
         let filterExit = filterSelection.exit().remove();
@@ -161,7 +161,7 @@ export class FiltersComponent extends BaseComponent {
             .text(d => d)
             .on('click', function(d) {
                 // Send out a deselection event for this amenity
-                self.dispatchAmenitySelection(d);
+                self.dispatchAmenitySelection(d, false);
             });
 
         let filterExit = filterSelection.exit().remove();

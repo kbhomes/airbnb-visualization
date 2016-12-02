@@ -180,6 +180,9 @@ export class PriceQuadrantsComponent extends BaseComponent {
         let rectWidth = 0; 
         let rectHeight = 0; 
 
+        // Determine whether the resulting selection should be new or appended
+        let newSelection = !d3.event.sourceEvent.shiftKey;
+
         // Add a new path to the drag area
         // let linegen = d3.line().curve(d3.curveBasis);
         // let path = this.view.dragArea
@@ -250,12 +253,31 @@ export class PriceQuadrantsComponent extends BaseComponent {
                     }
                 }
 
-                this.dispatcher.call(DispatchEvent.Select, this, {
-                    neighborhoods: neighborhoods,
+                let selection: SelectEventData = {
+                    neighborhoods: (this.selection.neighborhoods || []).slice(),
                     listings: undefined,
                     priceBlocks: undefined,
-                    markupBlocks: undefined
-                } as SelectEventData);
+                    markupBlocks: undefined,
+                    amenities: undefined
+                };
+
+                if (newSelection) {
+                    // Overwrite the selection with the selected neighborhoods
+                    selection.neighborhoods = neighborhoods;
+                }
+                else {
+                    // Add any newly selected neighborhoods to the selection
+                    for (let n of neighborhoods) {
+                        if (selection.neighborhoods.indexOf(n) === -1)
+                            selection.neighborhoods.push(n);
+                    }
+                }
+
+                if (selection.neighborhoods.length === 0) {
+                    selection.neighborhoods = [];
+                }
+
+                this.dispatcher.call(DispatchEvent.Select, this, selection);
             }
             else {
                 let listings: Listing[] = [];
@@ -269,12 +291,31 @@ export class PriceQuadrantsComponent extends BaseComponent {
                     }
                 }
 
-                this.dispatcher.call(DispatchEvent.Select, this, {
+                let selection: SelectEventData = {
                     neighborhoods: undefined,
-                    listings: listings,
+                    listings: (this.selection.listings || []).slice(),
                     priceBlocks: undefined,
-                    markupBlocks: undefined
-                } as SelectEventData);
+                    markupBlocks: undefined,
+                    amenities: undefined
+                };
+
+                if (newSelection) {
+                    // Overwrite the selection with the selected listings
+                    selection.listings = listings;
+                }
+                else {
+                    // Add any newly selected listings to the selection
+                    for (let l of listings) {
+                        if (selection.listings.indexOf(l) === -1)
+                            selection.listings.push(l);
+                    }
+                }
+
+                if (selection.listings.length === 0) {
+                    selection.listings = [];
+                }
+
+                this.dispatcher.call(DispatchEvent.Select, this, selection);
             }
 
             // Remove the path from existence
@@ -462,7 +503,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
                 .attr('r', d => this.view.sizeScale(Attribute.count.neighborhoodAccessor(d)))
                 .on('mouseenter', d => this.dispatchNeighborhoodHighlight(d, true))
                 .on('mouseleave', d => this.dispatchNeighborhoodHighlight(d, false))
-                .on('click', d => this.dispatchNeighborhoodSelection(d));
+                .on('click', d => this.dispatchNeighborhoodSelection(d, !d3.event.shiftKey));
 
             this.view.neighborhoodCircles = circleSelection.merge(circleEnter);
             this.view.neighborhoodCircles
@@ -523,7 +564,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
                 .attr('r', d => this.view.sizeScale(Attribute.price.accessor(d)))
                 .on('mouseenter', d => this.dispatchListingHighlight(d, true))
                 .on('mouseleave', d => this.dispatchListingHighlight(d, false))
-                .on('click', d => this.dispatchListingSelection(d));
+                .on('click', d => this.dispatchListingSelection(d, !d3.event.shiftKey));
 
             this.view.listingCircles = circleSelection.merge(circleEnter);
             this.view.listingCircles

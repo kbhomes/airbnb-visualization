@@ -359,7 +359,7 @@ export class ListingBlocksComponent extends BaseComponent {
         priceBlocksEnter
           .append('rect')
             .attr('class', 'block-rect')
-            .on('click', d => this.dispatchBlockSelection(d));
+            .on('click', d => this.dispatchBlockSelection(d, !d3.event.shiftKey));
 
         this.view.priceBlockGroups = priceBlocksSelection.merge(priceBlocksEnter);
         this.view.priceBlockGroups.style('transform', d => `translate(${blockX(d)}px, ${-padding}px)`);
@@ -388,7 +388,7 @@ export class ListingBlocksComponent extends BaseComponent {
         markupBlocksEnter.append('text').attr('class', 'block-label');
         markupBlocksEnter.append('rect')
             .attr('class', 'block-rect')
-            .on('click', d => this.dispatchBlockSelection(d));
+            .on('click', d => this.dispatchBlockSelection(d, !d3.event.shiftKey));
 
         this.view.markupBlockGroups = markupBlocksSelection.merge(markupBlocksEnter);
         this.view.markupBlockGroups.style('transform', d => `translate(${blockX(d)}px, ${padding + height/2}px)`);

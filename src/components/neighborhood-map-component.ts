@@ -185,7 +185,7 @@ export class NeighborhoodMapComponent extends BaseComponent {
 
                     
                 let selectedNeighborhood =  self.data.neighborhoods.get(d.properties.neighborho)
-                self.dispatchNeighborhoodSelection(selectedNeighborhood);
+                self.dispatchNeighborhoodSelection(selectedNeighborhood, !d3.event.shiftKey);
 
                 
 
@@ -213,7 +213,7 @@ export class NeighborhoodMapComponent extends BaseComponent {
             .attr('x', 0)
             .attr('dy', '1.2em')
             .text(d => d.properties.neighborho);
-            
+
         labelEnter.append('tspan')
             .attr('class', 'map-label-price')
             .attr('x', 0)

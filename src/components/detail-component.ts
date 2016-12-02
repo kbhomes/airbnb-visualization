@@ -225,7 +225,7 @@ export class DetailComponent extends BaseComponent {
             })
             .on('click', function([amenity, count]) {
                 // Send a selection event for this amenity
-                self.dispatchAmenitySelection(amenity);  
+                self.dispatchAmenitySelection(amenity, !d3.event.shiftKey);  
             });
 
         // Update the amenities grid
