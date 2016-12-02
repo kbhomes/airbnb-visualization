@@ -153,7 +153,7 @@ export class FiltersComponent extends BaseComponent {
         let filterSelection = d3.select(this.selector)
             .select('.filter-amenities')
             .selectAll('div')
-            .data(this.selection.amenities || []);
+            .data(this.selection.amenities || [], (amenity: string) => amenity);
 
         let filterEnter = filterSelection
           .enter()

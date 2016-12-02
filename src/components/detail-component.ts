@@ -80,7 +80,7 @@ export class DetailComponent extends BaseComponent {
         }
         else if (this.selection.amenities && this.selection.amenities.length) {
             let listings = this.listings.filter(l => {
-                return this.selection.amenities.some(amenity => l.amenities.indexOf(amenity) !== -1)
+                return this.selection.amenities.every(amenity => l.amenities.indexOf(amenity) !== -1)
             });
             this.renderListingDetails(listings);
         }

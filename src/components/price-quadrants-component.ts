@@ -396,7 +396,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
             selectedNeighborhoods.indexOf(listing.neighborhood) !== -1 ||
             selectedPriceBlocks.indexOf(listing.priceBlock) !== -1 ||
             selectedMarkupBlocks.indexOf(listing.markupBlock) !== -1 ||
-            selectedAmenities.some(amenity => listing.amenities.indexOf(amenity) !== -1)
+            selectedAmenities.every(amenity => listing.amenities.indexOf(amenity) !== -1)
         ) {
             return 'rgba(255, 100, 100, 0.5)';
         }

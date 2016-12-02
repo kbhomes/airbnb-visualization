@@ -138,7 +138,7 @@ export class ListingBlocksComponent extends BaseComponent {
         else if (this.selection.amenities && this.selection.amenities.length) {
             // Add the listings that have this amenity
             let hasAmenities = Array.from(this.data.listings.values()).filter(l => {
-                return this.selection.amenities.some(amenity => l.amenities.indexOf(amenity) !== -1)
+                return this.selection.amenities.every(amenity => l.amenities.indexOf(amenity) !== -1)
             });
             Array.prototype.push.apply(listings, hasAmenities);
         }
