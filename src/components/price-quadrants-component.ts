@@ -296,14 +296,13 @@ export class PriceQuadrantsComponent extends BaseComponent {
         if (this.selectedLevel === 'Neighborhoods') {
             let data = this.neighborhoods;
             markupDomain = Attribute.markup.neighborhoodDomain(data);
-            sizeDomain = Attribute.price.neighborhoodDomain(data);
+            sizeDomain = Attribute.count.neighborhoodDomain(data);
             otherDomain = this.selectedAttribute.neighborhoodDomain(data);
-
         }
         else {
             let data = this.listings;
             markupDomain = Attribute.markup.listingDomain(data);
-            sizeDomain = Attribute.price.listingDomain(data);
+            sizeDomain = Attribute.count.listingDomain(data);
             otherDomain = this.selectedAttribute.listingDomain(data);
         }
 
@@ -321,7 +320,13 @@ export class PriceQuadrantsComponent extends BaseComponent {
         // Update the ranges of the scales
         this.view.markupScale.range([innerPadding.height(height) + innerPadding.top, innerPadding.top]);
         this.view.otherScale.range([innerPadding.left, innerPadding.left + innerPadding.width(width)]);
-        this.view.sizeScale.range([5, 30]);
+
+        if (this.selectedLevel === 'Neighborhoods') {
+            this.view.sizeScale.range([5, 30]);
+        }
+        else {
+            this.view.sizeScale.range([5, 5]);
+        }
     }
 
     public onLoad(data: LoadEventData) {
@@ -396,7 +401,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
             selectedNeighborhoods.indexOf(listing.neighborhood) !== -1 ||
             selectedPriceBlocks.indexOf(listing.priceBlock) !== -1 ||
             selectedMarkupBlocks.indexOf(listing.markupBlock) !== -1 ||
-            selectedAmenities.every(amenity => listing.amenities.indexOf(amenity) !== -1)
+            (selectedAmenities.length && selectedAmenities.every(amenity => listing.amenities.indexOf(amenity) !== -1))
         ) {
             return 'rgba(255, 100, 100, 0.5)';
         }
@@ -454,7 +459,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
                 .attr('opacity', 0)
                 .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d)))
                 .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d)))
-                .attr('r', d => this.view.sizeScale(Attribute.price.neighborhoodAccessor(d)))
+                .attr('r', d => this.view.sizeScale(Attribute.count.neighborhoodAccessor(d)))
                 .on('mouseenter', d => this.dispatchNeighborhoodHighlight(d, true))
                 .on('mouseleave', d => this.dispatchNeighborhoodHighlight(d, false))
                 .on('click', d => this.dispatchNeighborhoodSelection(d));
@@ -465,7 +470,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
                 .attr('opacity', 1)
                 .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d)))
                 .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d)))
-                .attr('r', d => this.view.sizeScale(Attribute.price.neighborhoodAccessor(d)))
+                .attr('r', d => this.view.sizeScale(Attribute.count.neighborhoodAccessor(d)))
                 .attr('fill', d => this.getNeighborhoodCircleFill(d));
         }
 
@@ -476,14 +481,14 @@ export class PriceQuadrantsComponent extends BaseComponent {
                 .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d.neighborhood)))
                 .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d.neighborhood)))
               .transition()
-                .attr('r', d => this.view.sizeScale(Attribute.price.neighborhoodAccessor(d.neighborhood)))
+                .attr('r', d => this.view.sizeScale(Attribute.count.neighborhoodAccessor(d.neighborhood)))
                 .attr('opacity', 0);
 
             this.view.neighborhoodCircles
                 .style('pointer-events', 'auto')
                 .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d)))
                 .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d)))
-                .attr('r', d => this.view.sizeScale(Attribute.price.neighborhoodAccessor(d)))
+                .attr('r', d => this.view.sizeScale(Attribute.count.neighborhoodAccessor(d)))
               .transition(transition)
               .transition().duration(1000)
                 .attr('opacity', 1);

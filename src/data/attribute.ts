@@ -12,6 +12,13 @@ export interface Attribute {
 }
 
 export module Attribute {
+    export var count: Attribute = {
+        name: 'Count',
+        accessor: l => 1,
+        neighborhoodAccessor: n => n.listings.length,
+        kind: 'continuous'
+    };
+
     export var rating: Attribute = { 
         name: 'Rating', 
         accessor: l => l.reviews.rating, 
@@ -50,7 +57,7 @@ export module Attribute {
     };
 
     // Set default domain accessors
-    for (let attr of [rating, price, monthlyPrice, markup]) {
+    for (let attr of [count, rating, price, monthlyPrice, markup]) {
         attr.listingDomain = (data) => d3.extent(data, d => attr.accessor(d));
         attr.neighborhoodDomain = (data) => d3.extent(data, d => attr.neighborhoodAccessor(d));
     }
