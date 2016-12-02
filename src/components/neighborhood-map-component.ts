@@ -10,6 +10,8 @@ export class NeighborhoodMapComponent extends BaseComponent {
     private view: {
         svg?: d3.Selection<d3.BaseType, {}, d3.BaseType, {}>;
         paths?: d3.Selection<d3.BaseType, NeighborhoodGeoJSONFeature, d3.BaseType, {}>;
+
+        moneyFormat?: (n:number) => string;
     }
 
     public constructor(selector: string, dispatcher: Dispatch) {
@@ -20,6 +22,7 @@ export class NeighborhoodMapComponent extends BaseComponent {
             height = this.element.clientHeight;
 
         this.view = {};
+        this.view.moneyFormat = d3.format('$.2f');
         this.view.svg = d3.select(this.selector).append('svg')
             .attr('class', 'map-chart')
             .attr('width', width)
@@ -153,31 +156,31 @@ export class NeighborhoodMapComponent extends BaseComponent {
                 self.dispatchNeighborhoodHighlight(selectedNeighborhood,true);
 
   
-                let sel = d3.select(this);
-                // Scale up the particular neighborhood. 
-                sel.moveToFront();
+                // let sel = d3.select(this);
+                // // Scale up the particular neighborhood. 
+                // sel.moveToFront();
 
-                let box = (sel.node() as SVGPathElement).getBBox();
+                // let box = (sel.node() as SVGPathElement).getBBox();
                 
-                // Do some really naive clamping to get already large neighborhood slightly scaled,
-                // and teeny tiny neighborhoods more highly scaled. The 2500 figures from a bounding
-                // box of approximately 50x50. Scale factor remains in range [1.5, 2.5].
-                let scale = Math.min(2.5, Math.max(1.5, 2500 / (box.width * box.height)));
-                let cx = box.x + box.width/2;
-                let cy = box.y + box.height/2;
+                // // Do some really naive clamping to get already large neighborhood slightly scaled,
+                // // and teeny tiny neighborhoods more highly scaled. The 2500 figures from a bounding
+                // // box of approximately 50x50. Scale factor remains in range [1.5, 2.5].
+                // let scale = Math.min(2.5, Math.max(1.5, 2500 / (box.width * box.height)));
+                // let cx = box.x + box.width/2;
+                // let cy = box.y + box.height/2;
                 
-                sel.transition()
-                    .style('transform', `translate(-${(scale - 1) * cx}px, -${(scale - 1) * cy}px) scale(${scale})`);
+                // sel.transition()
+                //     .style('transform', `translate(-${(scale - 1) * cx}px, -${(scale - 1) * cy}px) scale(${scale})`);
             })
             .on('mouseleave', function(d) {
                 // Dispatch an empty highlight event
                let selectedNeighborhood =  self.data.neighborhoods.get(d.properties.neighborho)
                 self.dispatchNeighborhoodHighlight(selectedNeighborhood,false);
 
-                let sel = d3.select(this);
-                sel.transition()
-                    .style('transform', `translate(0px, 0px) scale(1.0)`)
-                    .on('end', () => sel.moveToBack());
+                // let sel = d3.select(this);
+                // sel.transition()
+                //     .style('transform', `translate(0px, 0px) scale(1.0)`)
+                //     .on('end', () => sel.moveToBack());
             }).on('click', function(d){
 
                     
@@ -187,24 +190,43 @@ export class NeighborhoodMapComponent extends BaseComponent {
                 
 
             });
-                //label each neighborhood
-                //TODO: tidy label up 
-                var label = this.view.svg.selectAll("text")
-                    .data(this.data.geo.features)
-                    .enter()
-                    .append("text")
-                    .attr("class", "label")
-                    .attr("transform", function(d) { return "translate(" + path.centroid(d) + ")"; })
-                    .text(function(d) { 
-                        let neighborhood = self.data.neighborhoods.get(d.properties.neighborho);  
-                        let price = '0';
-                        if (neighborhood != undefined){
-                           price = Attribute.price.neighborhoodAccessor(neighborhood);
-                           return d.properties.neighborho +" $"+price ; 
-                        }
-                        return d.properties.neighborho +" $"+price;
-                    })
-                    .attr('font-size',8);
+
+        //label each neighborhood
+        //TODO: tidy label up 
+        let labelSelection = this.view.svg
+          .selectAll('g.map-label')
+            .data(this.data.geo.features);
+        
+        let labelEnter = labelSelection.enter()
+          .append('g')
+            .attr('class', 'map-label')
+            .attr('transform', d => {
+                let [x, y] = path.centroid(d);
+                return `translate(${x} ${y - 12})`
+            })
+          .append('text')
+            .attr('x', 0)
+            .attr('y', 0);
+
+        labelEnter.append('tspan')
+            .attr('class', 'map-label-name')
+            .attr('x', 0)
+            .attr('dy', '1.2em')
+            .text(d => d.properties.neighborho);
+            
+        labelEnter.append('tspan')
+            .attr('class', 'map-label-price')
+            .attr('x', 0)
+            .attr('dy', '1.2em')
+            .text(d => {
+                let neighborhood = this.data.neighborhoods.get(d.properties.neighborho);  
+                if (neighborhood){
+                    return this.view.moneyFormat(Attribute.price.neighborhoodAccessor(neighborhood));
+                }
+                else {
+                    return ''
+                }
+            });
                    
         // Create the update selection
         this.view.paths = pathsEnter.merge(pathsSelection);
