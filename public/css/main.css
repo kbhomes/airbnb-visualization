@@ -65,7 +65,7 @@ div {
 
 #listing-blocks {
   flex: 0;
-  height: 200px;
+  height: 150px;
 }
 
 #map {
@@ -110,28 +110,28 @@ div {
   padding: 0;
 }
 
-#filters {
+#selection, #filters {
   border-bottom: 1px solid #ccc;
   flex: 3;
 }
 
-.filter-description {
+.selection-description {
     margin: 10px;
     font-size: 12px;
     text-transform: uppercase;
 }
 
-.filter-description .reset {
+.selection-description .reset {
   text-decoration: none;
   cursor: point;
 }
 
-.filter-list {
+.selection-list {
   padding: 0;
   margin: 10px;
 }
 
-.filter-list div {
+.selection-list div {
   font-size: 12px;
   padding: 5px 8px 5px 5px;
   background: #d8d8d8;
@@ -140,7 +140,7 @@ div {
   margin: 3px;;
 }
 
-.filter-list div:before {
+.selection-list div:before {
   content: 'ｘ';
   color: #777;
   padding-right: 5px;

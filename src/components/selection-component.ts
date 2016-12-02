@@ -6,14 +6,14 @@ import { Attribute } from '../data/attribute';
 import { Listing, Neighborhood } from '../data/listing';
 import { Block } from '../data/block';
 
-export class FiltersComponent extends BaseComponent {
+export class SelectionComponent extends BaseComponent {
 
     private view: {
-        neighborhoodFiltersList?: d3.DataSelection<Neighborhood>;
-        listingsFilterList?: d3.DataSelection<Listing>;
-        priceBlocksFilterList?: d3.DataSelection<Block>;
-        markupBlocksFilterList?: d3.DataSelection<Block>;
-        amenitiesFilterList?: d3.DataSelection<string>;
+        neighborhoodSelectionList?: d3.DataSelection<Neighborhood>;
+        listingsSelectionList?: d3.DataSelection<Listing>;
+        priceBlocksSelectionList?: d3.DataSelection<Block>;
+        markupBlocksSelectionList?: d3.DataSelection<Block>;
+        amenitiesSelectionList?: d3.DataSelection<string>;
         description?: d3.DatalessSelection;
     }
 
@@ -21,7 +21,7 @@ export class FiltersComponent extends BaseComponent {
         super(selector, dispatcher);
 
         this.view = {};
-        this.view.description = d3.select(this.element).select('.filter-description');
+        this.view.description = d3.select(this.element).select('.selection-description');
         this.view.description.select('.reset').on('click', () => {
             this.dispatcher.call(DispatchEvent.Select, this, Dispatch.emptySelection());
         });
@@ -39,12 +39,12 @@ export class FiltersComponent extends BaseComponent {
     private renderNeighborhoods() {
         let self = this;
 
-        let filterSelection = d3.select(this.selector)
-            .select('.filter-neighborhoods')
+        let selectionSelection = d3.select(this.selector)
+            .select('.selection-neighborhoods')
             .selectAll('div')
             .data(this.selection.neighborhoods || [], (d: Neighborhood) => d.name);
 
-        let filterEnter = filterSelection
+        let selectionEnter = selectionSelection
           .enter()
           .append('div')
             .text(d => d.name)
@@ -53,19 +53,19 @@ export class FiltersComponent extends BaseComponent {
                 self.dispatchNeighborhoodSelection(d, false);
             });
 
-        let filterExit = filterSelection.exit().remove();
-        this.view.neighborhoodFiltersList = filterSelection.merge(filterEnter);
+        let selectionExit = selectionSelection.exit().remove();
+        this.view.neighborhoodSelectionList = selectionSelection.merge(selectionEnter);
     }
 
     private renderListings() {
         let self = this;
         
-        let filterSelection = d3.select(this.selector)
-            .select('.filter-listings')
+        let selectionSelection = d3.select(this.selector)
+            .select('.selection-listings')
             .selectAll('div')
             .data(this.selection.listings || [], (d: Listing) => d.id + '');
 
-        let filterEnter = filterSelection
+        let selectionEnter = selectionSelection
           .enter()
           .append('div')
             .text(d => d.name)
@@ -74,19 +74,19 @@ export class FiltersComponent extends BaseComponent {
                 self.dispatchListingSelection(d, false);
             });
 
-        let filterExit = filterSelection.exit().remove();
-        this.view.listingsFilterList = filterSelection.merge(filterEnter);
+        let selectionExit = selectionSelection.exit().remove();
+        this.view.listingsSelectionList = selectionSelection.merge(selectionEnter);
     }
 
     private renderPriceBlocks() {
         let self = this;
         
-        let filterSelection = d3.select(this.selector)
-            .select('.filter-price-blocks')
+        let selectionSelection = d3.select(this.selector)
+            .select('.selection-price-blocks')
             .selectAll('div')
             .data(this.selection.priceBlocks || [], (d: Block) => d.number + '');
 
-        let filterEnter = filterSelection
+        let selectionEnter = selectionSelection
           .enter()
           .append('div')
             .text(d => {
@@ -106,19 +106,19 @@ export class FiltersComponent extends BaseComponent {
                 self.dispatchBlockSelection(d, false);
             });
 
-        let filterExit = filterSelection.exit().remove();
-        this.view.priceBlocksFilterList = filterSelection.merge(filterEnter);
+        let selectionExit = selectionSelection.exit().remove();
+        this.view.priceBlocksSelectionList = selectionSelection.merge(selectionEnter);
     }
 
     private renderMarkupBlocks() {
         let self = this;
         
-        let filterSelection = d3.select(this.selector)
-            .select('.filter-markup-blocks')
+        let selectionSelection = d3.select(this.selector)
+            .select('.selection-markup-blocks')
             .selectAll('div')
             .data(this.selection.markupBlocks || [], (d: Block) => d.number + '');
 
-        let filterEnter = filterSelection
+        let selectionEnter = selectionSelection
           .enter()
           .append('div')
             .text(d => {
@@ -138,19 +138,19 @@ export class FiltersComponent extends BaseComponent {
                 self.dispatchBlockSelection(d, false);
             });
 
-        let filterExit = filterSelection.exit().remove();
-        this.view.markupBlocksFilterList = filterSelection.merge(filterEnter);
+        let selectionExit = selectionSelection.exit().remove();
+        this.view.markupBlocksSelectionList = selectionSelection.merge(selectionEnter);
     }
 
     private renderAmenities() {
         let self = this;
         
-        let filterSelection = d3.select(this.selector)
-            .select('.filter-amenities')
+        let selectionSelection = d3.select(this.selector)
+            .select('.selection-amenities')
             .selectAll('div')
             .data(this.selection.amenities || [], (amenity: string) => amenity);
 
-        let filterEnter = filterSelection
+        let selectionEnter = selectionSelection
           .enter()
           .append('div')
             .text(d => d)
@@ -159,11 +159,11 @@ export class FiltersComponent extends BaseComponent {
                 self.dispatchAmenitySelection(d, false);
             });
 
-        let filterExit = filterSelection.exit().remove();
-        this.view.amenitiesFilterList = filterSelection.merge(filterEnter);
+        let selectionExit = selectionSelection.exit().remove();
+        this.view.amenitiesSelectionList = selectionSelection.merge(selectionEnter);
     }
 
-    private renderFilterDescription() {
+    private renderSelectionDescription() {
         let pluralize = (count: number, word: string) => {
             let label = count + ' ';
             
@@ -230,6 +230,6 @@ export class FiltersComponent extends BaseComponent {
         this.renderPriceBlocks();
         this.renderMarkupBlocks();
         this.renderAmenities();
-        this.renderFilterDescription();
+        this.renderSelectionDescription();
     }
 } 
