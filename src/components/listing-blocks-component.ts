@@ -113,19 +113,19 @@ export class ListingBlocksComponent extends BaseComponent {
 
         let listings: Listing[] = [];
 
-        if (this.selection.neighborhoods) {
+        if (this.selection.neighborhoods && this.selection.neighborhoods.length) {
             // Add each listing in the neighborhoods
             for (let neighborhood of this.selection.neighborhoods) {
                 Array.prototype.push.apply(listings, neighborhood.listings);
             }
         }
-        else if (this.selection.priceBlocks) {
+        else if (this.selection.priceBlocks && this.selection.priceBlocks.length) {
             // Add each listing in the selected blocks
             for (let block of this.selection.priceBlocks) {
                 Array.prototype.push.apply(listings, block.listings);
             }
         }
-        else if (this.selection.markupBlocks) {
+        else if (this.selection.markupBlocks && this.selection.markupBlocks.length) {
             // Add each listing in the selected blocks
             for (let block of this.selection.markupBlocks) {
                 Array.prototype.push.apply(listings, block.listings);
@@ -134,6 +134,13 @@ export class ListingBlocksComponent extends BaseComponent {
         else if (this.selection.listings && this.selection.listings.length > 1) {
             // Add each selected listing
             Array.prototype.push.apply(listings, this.selection.listings);
+        }
+        else if (this.selection.amenities && this.selection.amenities.length) {
+            // Add the listings that have this amenity
+            let hasAmenities = Array.from(this.data.listings.values()).filter(l => {
+                return this.selection.amenities.some(amenity => l.amenities.indexOf(amenity) !== -1)
+            });
+            Array.prototype.push.apply(listings, hasAmenities);
         }
         else if (this.highlight.neighborhood) {
             // Add each listing in the highlighted neighborhood

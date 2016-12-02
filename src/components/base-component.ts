@@ -25,7 +25,7 @@ export abstract class BaseComponent {
         this.dispatcher.on(this.getComponentEventName(dispatch.DispatchEvent.Filter), this.eventBind(this.onFilter));
 
         // Set up empty events
-        this.selection = { neighborhoods: undefined, listings: undefined, priceBlocks: undefined, markupBlocks: undefined };
+        this.selection = { neighborhoods: undefined, listings: undefined, priceBlocks: undefined, markupBlocks: undefined, amenities: undefined };
         this.highlight = { neighborhood: undefined, listing: undefined };
         this.filter = { filter: false };
     }
@@ -187,6 +187,40 @@ export abstract class BaseComponent {
                     markupBlocks: selectedMarkupBlocks
                 } as dispatch.SelectEventData);
             }
+        }
+    }
+
+    protected dispatchAmenitySelection(amenity: string) {
+        // Check whether to add or remove this amenity from the selection
+        if (this.selection.amenities && this.selection.amenities.indexOf(amenity) !== -1) {
+            // Amenity is already selected, so send out a selection event with this deselected
+            let selectedIndex = this.selection.amenities.indexOf(amenity);
+            let selectedAmenities = this.selection.amenities.slice();
+            selectedAmenities.splice(selectedIndex, 1);
+
+            if (selectedAmenities.length === 0)
+                selectedAmenities = undefined;
+
+            this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
+                neighborhoods: undefined,
+                listings: undefined,
+                priceBlocks: undefined,
+                markupBlocks: undefined,
+                amenities: selectedAmenities
+            } as dispatch.SelectEventData);
+        }
+        else {
+            // Amenity is not already selected, so send out a selection event with this selected
+            let selectedAmenities = (this.selection.amenities || []).slice();
+            selectedAmenities.push(amenity);
+
+            this.dispatcher.call(dispatch.DispatchEvent.Select, this, {
+                neighborhoods: undefined,
+                listings: undefined,
+                priceBlocks: undefined,
+                markupBlocks: undefined,
+                amenities: selectedAmenities
+            } as dispatch.SelectEventData);
         }
     }
 

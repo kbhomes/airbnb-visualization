@@ -54,30 +54,7 @@ export class DetailComponent extends BaseComponent {
         this.listings = Array.from(this.data.listings.values());
 
         // Create the amenities map from the data set
-        this.amenitiesMap = new Map<string, number>();
-        for (let listing of this.listings) {
-            for (let amenity of listing.amenities) {
-                let count = this.amenitiesMap.get(amenity);
-
-                // The amenity wasn't yet seen in this map
-                if (count === undefined) 
-                    this.amenitiesMap.set(amenity, 1);
-                else
-                    this.amenitiesMap.set(amenity, count + 1);
-            }
-        }
-
-        // Clean up our list of amenities:
-        //   - Get the list of amenities from our calculated map
-        //   - Sort the amenities by count of listings that have them
-        //   - Filter out the amenities that say 'translation missing' (why do these exist?)
-        //   - Take the first of these 35 amenities
-        let amenitiesOrdered = Array
-            .from(this.amenitiesMap.entries()) 
-            .sort((a, b) => b[1] - a[1])
-            .filter(([amenity, count]) => amenity.indexOf('translation missing') === -1)
-            .slice(0, 35);
-        this.amenitiesMap = new Map(amenitiesOrdered);
+        this.amenitiesMap = new Map<string, number>(this.data.amenities.map((amenity):[string,number] => [amenity, 0]))
 
         // Render the default details 
         this.renderAllDetails();
@@ -85,6 +62,9 @@ export class DetailComponent extends BaseComponent {
 
     public onSelect(selection: SelectEventData) {
         super.onSelect(selection);
+
+        // Highlight the selected amenities, if any
+        this.view.amenitiesGrid.style('stroke-width', ([amenity, count]) => this.getAmenityStrokeWidth(amenity));
 
         if (this.selection.neighborhoods && this.selection.neighborhoods.length) {
             this.renderNeighborhoodDetails(this.selection.neighborhoods);
@@ -97,6 +77,12 @@ export class DetailComponent extends BaseComponent {
         }
         else if (this.selection.markupBlocks && this.selection.markupBlocks.length) {
             this.renderBlockDetails(this.selection.markupBlocks);
+        }
+        else if (this.selection.amenities && this.selection.amenities.length) {
+            let listings = this.listings.filter(l => {
+                return this.selection.amenities.some(amenity => l.amenities.indexOf(amenity) !== -1)
+            });
+            this.renderListingDetails(listings);
         }
         else {
             // Nothing was selected, so render the default details
@@ -221,7 +207,7 @@ export class DetailComponent extends BaseComponent {
                 let listingPercentage = (count/listingCount*100).toFixed(0);
 
                 // Highlight this grid square
-                d3.select(this).style('stroke-width', 1);
+                d3.select(this).style('stroke-width', self.getAmenityStrokeWidth(amenity, true));
 
                 // Show the details of this amenity
                 self.view.amenitiesHoverDetails.html(`
@@ -232,10 +218,14 @@ export class DetailComponent extends BaseComponent {
             })
             .on('mouseleave', function([amenity, count]) {
                 // Unhighlight this grid square
-                d3.select(this).style('stroke-width', 0);
+                d3.select(this).style('stroke-width', self.getAmenityStrokeWidth(amenity, false));
 
                 // Clear the amenity details
                 self.view.amenitiesHoverDetails.html('');
+            })
+            .on('click', function([amenity, count]) {
+                // Send a selection event for this amenity
+                self.dispatchAmenitySelection(amenity);  
             });
 
         // Update the amenities grid
@@ -243,6 +233,20 @@ export class DetailComponent extends BaseComponent {
         this.view.amenitiesGrid
             .attr('data-listings-count', listings.length)
             .style('fill', ([amenity, count]) => this.view.amenitiesColorScale(count));
+    }
+
+    private getAmenityStrokeWidth(amenity: string, hover: boolean = false) {
+        if (this.selection.amenities && this.selection.amenities.indexOf(amenity) !== -1) {
+            return 1;
+        }
+        else {
+            if (hover) {
+                return 1;
+            }
+            else {
+                return 0;
+            }
+        }
     }
 
     public resize() {

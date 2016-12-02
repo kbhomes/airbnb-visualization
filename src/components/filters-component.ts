@@ -13,6 +13,7 @@ export class FiltersComponent extends BaseComponent {
         listingsFilterList?: d3.DataSelection<Listing>;
         priceBlocksFilterList?: d3.DataSelection<Block>;
         markupBlocksFilterList?: d3.DataSelection<Block>;
+        amenitiesFilterList?: d3.DataSelection<string>;
         description?: d3.DatalessSelection;
     }
 
@@ -74,7 +75,7 @@ export class FiltersComponent extends BaseComponent {
           .append('div')
             .text(d => d.name)
             .on('click', function(d) {
-                // Send out a deselection event for this neighborhood
+                // Send out a deselection event for this listing
                 self.dispatchListingSelection(d);
             });
 
@@ -106,7 +107,7 @@ export class FiltersComponent extends BaseComponent {
                 return label;
             })
             .on('click', function(d) {
-                // Send out a deselection event for this neighborhood
+                // Send out a deselection event for this price block
                 self.dispatchBlockSelection(d);
             });
 
@@ -138,7 +139,7 @@ export class FiltersComponent extends BaseComponent {
                 return label;
             })
             .on('click', function(d) {
-                // Send out a deselection event for this neighborhood
+                // Send out a deselection event for this markup block
                 self.dispatchBlockSelection(d);
             });
 
@@ -146,14 +147,42 @@ export class FiltersComponent extends BaseComponent {
         this.view.markupBlocksFilterList = filterSelection.merge(filterEnter);
     }
 
+    private renderAmenities() {
+        let self = this;
+        
+        let filterSelection = d3.select(this.selector)
+            .select('.filter-amenities')
+            .selectAll('div')
+            .data(this.selection.amenities || []);
+
+        let filterEnter = filterSelection
+          .enter()
+          .append('div')
+            .text(d => d)
+            .on('click', function(d) {
+                // Send out a deselection event for this amenity
+                self.dispatchAmenitySelection(d);
+            });
+
+        let filterExit = filterSelection.exit().remove();
+        this.view.amenitiesFilterList = filterSelection.merge(filterEnter);
+    }
+
     private renderFilterDescription() {
         let pluralize = (count: number, word: string) => {
             let label = count + ' ';
             
-            if (count === 1)
+            if (count === 1) {
                 label += word;
-            else 
-                label += word + 's';
+            }
+            else {
+                if (word.charAt(word.length - 1) == 'y') {
+                    label += word.slice(0, word.length - 1) + 'ies';
+                }
+                else {
+                    label += word + 's';
+                }
+            }
 
             return label;
         };
@@ -182,6 +211,12 @@ export class FiltersComponent extends BaseComponent {
               .select('.count')
                 .text(pluralize(this.selection.markupBlocks.length, 'markup block'));
         }
+        else if (this.selection.amenities && this.selection.amenities.length) {
+            this.view.description
+                .style('display', 'block')
+              .select('.count')
+                .text(pluralize(this.selection.amenities.length, 'amenity'));
+        }
         else {
             this.view.description.style('display', 'none');
         }
@@ -194,6 +229,7 @@ export class FiltersComponent extends BaseComponent {
         this.renderListings();
         this.renderPriceBlocks();
         this.renderMarkupBlocks();
+        this.renderAmenities();
         this.renderFilterDescription();
     }
 } 

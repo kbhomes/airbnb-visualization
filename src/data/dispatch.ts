@@ -18,6 +18,7 @@ export interface LoadEventData {
     listings: Map<Listing.IDType, Listing>;
     priceBlocks: Block[];
     markupBlocks: Block[];
+    amenities: string[];
 }
 
 export interface SelectEventData {
@@ -25,6 +26,7 @@ export interface SelectEventData {
     listings: Listing[];
     priceBlocks: Block[];
     markupBlocks: Block[];
+    amenities: string[];
 }
 
 export interface HighlightEventData {
@@ -42,12 +44,14 @@ export interface FilterEventData {
 //      - listings: mapping from listing ids to listings
 //      - priceBlocks: list of blocks that contain the price ranges
 //      - markupBlocks: list of blocks that contain the markup ranges
+//      - amenities: list of amenities that are tracked
 
 // Select:
 //      - neighborhoods: array of neighborhood names
 //      - listings: array of listing ids
 //      - priceBlocks: array of price blocks that are selected
 //      - markupBlocks: array of markup blocks that are selected
+//      - amenities: array of amenities that are selected
 //
 // (either neighborhoods, or listings, or price blocks, or markup blocks, or none)
 
