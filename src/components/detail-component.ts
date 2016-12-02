@@ -67,12 +67,13 @@ export class DetailComponent extends BaseComponent {
         this.view.amenitiesGrid.style('stroke-width', ([amenity, count]) => this.getAmenityStrokeWidth(amenity));
 
         // Keep track of all the listings that are selected
-        if (this.allSelectedListings.length) {
-            this.renderListingDetails(this.allSelectedListings);
-        }
-        else {
+        if (Dispatch.isEmptySelection(this.selection)) {
             // Nothing was selected, so render the default details
             this.renderAllDetails();
+        }
+        else {
+            // Render all selected listings
+            this.renderListingDetails(this.allSelectedListings);
         }
     }
 
