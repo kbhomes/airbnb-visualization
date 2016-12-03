@@ -469,7 +469,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
         let neighborhoodsTransitionActions = () => {
             let circleSelection = this.view.svg
                 .selectAll('circle.neighborhood')
-                    .data(this.filteredNeighborhoods);
+                    .data(this.filteredNeighborhoods, (n: Neighborhood) => n.name);
 
             let circleEnter = circleSelection.enter()
                 .append('circle')
@@ -535,7 +535,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
         let listingsTransitionActions = () => {
             let circleSelection = this.view.svg
                 .selectAll('circle.listing')
-                    .data(this.filteredListings);
+                    .data(this.filteredListings, (l: Listing) => l.id + '');
 
             let circleEnter = circleSelection.enter()
                 .append('circle')
