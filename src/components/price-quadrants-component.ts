@@ -7,9 +7,6 @@ import { Attribute } from '../data/attribute';
 
 export class PriceQuadrantsComponent extends BaseComponent {
     
-    private listings: Listing[];
-    private neighborhoods: Neighborhood[];
-
     private attributeMap: Attribute[];
     private selectedAttribute: Attribute;
     private selectedLevel: 'Neighborhoods' | 'Listings';
@@ -319,13 +316,13 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
         // Determine the domains of the scales
         if (this.selectedLevel === 'Neighborhoods') {
-            let data = this.neighborhoods;
+            let data = this.filteredNeighborhoods;
             markupDomain = Attribute.markup.neighborhoodDomain(data);
             sizeDomain = Attribute.count.neighborhoodDomain(data);
             otherDomain = this.selectedAttribute.neighborhoodDomain(data);
         }
         else {
-            let data = this.listings;
+            let data = this.filteredListings;
             markupDomain = Attribute.markup.listingDomain(data);
             sizeDomain = Attribute.count.listingDomain(data);
             otherDomain = this.selectedAttribute.listingDomain(data);
@@ -357,9 +354,6 @@ export class PriceQuadrantsComponent extends BaseComponent {
     public onLoad(data: LoadEventData) {
         super.onLoad(data);
 
-        this.listings = Array.from(this.data.listings.values());
-        this.neighborhoods = Array.from(this.data.neighborhoods.values());
-
         this.initializeQuadrants();
         this.initializeAxes(); 
         this.initializeLevelSelect();
@@ -373,7 +367,6 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
         if (this.selectedLevel === 'Neighborhoods') {
             this.view.neighborhoodCircles.attr('fill', d => this.getNeighborhoodCircleFill(d));
-            
         }
         else {
             this.view.listingCircles.attr('fill', d => this.getListingCircleFill(d));
@@ -393,6 +386,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
     public onFilter(filter: FilterEventData) {
         super.onFilter(filter);
+        this.render();
     }
 
     public resize() {
@@ -467,7 +461,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
         let neighborhoodsTransitionActions = () => {
             let circleSelection = this.view.svg
                 .selectAll('circle.neighborhood')
-                    .data(this.neighborhoods);
+                    .data(this.filteredNeighborhoods);
 
             let circleEnter = circleSelection.enter()
                 .append('circle')
@@ -479,6 +473,11 @@ export class PriceQuadrantsComponent extends BaseComponent {
                 .on('mouseenter', d => this.dispatchNeighborhoodHighlight(d, true))
                 .on('mouseleave', d => this.dispatchNeighborhoodHighlight(d, false))
                 .on('click', d => this.dispatchNeighborhoodSelection(d, !d3.event.shiftKey));
+
+            circleSelection.exit()
+              .transition().duration(250)
+                .attr('opacity', 0)
+                .remove();
 
             this.view.neighborhoodCircles = circleSelection.merge(circleEnter);
             this.view.neighborhoodCircles
@@ -528,7 +527,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
         let listingsTransitionActions = () => {
             let circleSelection = this.view.svg
                 .selectAll('circle.listing')
-                    .data(this.listings);
+                    .data(this.filteredListings);
 
             let circleEnter = circleSelection.enter()
                 .append('circle')
@@ -540,6 +539,11 @@ export class PriceQuadrantsComponent extends BaseComponent {
                 .on('mouseenter', d => this.dispatchListingHighlight(d, true))
                 .on('mouseleave', d => this.dispatchListingHighlight(d, false))
                 .on('click', d => this.dispatchListingSelection(d, !d3.event.shiftKey));
+
+            circleSelection.exit()
+              .transition().duration(250)
+                .attr('opacity', 0)
+                .remove();
 
             this.view.listingCircles = circleSelection.merge(circleEnter);
             this.view.listingCircles
