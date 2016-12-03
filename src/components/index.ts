@@ -4,3 +4,4 @@ export * from './listing-blocks-component';
 export * from './price-quadrants-component';
 export * from './detail-component';
 export * from './selection-component';
+export * from './filters-component';

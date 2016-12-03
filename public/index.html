@@ -24,6 +24,8 @@
                                 <span class="count"></span>
                                 <span> - </span>
                                 <a class="reset" href="javascript:void(0)">Reset</a>
+                                <span> - </span>
+                                <a class="apply-filter" href="javascript:void(0)">Use as Filter</a>
                             </div>
                             <div class="selection-list selection-neighborhoods"></div>
                             <div class="selection-list selection-listings"></div>
@@ -35,7 +37,16 @@
                     <div class="section" id="filters">
                         <div class="title">Filters</div>
                         <div class="content">
-                            
+                            <table id="filter-controls">
+                                <tr>
+                                    <td><select multiple class="filter-control filter-neighborhoods"></select></td>
+                                    <td><select multiple class="filter-control filter-amenities"></select></td>
+                                </tr>
+                                <tr>
+                                    <td><select multiple class="filter-control filter-price-blocks"></select></td>
+                                    <td><select multiple class="filter-control filter-markup-blocks"></select></td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
                     <div class="section" id="details">

@@ -22,9 +22,16 @@ export class SelectionComponent extends BaseComponent {
 
         this.view = {};
         this.view.description = d3.select(this.element).select('.selection-description');
-        this.view.description.select('.reset').on('click', () => {
-            this.dispatcher.call(DispatchEvent.Select, this, Dispatch.emptySelection());
-        });
+        this.view.description
+            .select('a.reset')
+            .on('click', () => {
+                this.dispatcher.call(DispatchEvent.Select, this, Dispatch.emptySelection());
+            });
+        this.view.description
+            .select('a.apply-filter')
+            .on('click', () => {
+                this.dispatcher.call(DispatchEvent.Filter, this, Dispatch.filterFromSelection(this.selection));
+            });
     }  
 
     public onSelect(selection: SelectEventData) {

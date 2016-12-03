@@ -146,6 +146,16 @@ div {
   padding-right: 5px;
 }
 
+#filters #filter-controls {
+  width: 100%;
+  border-spacing: 10px;
+  table-layout: fixed;
+}
+
+#filter-controls select {
+  width: 100%;
+}
+
 .chart .axis-label text {
   font: 12px sans-serif;
   text-anchor: middle;

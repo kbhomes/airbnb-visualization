@@ -16,6 +16,7 @@ export class Application {
     private quadrantsComponent: components.PriceQuadrantsComponent;
     private detailComponent: components.DetailComponent;
     private selectionComponent: components.SelectionComponent;
+    private filtersComponent: components.FiltersComponent;
 
     public constructor() {
         // Create the dispatcher
@@ -27,6 +28,7 @@ export class Application {
         this.quadrantsComponent = new components.PriceQuadrantsComponent('#quadrants .content', this.dispatcher);
         this.detailComponent = new components.DetailComponent('#details .content', this.dispatcher);
         this.selectionComponent = new components.SelectionComponent('#selection .content', this.dispatcher);
+        this.filtersComponent = new components.FiltersComponent('#filters .content', this.dispatcher);
 
         // Begin loading
         this.loadData();

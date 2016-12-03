@@ -29,7 +29,7 @@ export abstract class BaseComponent {
         // Set up empty events
         this.selection = dispatch.Dispatch.emptySelection();
         this.highlight = { neighborhood: undefined, listing: undefined };
-        this.filter = { filter: false };
+        this.filter = dispatch.Dispatch.emptyFilter();
 
         this.allSelectedListings = [];
     }
@@ -134,6 +134,12 @@ export abstract class BaseComponent {
         }
     }
 
+    protected dispatchNeighborhoodFilter(neighborhoods: Neighborhood[]) {
+        let filter = dispatch.Dispatch.cloneFilter(this.filter);
+        filter.neighborhoods = neighborhoods.slice();
+        this.dispatcher.call(dispatch.DispatchEvent.Filter, this, filter);
+    }
+
     protected dispatchNeighborhoodSelection(neighborhood: Neighborhood, createNewSelection: boolean) {
         if (createNewSelection) {
             let sel = dispatch.Dispatch.emptySelection();
@@ -161,6 +167,12 @@ export abstract class BaseComponent {
         }
     }
 
+    protected dispatchPriceBlockFilter(priceBlocks: Block[]) {
+        let filter = dispatch.Dispatch.cloneFilter(this.filter);
+        filter.priceBlocks = priceBlocks.slice();
+        this.dispatcher.call(dispatch.DispatchEvent.Filter, this, filter);
+    }
+
     protected dispatchBlockSelection(block: Block, createNewSelection: boolean) {
         if (block.type === 'price') {
             if (createNewSelection) {
@@ -180,7 +192,7 @@ export abstract class BaseComponent {
                     this.dispatcher.call(dispatch.DispatchEvent.Select, this, sel);
                 }
                 else {
-                    // Neighborhood is not already selected, so send out a selection event with this selected
+                    // Price block is not already selected, so send out a selection event with this selected
                     let sel = dispatch.Dispatch.cloneSelection(this.selection);
                     sel.priceBlocks.push(block);
 
@@ -206,7 +218,7 @@ export abstract class BaseComponent {
                     this.dispatcher.call(dispatch.DispatchEvent.Select, this, sel);
                 }
                 else {
-                    // Neighborhood is not already selected, so send out a selection event with this selected
+                    // Markup block is not already selected, so send out a selection event with this selected
                     let sel = dispatch.Dispatch.cloneSelection(this.selection);
                     sel.markupBlocks.push(block);
 
@@ -214,6 +226,12 @@ export abstract class BaseComponent {
                 }
             }
         }
+    }
+
+    protected dispatchMarkupBlockFilter(markupBlocks: Block[]) {
+        let filter = dispatch.Dispatch.cloneFilter(this.filter);
+        filter.markupBlocks = markupBlocks.slice();
+        this.dispatcher.call(dispatch.DispatchEvent.Filter, this, filter);
     }
 
     protected dispatchAmenitySelection(amenity: string, createNewSelection: boolean) {
@@ -241,6 +259,12 @@ export abstract class BaseComponent {
                 this.dispatcher.call(dispatch.DispatchEvent.Select, this, sel);
             }
         }
+    }
+
+    protected dispatchAmenityFilter(amenities: string[]) {
+        let filter = dispatch.Dispatch.cloneFilter(this.filter);
+        filter.amenities = amenities.slice();
+        this.dispatcher.call(dispatch.DispatchEvent.Filter, this, filter);
     }
 
     public onLoad(data: dispatch.LoadEventData) : void {

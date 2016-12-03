@@ -27,13 +27,7 @@ export module Dispatch {
     }
 
     export function cloneSelection(selection: SelectEventData) {
-        let cloned: SelectEventData = {
-            neighborhoods: [],
-            listings: [],
-            priceBlocks: [],
-            markupBlocks: [],
-            amenities: []
-        };
+        let cloned: SelectEventData = Dispatch.emptySelection();
 
         if (selection.neighborhoods)
             cloned.neighborhoods = selection.neighborhoods.slice();
@@ -52,6 +46,49 @@ export module Dispatch {
 
         return cloned;
     }
+
+    export function emptyHighlight() : HighlightEventData {
+        return {
+            neighborhood: undefined,
+            listing: undefined
+        };
+    }
+
+    export function emptyFilter() : FilterEventData {
+        return {
+            neighborhoods: [],
+            priceBlocks: [],
+            markupBlocks: [],
+            amenities: []
+        };
+    }
+
+    export function cloneFilter(filter: FilterEventData) : FilterEventData {
+        let cloned: FilterEventData = Dispatch.emptyFilter();
+
+        if (filter.neighborhoods)
+            cloned.neighborhoods = filter.neighborhoods.slice();
+
+        if (filter.priceBlocks)
+            cloned.priceBlocks = filter.priceBlocks.slice();
+
+        if (filter.markupBlocks)
+            cloned.markupBlocks = filter.markupBlocks.slice();
+
+        if (filter.amenities) 
+            cloned.amenities = filter.amenities.slice();
+
+        return cloned;
+    }
+
+    export function filterFromSelection(selection: SelectEventData) : FilterEventData {
+        let filter: FilterEventData = Dispatch.emptyFilter();
+        filter.neighborhoods = selection.neighborhoods.slice();
+        filter.priceBlocks = selection.priceBlocks.slice();
+        filter.markupBlocks = selection.markupBlocks.slice();
+        filter.amenities = selection.amenities.slice();
+        return filter;
+    };
 }
 
 
@@ -85,7 +122,10 @@ export interface HighlightEventData {
 }
 
 export interface FilterEventData {
-    filter: boolean;
+    neighborhoods: Neighborhood[];
+    priceBlocks: Block[];
+    markupBlocks: Block[];
+    amenities: string[];
 }
 
 // Load:
@@ -97,13 +137,12 @@ export interface FilterEventData {
 //      - amenities: list of amenities that are tracked
 
 // Select:
-//      - neighborhoods: array of neighborhood names
-//      - listings: array of listing ids
+//      - neighborhoods: array of neighborhood 
+//      - listings: array of listing 
 //      - priceBlocks: array of price blocks that are selected
 //      - markupBlocks: array of markup blocks that are selected
 //      - amenities: array of amenities that are selected
 //
-// (either neighborhoods, or listings, or price blocks, or markup blocks, or none)
 
 // Highlight:
 //      - neighborhood: neighborhood name
@@ -112,4 +151,7 @@ export interface FilterEventData {
 // (either neighborhoods, or listings, or none)
 
 // Filter:
-//      - filter: boolean (corresponds to 'display selection only')
+//      - neighborhoods: array of neighborhood
+//      - priceBlocks: array of price blocks that are selected
+//      - markupBlocks: array of markup blocks that are selected
+//      - amenities: array of amenities that are selected
