@@ -171,6 +171,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
         // Get the drag position
         let x0: number = Math.max(0, Math.min(width, d3.event.x));
         let y0: number = Math.max(0, Math.min(height, d3.event.y));
+        let didMove = false;
 
         let rectLeft = 0; 
         let rectTop = 0; 
@@ -193,6 +194,8 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
         d3.event
         .on('drag', () => {
+            didMove = true;
+
             // console.log(d3.event);
             let x1: number = Math.max(0, Math.min(width, d3.event.x));
             let y1: number = Math.max(0, Math.min(height, d3.event.y));
@@ -223,6 +226,11 @@ export class PriceQuadrantsComponent extends BaseComponent {
                 .attr('height', rectHeight);
         })
         .on('end', () => {
+            if (!didMove) {
+                rectLeft = x0;
+                rectTop = y0;
+            }
+
             // // Close off the path
             // d.push([d[0][0], d[0][1]]);
             // path.attr('d', linegen);
