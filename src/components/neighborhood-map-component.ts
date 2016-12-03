@@ -81,18 +81,18 @@ export class NeighborhoodMapComponent extends BaseComponent {
     private getColor(averageNeighborhoodPrice):string{
 
         if(averageNeighborhoodPrice>0 && averageNeighborhoodPrice<=199 ){
-            return 'rgb(126,229,108)';
+            return 'rgb(204,236,230)';
         }
         if(averageNeighborhoodPrice>200 && averageNeighborhoodPrice<=300 ){
-            return 'rgb(54,186,69)';
+            return 'rgb(153,216,201)';
         }else if(averageNeighborhoodPrice>301 && averageNeighborhoodPrice<=399 ){
-            return 'rgb(20,117,52)';
+            return 'rgb(102,194,164)';
         }else if(averageNeighborhoodPrice>401 && averageNeighborhoodPrice<=600 ){
-            return 'rgb(80,225,80)';
+            return 'rgb(65,174,118)';
         }else if(averageNeighborhoodPrice>601 && averageNeighborhoodPrice<=1000){
-            return 'rgb(3,69,37)'
+            return 'rgb(35,139,69)'
         }else if(averageNeighborhoodPrice>1401 && averageNeighborhoodPrice<1600){
-            return 'rgb(20,117,52)';
+            return 'rgb(0,88,36)';
         }
 
         return 'rgb(38,38,38)';

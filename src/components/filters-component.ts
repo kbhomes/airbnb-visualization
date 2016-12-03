@@ -56,9 +56,16 @@ export class FiltersComponent extends BaseComponent {
 
         let filterSelect = d3.select(this.selector).select('.filter-neighborhoods')
         
+
+        let neighborhoods = Array.from(this.data.neighborhoods.values()).sort(function(a,b){
+            if(a.name < b.name) return -1;
+            if(a.name > b.name) return 1;
+            return 0;
+        })
+        
         let filterOptions = filterSelect
           .selectAll('option.choice')
-            .data(Array.from(this.data.neighborhoods.values()), (d: Neighborhood) => d.name);
+            .data(neighborhoods, (d: Neighborhood) => d.name);
 
         let filterOptionsEnter = filterOptions
           .enter()
