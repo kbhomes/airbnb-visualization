@@ -24,7 +24,6 @@ export class DetailComponent extends BaseComponent {
     }
 
     private airbnbUrl = 'https://www.airbnb.com/rooms/';
-    private listings: Listing[];
     private amenitiesMap: Map<string, number>;
 
     public constructor(selector: string, dispatcher: Dispatch) {
@@ -50,9 +49,6 @@ export class DetailComponent extends BaseComponent {
     public onLoad(data: LoadEventData) {
         super.onLoad(data);
 
-        // Create the flat array copy of all the listings
-        this.listings = Array.from(this.data.listings.values());
-
         // Create the amenities map from the data set
         this.amenitiesMap = new Map<string, number>(this.data.amenities.map((amenity):[string,number] => [amenity, 0]))
 
@@ -62,28 +58,17 @@ export class DetailComponent extends BaseComponent {
 
     public onSelect(selection: SelectEventData) {
         super.onSelect(selection);
-
-        // Highlight the selected amenities, if any
-        this.view.amenitiesGrid.style('stroke-width', ([amenity, count]) => this.getAmenityStrokeWidth(amenity));
-
-        // Keep track of all the listings that are selected
-        if (Dispatch.isEmptySelection(this.selection)) {
-            // Nothing was selected, so render the default details
-            this.renderAllDetails();
-        }
-        else {
-            // Render all selected listings
-            this.renderListingDetails(this.allSelectedListings);
-        }
+        this.render();
     }
 
     public onFilter(filter: FilterEventData) {
         super.onFilter(filter);
+        this.render();
     }
 
     private renderAllDetails() {
         // Render details for all our listings
-        this.renderListingDetails(this.listings);
+        this.renderListingDetails(this.filteredListings);
     }
 
     private renderListingDetails(listings: Listing[]) {
@@ -172,6 +157,10 @@ export class DetailComponent extends BaseComponent {
             .style('stroke', 'black')
             .style('fill', 'white')
             .on('mouseenter', function([amenity, count]) {
+                // Don't interact with this amenity if it's filtered out
+                if (!self.isAmenityEnabled(amenity))
+                    return;
+
                 let sel = d3.select(this);
 
                 let listingCount = +sel.attr('data-listings-count');
@@ -188,6 +177,10 @@ export class DetailComponent extends BaseComponent {
                 `);
             })
             .on('mouseleave', function([amenity, count]) {
+                // Don't interact with this amenity if it's filtered out
+                if (!self.isAmenityEnabled(amenity))
+                    return;
+
                 // Unhighlight this grid square
                 d3.select(this).style('stroke-width', self.getAmenityStrokeWidth(amenity, false));
 
@@ -195,6 +188,10 @@ export class DetailComponent extends BaseComponent {
                 self.view.amenitiesHoverDetails.html('');
             })
             .on('click', function([amenity, count]) {
+                // Don't interact with this amenity if it's filtered out
+                if (!self.isAmenityEnabled(amenity))
+                    return;
+
                 // Send a selection event for this amenity
                 self.dispatchAmenitySelection(amenity, !d3.event.shiftKey);  
             });
@@ -203,7 +200,18 @@ export class DetailComponent extends BaseComponent {
         this.view.amenitiesGrid = amenitiesSelection.merge(amenitiesEnter);
         this.view.amenitiesGrid
             .attr('data-listings-count', listings.length)
-            .style('fill', ([amenity, count]) => this.view.amenitiesColorScale(count));
+            .style('fill', d => this.getAmenityFill(d));
+    }
+
+    private isAmenityEnabled(amenity: string) {
+        return !(this.filter.amenities.length && this.filter.amenities.indexOf(amenity) === -1);
+    }
+
+    private getAmenityFill([amenity, count]: [string, number]) {
+        if (this.filter.amenities.length && this.filter.amenities.indexOf(amenity) === -1)
+            return 'grey';
+        else
+            return this.view.amenitiesColorScale(count);
     }
 
     private getAmenityStrokeWidth(amenity: string, hover: boolean = false) {
@@ -226,5 +234,21 @@ export class DetailComponent extends BaseComponent {
 
     public render() {
         let self = this;
+
+        // Keep track of all the listings that are selected
+        if (Dispatch.isEmptySelection(this.selection)) {
+            // Nothing was selected, so render the default details
+            this.renderAllDetails();
+        }
+        else {
+            // Render all selected listings
+            this.renderListingDetails(this.allSelectedListings);
+        }
+
+        // Re-color amenities
+        this.view.amenitiesGrid.style('fill', d => this.getAmenityFill(d));
+
+        // Highlight the selected amenities, if any
+        this.view.amenitiesGrid.style('stroke-width', ([amenity, count]) => this.getAmenityStrokeWidth(amenity));
     }
 } 
