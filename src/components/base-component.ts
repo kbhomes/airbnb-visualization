@@ -67,7 +67,7 @@ export abstract class BaseComponent {
             return;
         }
 
-        for (let listing of Array.from(this.data.listings.values())) {
+        for (let listing of this.filteredListings) {
             // Don't add listings not in a selected neighborhood
             if (this.selection.neighborhoods.length) {
                 if (this.selection.neighborhoods.indexOf(listing.neighborhood) === -1)

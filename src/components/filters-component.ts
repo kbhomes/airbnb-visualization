@@ -61,7 +61,8 @@ export class FiltersComponent extends BaseComponent {
             let selectedNeighborhoods = this.view.neighborhoodFilterList
                 .filter(function(d) { return this['selected']; })
                 .data();
-
+            
+            this.dispatcher.call(DispatchEvent.Select, this, Dispatch.emptySelection());
             this.dispatchNeighborhoodFilter(selectedNeighborhoods);
         });
     }
@@ -99,6 +100,7 @@ export class FiltersComponent extends BaseComponent {
                 .filter(function(d) { return this['selected']; })
                 .data();
 
+            this.dispatcher.call(DispatchEvent.Select, this, Dispatch.emptySelection());
             this.dispatchPriceBlockFilter(selectedPriceBlocks);
         });
     }
@@ -136,6 +138,7 @@ export class FiltersComponent extends BaseComponent {
                 .filter(function(d) { return this['selected']; })
                 .data();
 
+            this.dispatcher.call(DispatchEvent.Select, this, Dispatch.emptySelection());
             this.dispatchMarkupBlockFilter(selectedMarkupBlocks);
         });
     }
@@ -162,6 +165,7 @@ export class FiltersComponent extends BaseComponent {
                 .filter(function(d) { return this['selected']; })
                 .data();
 
+            this.dispatcher.call(DispatchEvent.Select, this, Dispatch.emptySelection());
             this.dispatchAmenityFilter(selectedAmenities);
         });
     }
