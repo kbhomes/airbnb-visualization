@@ -13,12 +13,20 @@ export class FiltersComponent extends BaseComponent {
         priceBlocksFilterList?: d3.DataSelection<Block>;
         markupBlocksFilterList?: d3.DataSelection<Block>;
         amenitiesFilterList?: d3.DataSelection<string>;
+
+        links?: d3.DatalessSelection;
     }
 
     public constructor(selector: string, dispatcher: Dispatch) {
         super(selector, dispatcher);
 
         this.view = {};
+        this.view.links = d3.select(this.element.parentElement).select('.filter-links');
+        this.view.links
+            .select('a.reset')
+            .on('click', () => {
+                this.dispatcher.call(DispatchEvent.Filter, this, Dispatch.emptyFilter());
+            });
     }  
 
     public onLoad(data: LoadEventData) {
@@ -34,6 +42,9 @@ export class FiltersComponent extends BaseComponent {
         this.view.priceBlocksFilterList.property('selected', d => filter.priceBlocks.indexOf(d) !== -1);
         this.view.markupBlocksFilterList.property('selected', d => filter.markupBlocks.indexOf(d) !== -1);
         this.view.amenitiesFilterList.property('selected', d => filter.amenities.indexOf(d) !== -1);
+
+        // Update the reset link
+        this.renderFilterLinks();
     }
 
     public resize() {
@@ -170,6 +181,15 @@ export class FiltersComponent extends BaseComponent {
         });
     }
 
+    public renderFilterLinks() {
+        if (Dispatch.isEmptyFilter(this.filter)) {
+            this.view.links.style('display', 'none');
+        }
+        else {
+            this.view.links.style('display', 'inline-block');
+        }
+    }
+
     public render() {
         let self = this;
 
@@ -177,5 +197,6 @@ export class FiltersComponent extends BaseComponent {
         this.renderPriceBlocks();
         this.renderMarkupBlocks();
         this.renderAmenities();
+        this.renderFilterLinks();
     }
 } 

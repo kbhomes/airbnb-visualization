@@ -14,20 +14,21 @@ export class SelectionComponent extends BaseComponent {
         priceBlocksSelectionList?: d3.DataSelection<Block>;
         markupBlocksSelectionList?: d3.DataSelection<Block>;
         amenitiesSelectionList?: d3.DataSelection<string>;
-        description?: d3.DatalessSelection;
+
+        links?: d3.DatalessSelection;
     }
 
     public constructor(selector: string, dispatcher: Dispatch) {
         super(selector, dispatcher);
 
         this.view = {};
-        this.view.description = d3.select(this.element).select('.selection-description');
-        this.view.description
+        this.view.links = d3.select(this.element.parentElement).select('.selection-links');
+        this.view.links
             .select('a.reset')
             .on('click', () => {
                 this.dispatcher.call(DispatchEvent.Select, this, Dispatch.emptySelection());
             });
-        this.view.description
+        this.view.links
             .select('a.apply-filter')
             .on('click', () => {
                 this.dispatcher.call(DispatchEvent.Filter, this, Dispatch.filterFromSelection(this.selection));
@@ -171,7 +172,7 @@ export class SelectionComponent extends BaseComponent {
         this.view.amenitiesSelectionList = selectionSelection.merge(selectionEnter);
     }
 
-    private renderSelectionDescription() {
+    private renderSelectionLinks() {
         // let pluralize = (count: number, word: string) => {
         //     let label = count + ' ';
             
@@ -191,10 +192,10 @@ export class SelectionComponent extends BaseComponent {
         // };
 
         if (Dispatch.isEmptySelection(this.selection)) {
-            this.view.description.style('display', 'none');
+            this.view.links.style('display', 'none');
         }
         else {
-            this.view.description.style('display', 'block');
+            this.view.links.style('display', 'inline-block');
         }
     }
 
@@ -206,6 +207,6 @@ export class SelectionComponent extends BaseComponent {
         this.renderPriceBlocks();
         this.renderMarkupBlocks();
         this.renderAmenities();
-        this.renderSelectionDescription();
+        this.renderSelectionLinks();
     }
 } 
