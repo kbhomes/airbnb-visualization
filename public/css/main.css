@@ -121,9 +121,9 @@ div {
     text-transform: uppercase;
 }
 
-.selection-description .reset {
+.selection-description .reset,
+.selection-description .apply-filter {
   text-decoration: none;
-  cursor: point;
 }
 
 .selection-list {

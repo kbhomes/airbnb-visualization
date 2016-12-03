@@ -63,6 +63,15 @@ export module Dispatch {
         };
     }
 
+    export function isEmptyFilter(filter: FilterEventData) : boolean {
+        return (
+            filter.neighborhoods.length === 0 &&
+            filter.priceBlocks.length === 0 &&
+            filter.markupBlocks.length === 0 &&
+            filter.amenities.length === 0
+        );
+    }
+
     export function cloneFilter(filter: FilterEventData) : FilterEventData {
         let cloned: FilterEventData = Dispatch.emptyFilter();
 

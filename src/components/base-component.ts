@@ -13,6 +13,11 @@ export abstract class BaseComponent {
     protected highlight: dispatch.HighlightEventData;
     protected filter: dispatch.FilterEventData;
 
+    protected filteredListings: Listing[];
+    protected filteredListingsMap: Map<Listing.IDType, Listing>;
+    protected filteredNeighborhoods: Neighborhood[];
+    protected filteredNeighborhoodMap: Map<Neighborhood.NameType, Neighborhood>;
+
     protected allSelectedListings: Listing[];
 
     public constructor(selector: string, dispatcher: dispatch.Dispatch) {
@@ -32,6 +37,10 @@ export abstract class BaseComponent {
         this.filter = dispatch.Dispatch.emptyFilter();
 
         this.allSelectedListings = [];
+        this.filteredListings = [];
+        this.filteredListingsMap = new Map();
+        this.filteredNeighborhoods = [];
+        this.filteredNeighborhoodMap = new Map();
     }
 
     private eventBind(handler: Function) {
@@ -269,6 +278,10 @@ export abstract class BaseComponent {
 
     public onLoad(data: dispatch.LoadEventData) : void {
         this.data = data;
+        this.filteredListings = Array.from(data.listings.values());
+        this.filteredListingsMap = new Map(this.filteredListings.map((l):[Listing.IDType, Listing] => [l.id, l]));
+        this.filteredNeighborhoods = Array.from(data.neighborhoods.values());
+        this.filteredNeighborhoodMap = new Map(this.filteredNeighborhoods.map((n):[Neighborhood.NameType, Neighborhood] => [n.name, n]));
     }
 
     public onSelect(selection: dispatch.SelectEventData) : void {
@@ -282,6 +295,45 @@ export abstract class BaseComponent {
     
     public onFilter(filter: dispatch.FilterEventData) : void {
         this.filter = filter;
+        this.filteredListings = [];
+
+        if (filter.neighborhoods.length) {
+            this.filteredNeighborhoods = filter.neighborhoods.slice();
+        }
+        else {
+            this.filteredNeighborhoods = Array.from(this.data.neighborhoods.values());
+        }
+
+        for (let listing of Array.from(this.data.listings.values())) {
+            // Don't add listings not in a filter neighborhood
+            if (this.filter.neighborhoods.length) {
+                if (this.filter.neighborhoods.indexOf(listing.neighborhood) === -1)
+                    continue;
+            }
+
+            // Don't add listings not in a filter price block
+            if (this.filter.priceBlocks.length) {
+                if (this.filter.priceBlocks.indexOf(listing.priceBlock) === -1)
+                    continue;
+            }
+
+            // Don't add listings not in a selected markup block
+            if (this.filter.markupBlocks.length) {
+                if (this.filter.markupBlocks.indexOf(listing.markupBlock) === -1)
+                    continue;
+            }
+
+            // Don't add listings what don't have the selected amenities
+            if (this.filter.amenities.length) {
+                if (!this.filter.amenities.every(amenity => listing.amenities.indexOf(amenity) !== -1))
+                    continue;
+            }
+
+            this.filteredListings.push(listing);
+        }
+
+        this.filteredListingsMap = new Map(this.filteredListings.map((l):[Listing.IDType, Listing] => [l.id, l]));
+        this.filteredNeighborhoodMap = new Map(this.filteredNeighborhoods.map((n):[Neighborhood.NameType, Neighborhood] => [n.name, n]));
     }
 
     public abstract resize();

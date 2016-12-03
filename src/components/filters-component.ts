@@ -57,12 +57,12 @@ export class FiltersComponent extends BaseComponent {
 
         this.view.neighborhoodFilterList = filterOptions.merge(filterOptionsEnter);
 
-        filterOptions.on('change', () => {
-            let selectedMarkupBlocks = this.view.markupBlocksFilterList
+        filterSelect.on('change', () => {
+            let selectedNeighborhoods = this.view.neighborhoodFilterList
                 .filter(function(d) { return this['selected']; })
                 .data();
 
-            this.dispatchMarkupBlockFilter(selectedMarkupBlocks);
+            this.dispatchNeighborhoodFilter(selectedNeighborhoods);
         });
     }
 
@@ -94,12 +94,12 @@ export class FiltersComponent extends BaseComponent {
 
         this.view.priceBlocksFilterList = filterOptions.merge(filterOptionsEnter);
 
-        filterOptions.on('change', () => {
-            let selectedMarkupBlocks = this.view.markupBlocksFilterList
+        filterSelect.on('change', () => {
+            let selectedPriceBlocks = this.view.priceBlocksFilterList
                 .filter(function(d) { return this['selected']; })
                 .data();
 
-            this.dispatchMarkupBlockFilter(selectedMarkupBlocks);
+            this.dispatchPriceBlockFilter(selectedPriceBlocks);
         });
     }
 
@@ -131,7 +131,7 @@ export class FiltersComponent extends BaseComponent {
 
         this.view.markupBlocksFilterList = filterOptions.merge(filterOptionsEnter);
 
-        filterOptions.on('change', () => {
+        filterSelect.on('change', () => {
             let selectedMarkupBlocks = this.view.markupBlocksFilterList
                 .filter(function(d) { return this['selected']; })
                 .data();

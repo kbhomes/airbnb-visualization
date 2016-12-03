@@ -36,17 +36,18 @@ export class NeighborhoodMapComponent extends BaseComponent {
 
     public onSelect(selection: SelectEventData) {
         super.onSelect(selection);
-            this.view.paths.attr('fill', d => this.getNeighborhoodRegion(this.data.neighborhoods.get(d.properties.neighborho)));
+        this.view.paths.attr('fill', d => this.getNeighborhoodRegion(this.filteredNeighborhoodMap.get(d.properties.neighborho)));
         
     }
 
     public onHighlight(highlight: HighlightEventData) {
         super.onHighlight(highlight);
-            this.view.paths.attr('fill', d => this.getNeighborhoodRegion(this.data.neighborhoods.get(d.properties.neighborho)));
+        this.view.paths.attr('fill', d => this.getNeighborhoodRegion(this.filteredNeighborhoodMap.get(d.properties.neighborho)));
     }
 
     public onFilter(filter: FilterEventData) {
         super.onFilter(filter);
+        this.view.paths.attr('fill', d => this.getNeighborhoodRegion(this.filteredNeighborhoodMap.get(d.properties.neighborho)));
     }
 
     public resize() {
@@ -70,11 +71,7 @@ export class NeighborhoodMapComponent extends BaseComponent {
 
 //returns shade of green
     public shadeOfGreen(neighborhood:Neighborhood):string{
-
-      
-        
-        let currentNeighborhood = this.data.neighborhoods.get(neighborhood.name); 
-        let average = Attribute.price.neighborhoodAccessor(currentNeighborhood);
+        let average = Attribute.price.neighborhoodAccessor(neighborhood);
 
         return this.getColor(average);
         
@@ -141,18 +138,16 @@ export class NeighborhoodMapComponent extends BaseComponent {
             .attr('d', path)
             .attr('data-id', d => d.id)
             .attr('data-name', d => d.properties.neighborho)
-            .attr('fill', function(d){
-
-                let neighborhood = self.data.neighborhoods.get(d.properties.neighborho);
-                //if the neighborhood exists
-                // return a color giving the price range
-                return (neighborhood != undefined) ? self.shadeOfGreen(neighborhood) : 'grey';
-            })
+            .attr('fill', d => this.getNeighborhoodRegion(this.filteredNeighborhoodMap.get(d.properties.neighborho)))
             .style('stroke', '#FFFFFF')
             .on('mouseenter', function(d) {
+                // If this neighborhood was filtered out, do nothing
+                if (!self.filteredNeighborhoodMap.has(d.properties.neighborho))
+                    return;
+
                 // Dispatch a highlight event for this neighborhood
 
-                let selectedNeighborhood =  self.data.neighborhoods.get(d.properties.neighborho)
+                let selectedNeighborhood =  self.filteredNeighborhoodMap.get(d.properties.neighborho)
                 self.dispatchNeighborhoodHighlight(selectedNeighborhood,true);
 
   
@@ -173,8 +168,12 @@ export class NeighborhoodMapComponent extends BaseComponent {
                 //     .style('transform', `translate(-${(scale - 1) * cx}px, -${(scale - 1) * cy}px) scale(${scale})`);
             })
             .on('mouseleave', function(d) {
+                // If this neighborhood was filtered out, do nothing
+                if (!self.filteredNeighborhoodMap.has(d.properties.neighborho))
+                    return;
+
                 // Dispatch an empty highlight event
-               let selectedNeighborhood =  self.data.neighborhoods.get(d.properties.neighborho)
+               let selectedNeighborhood =  self.filteredNeighborhoodMap.get(d.properties.neighborho)
                 self.dispatchNeighborhoodHighlight(selectedNeighborhood,false);
 
                 // let sel = d3.select(this);
@@ -182,9 +181,11 @@ export class NeighborhoodMapComponent extends BaseComponent {
                 //     .style('transform', `translate(0px, 0px) scale(1.0)`)
                 //     .on('end', () => sel.moveToBack());
             }).on('click', function(d){
-
+                // If this neighborhood was filtered out, do nothing
+                if (!self.filteredNeighborhoodMap.has(d.properties.neighborho))
+                    return;
                     
-                let selectedNeighborhood =  self.data.neighborhoods.get(d.properties.neighborho)
+                let selectedNeighborhood =  self.filteredNeighborhoodMap.get(d.properties.neighborho)
                 self.dispatchNeighborhoodSelection(selectedNeighborhood, !d3.event.shiftKey);
 
                 

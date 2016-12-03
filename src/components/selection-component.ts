@@ -31,6 +31,7 @@ export class SelectionComponent extends BaseComponent {
             .select('a.apply-filter')
             .on('click', () => {
                 this.dispatcher.call(DispatchEvent.Filter, this, Dispatch.filterFromSelection(this.selection));
+                this.dispatcher.call(DispatchEvent.Select, this, Dispatch.emptySelection());
             });
     }  
 
@@ -171,62 +172,30 @@ export class SelectionComponent extends BaseComponent {
     }
 
     private renderSelectionDescription() {
-        let pluralize = (count: number, word: string) => {
-            let label = count + ' ';
+        // let pluralize = (count: number, word: string) => {
+        //     let label = count + ' ';
             
-            if (count === 1) {
-                label += word;
-            }
-            else {
-                if (word.charAt(word.length - 1) == 'y') {
-                    label += word.slice(0, word.length - 1) + 'ies';
-                }
-                else {
-                    label += word + 's';
-                }
-            }
+        //     if (count === 1) {
+        //         label += word;
+        //     }
+        //     else {
+        //         if (word.charAt(word.length - 1) == 'y') {
+        //             label += word.slice(0, word.length - 1) + 'ies';
+        //         }
+        //         else {
+        //             label += word + 's';
+        //         }
+        //     }
 
-            return label;
-        };
+        //     return label;
+        // };
 
-        if (this.selection.neighborhoods.length) {
-            this.view.description
-                .style('display', 'block')
-              .select('.count')
-                .text(pluralize(this.selection.neighborhoods.length, 'neighborhood'));
+        if (Dispatch.isEmptySelection(this.selection)) {
+            this.view.description.style('display', 'none');
         }
-        
-        if (this.selection.listings.length) {
-            this.view.description
-                .style('display', 'block')
-              .select('.count')
-                .text(pluralize(this.selection.listings.length, 'listing'));
+        else {
+            this.view.description.style('display', 'block');
         }
-        
-        if (this.selection.priceBlocks.length) {
-            this.view.description
-                .style('display', 'block')
-              .select('.count')
-                .text(pluralize(this.selection.priceBlocks.length, 'price block'));
-        }
-        
-        if (this.selection.markupBlocks.length) {
-            this.view.description
-                .style('display', 'block')
-              .select('.count')
-                .text(pluralize(this.selection.markupBlocks.length, 'markup block'));
-        }
-        
-        if (this.selection.amenities.length) {
-            this.view.description
-                .style('display', 'block')
-              .select('.count')
-                .text(pluralize(this.selection.amenities.length, 'amenity'));
-        }
-
-        // else {
-        //     this.view.description.style('display', 'none');
-        // }
     }
 
     public render() {
