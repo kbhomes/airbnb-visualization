@@ -47,7 +47,8 @@ export class PriceQuadrantsComponent extends BaseComponent {
         this.view.svg = d3.select(this.selector).append('svg')
             .attr('class', 'chart')
             .attr('width', width)
-            .attr('height', height);
+            .attr('height', height)
+       
         
         this.attributeMap = [];
         this.attributeMap.push(Attribute.price);
@@ -141,6 +142,8 @@ export class PriceQuadrantsComponent extends BaseComponent {
             this.render();
         });
     }
+
+    
 
     private initializeDrag() {
         this.view.dragArea = this.view.svg.append('g').attr('class', 'drag-area');
@@ -591,6 +594,12 @@ export class PriceQuadrantsComponent extends BaseComponent {
         }
     }
 
+    private zoomInZoomOut(){
+
+        
+        
+    }
+
     public render() {
         let self = this;
 
@@ -611,6 +620,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
         //zoom to function
         var zoom = d3.zoom().on("zoom",function(){
            
+            //update axis
             self.view.svg.select('g.other-axis').call(otherAxis.scale(d3.event.transform.rescaleX(self.view.otherScale)));
             self.view.svg.select('g.markup-axis').call(markupAxis.scale(d3.event.transform.rescaleY(self.view.markupScale)));
             //zoom to neighborhoods
@@ -622,6 +632,24 @@ export class PriceQuadrantsComponent extends BaseComponent {
                 return d3.event.transform;
             });
         })
+
+
+        d3.select('.zoomin').on('click',function(){
+        //todo: zoom in     
+         
+        });
+
+
+        d3.select('.reset').on('click',function(){
+        //todo: reset 
+        
+        });
+
+
+        d3.select('.zoomout').on('click',function(){
+        //todo zoom out
+
+        });
 
         //call if in drag area
         this.view.svg.select(".drag-area").call(zoom);
