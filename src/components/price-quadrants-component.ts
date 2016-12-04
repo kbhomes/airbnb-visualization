@@ -475,9 +475,9 @@ export class PriceQuadrantsComponent extends BaseComponent {
                 .append('circle')
                 .attr('class', 'neighborhood')
                 .attr('opacity', 0)
-                .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d)))
+                .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d)) )
                 .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d)))
-                .attr('r', d => this.view.sizeScale(Attribute.count.neighborhoodAccessor(d)))
+                .attr('r', 10 )
                 .on('mouseenter', d => this.dispatchNeighborhoodHighlight(d, true))
                 .on('mouseleave', d => this.dispatchNeighborhoodHighlight(d, false))
                 .on('click', d => this.dispatchNeighborhoodSelection(d, !d3.event.shiftKey));
@@ -493,7 +493,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
                 .attr('opacity', 1)
                 .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d)))
                 .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d)))
-                .attr('r', d => this.view.sizeScale(Attribute.count.neighborhoodAccessor(d)))
+                .attr('r',10)
                 .attr('fill', d => this.getNeighborhoodCircleFill(d));
         }
 
@@ -608,16 +608,22 @@ export class PriceQuadrantsComponent extends BaseComponent {
         let otherAxis = d3.axisBottom(this.view.otherScale);
 
 
+        //zoom to function
         var zoom = d3.zoom().on("zoom",function(){
            
-            // self.view.svg.attr("transform", d3.event.transform);
             self.view.svg.select('g.other-axis').call(otherAxis.scale(d3.event.transform.rescaleX(self.view.otherScale)));
             self.view.svg.select('g.markup-axis').call(markupAxis.scale(d3.event.transform.rescaleY(self.view.markupScale)));
+            //zoom to neighborhoods
             self.view.svg.selectAll('circle.neighborhood').attr("transform",function(d){
+                return d3.event.transform;
+            });
+            //zoom to listings
+            self.view.svg.selectAll('circle.listing').attr("transform",function(d){
                 return d3.event.transform;
             });
         })
 
+        //call if in drag area
         this.view.svg.select(".drag-area").call(zoom);
 
         // Draw the axes
