@@ -607,6 +607,19 @@ export class PriceQuadrantsComponent extends BaseComponent {
         let markupAxis = d3.axisLeft(this.view.markupScale);
         let otherAxis = d3.axisBottom(this.view.otherScale);
 
+
+        var zoom = d3.zoom().on("zoom",function(){
+           
+            // self.view.svg.attr("transform", d3.event.transform);
+            self.view.svg.select('g.other-axis').call(otherAxis.scale(d3.event.transform.rescaleX(self.view.otherScale)));
+            self.view.svg.select('g.markup-axis').call(markupAxis.scale(d3.event.transform.rescaleY(self.view.markupScale)));
+            self.view.svg.selectAll('circle.neighborhood').attr("transform",function(d){
+                return d3.event.transform;
+            });
+        })
+
+        this.view.svg.select(".drag-area").call(zoom);
+
         // Draw the axes
         this.view.svg.select('g.markup-axis')
             .style('transform', innerPadding.translateX(0))
@@ -649,5 +662,10 @@ export class PriceQuadrantsComponent extends BaseComponent {
         else if (this.selectedLevel === 'Listings') {
             this.drawListings(updateTransition);
         }
-    }
+
+
+
+		}
+		 
+
 } 
