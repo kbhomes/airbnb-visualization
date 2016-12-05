@@ -50,11 +50,6 @@ export class PriceQuadrantsComponent extends BaseComponent {
             .attr('class', 'chart')
             .attr('width', width)
             .attr('height', height)
-
-        this.view.circlesContainerGroup = this.view.svg.append('g')
-            .attr('class', 'circles-container');
-        
-        this.view.circlesContainerRoot = this.view.circlesContainerGroup.append('svg');
         
         this.attributeMap = [];
         this.attributeMap.push(Attribute.price);
@@ -322,6 +317,11 @@ export class PriceQuadrantsComponent extends BaseComponent {
         });
     }
 
+    private initializeCircles() {
+        this.view.circlesContainerGroup = this.view.svg.append('g').attr('class', 'circles-container');
+        this.view.circlesContainerRoot = this.view.circlesContainerGroup.append('svg');
+    }
+
     private updateScales() {
         let width = this.element.clientWidth;
         let height = this.element.clientHeight;
@@ -375,6 +375,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
         this.initializeAxes(); 
         this.initializeLevelSelect();
         this.initializeDrag();
+        this.initializeCircles();
 
         this.render();
     }
