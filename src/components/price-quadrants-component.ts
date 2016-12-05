@@ -55,7 +55,6 @@ export class PriceQuadrantsComponent extends BaseComponent {
             .attr('class', 'circles-container');
         
         this.view.circlesContainerRoot = this.view.circlesContainerGroup.append('svg');
-       
         
         this.attributeMap = [];
         this.attributeMap.push(Attribute.price);
@@ -601,11 +600,9 @@ export class PriceQuadrantsComponent extends BaseComponent {
         }
     }
 
-    private zoomInZoomOut(){
-
+        private scaleTransition() {
         
-        
-    }
+        }
 
     public render() {
         let self = this;
@@ -648,8 +645,23 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
 
         d3.select('.reset').on('click',function(){
-        //todo: reset 
+            //todo: reset 
+            markupAxis = d3.axisLeft(self.view.markupScale);
+            otherAxis = d3.axisBottom(self.view.otherScale);
+
+            self.view.svg.select('g.other-axis').transition(updateTransition).call(otherAxis);
+            self.view.svg.select('g.markup-axis').transition(updateTransition).call(markupAxis);
         
+            self.view.svg.selectAll('circle.neighborhood').transition(updateTransition).attr("transform",function(d){
+                return "translate(0,0)scale(1)" ;
+            });
+
+            self.view.svg.selectAll('circle.listing').transition(updateTransition).attr("transform",function(d){
+                return d3.event.transform;
+            });
+
+             self.view.svg.select(".drag-area").transition(updateTransition).call(zoom.transform, d3.zoomIdentity)
+
         });
 
 
