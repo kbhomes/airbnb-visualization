@@ -6,6 +6,8 @@ import { Attribute } from '../data/attribute';
 import { Listing, Neighborhood } from '../data/listing';
 import { Block } from '../data/block';
 
+import { CheckboxMultiselect } from '../util/checkbox-multiselect';
+
 export class FiltersComponent extends BaseComponent {
 
     private view: {
@@ -13,6 +15,11 @@ export class FiltersComponent extends BaseComponent {
         priceBlocksFilterList?: d3.DataSelection<Block>;
         markupBlocksFilterList?: d3.DataSelection<Block>;
         amenitiesFilterList?: d3.DataSelection<string>;
+
+        neighborhoodMultiselect?: CheckboxMultiselect;
+        priceBlocksMultiselect?: CheckboxMultiselect;
+        markupBlocksMultiselect?: CheckboxMultiselect;
+        amenitiesMultiselect?: CheckboxMultiselect;
 
         links?: d3.DatalessSelection;
     }
@@ -42,6 +49,12 @@ export class FiltersComponent extends BaseComponent {
         this.view.priceBlocksFilterList.property('selected', d => filter.priceBlocks.indexOf(d) !== -1);
         this.view.markupBlocksFilterList.property('selected', d => filter.markupBlocks.indexOf(d) !== -1);
         this.view.amenitiesFilterList.property('selected', d => filter.amenities.indexOf(d) !== -1);
+
+        // Update the multiselects
+        this.view.neighborhoodMultiselect.update(filter.neighborhoods.length + ' neighborhoods');
+        this.view.priceBlocksMultiselect.update(filter.priceBlocks.length + ' price blocks');
+        this.view.markupBlocksMultiselect.update(filter.markupBlocks.length + ' markup blocks');
+        this.view.amenitiesMultiselect.update(filter.amenities.length + ' amenities');
 
         // Update the reset link
         this.renderFilterLinks();
@@ -205,5 +218,11 @@ export class FiltersComponent extends BaseComponent {
         this.renderMarkupBlocks();
         this.renderAmenities();
         this.renderFilterLinks();
+
+        // Run the checkbox-multiselect plugin on the selects
+        this.view.neighborhoodMultiselect = CheckboxMultiselect(this.element.querySelector('.filter-neighborhoods') as HTMLSelectElement, '0 neighborhoods');
+        this.view.priceBlocksMultiselect = CheckboxMultiselect(this.element.querySelector('.filter-price-blocks') as HTMLSelectElement, '0 price blocks');
+        this.view.markupBlocksMultiselect = CheckboxMultiselect(this.element.querySelector('.filter-markup-blocks') as HTMLSelectElement, '0 markup blocks');
+        this.view.amenitiesMultiselect = CheckboxMultiselect(this.element.querySelector('.filter-amenities') as HTMLSelectElement, '0 amenities');
     }
 } 

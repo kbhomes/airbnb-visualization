@@ -486,7 +486,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
                 .attr('opacity', 0)
                 .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d)) )
                 .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d)))
-                .attr('r', 10 )
+                .attr('r', d => this.view.sizeScale(Attribute.count.neighborhoodAccessor(d)))
                 .on('mouseenter', d => this.dispatchNeighborhoodHighlight(d, true))
                 .on('mouseleave', d => this.dispatchNeighborhoodHighlight(d, false))
                 .on('click', d => this.dispatchNeighborhoodSelection(d, !d3.event.shiftKey));
@@ -502,7 +502,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
                 .attr('opacity', 1)
                 .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d)))
                 .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d)))
-                .attr('r',10)
+                .attr('r', d => this.view.sizeScale(Attribute.count.neighborhoodAccessor(d)))
                 .attr('fill', d => this.getNeighborhoodCircleFill(d));
         }
 
@@ -622,20 +622,27 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
 
         //zoom to function
-        var zoom = d3.zoom().on("zoom",function(){
+        var zoom = d3.zoom().on('zoom', function() {
+            let transform: d3.ZoomTransform = d3.event.transform;
            
             //update axis
-            self.view.svg.select('g.other-axis').call(otherAxis.scale(d3.event.transform.rescaleX(self.view.otherScale)));
-            self.view.svg.select('g.markup-axis').call(markupAxis.scale(d3.event.transform.rescaleY(self.view.markupScale)));
+            self.view.svg.select('g.other-axis').call(otherAxis.scale(transform.rescaleX(self.view.otherScale)));
+            self.view.svg.select('g.markup-axis').call(markupAxis.scale(transform.rescaleY(self.view.markupScale)));
+
             //zoom to neighborhoods
-            self.view.svg.selectAll('circle.neighborhood').attr("transform",function(d){
-                return d3.event.transform;
-            });
+            if (self.view.neighborhoodCircles) {
+                self.view.neighborhoodCircles
+                    .attr('transform', transform + '')
+                    // .attr('r', d => self.view.sizeScale(Attribute.count.neighborhoodAccessor(d)) / transform.k);
+            }
+
             //zoom to listings
-            self.view.svg.selectAll('circle.listing').attr("transform",function(d){
-                return d3.event.transform;
-            });
-        })
+            if (self.view.listingCircles) {
+                self.view.listingCircles
+                    .attr('transform', transform + '')
+                    // .attr('r', d => self.view.sizeScale(Attribute.count.accessor(d)) / transform.k);
+            }
+        });
 
 
         d3.select('.zoomin').on('click',function(){
