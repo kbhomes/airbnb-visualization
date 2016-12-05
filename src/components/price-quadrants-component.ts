@@ -636,14 +636,14 @@ export class PriceQuadrantsComponent extends BaseComponent {
             if (self.view.neighborhoodCircles) {
                 self.view.neighborhoodCircles
                     .attr('transform', transform + '')
-                    // .attr('r', d => self.view.sizeScale(Attribute.count.neighborhoodAccessor(d)) / transform.k);
+                    .attr('r', d => self.view.sizeScale(Attribute.count.neighborhoodAccessor(d)) / transform.k);
             }
 
             //zoom to listings
             if (self.view.listingCircles) {
                 self.view.listingCircles
                     .attr('transform', transform + '')
-                    // .attr('r', d => self.view.sizeScale(Attribute.count.accessor(d)) / transform.k);
+                    .attr('r', d => self.view.sizeScale(Attribute.count.accessor(d)) / transform.k);
             }
         });
 
