@@ -20,6 +20,7 @@ export * from 'd3-selection';
 export * from 'd3-time';
 export * from 'd3-timer';
 export * from 'd3-transition';
+export * from 'd3-zoom';
 
 import * as d3Selection from 'd3-selection';
 import * as d3Axis from 'd3-axis';

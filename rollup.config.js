@@ -6,7 +6,7 @@ export default {
   dest: 'build/index.js',
   format: 'iife',
   sourceMap: 'inline',
-  external: ['d3-array', 'd3-axis', 'd3-collection', 'd3-color', 'd3-dispatch', 'd3-drag', 'd3-dsv', 'd3-ease', 'd3-format', 'd3-geo', 'd3-interpolate', 'd3-shape', 'd3-path', 'd3-queue', 'd3-random', 'd3-request', 'd3-scale', 'd3-scale-chromatic', 'd3-selection', 'd3-time', 'd3-timer', 'd3-transition'],
+  external: ['d3-array', 'd3-axis', 'd3-collection', 'd3-color', 'd3-dispatch', 'd3-drag', 'd3-dsv', 'd3-ease', 'd3-format', 'd3-geo', 'd3-interpolate', 'd3-shape', 'd3-path', 'd3-queue', 'd3-random', 'd3-request', 'd3-scale', 'd3-scale-chromatic', 'd3-selection', 'd3-time', 'd3-timer', 'd3-transition', 'd3-zoom'],
   globals: {
     'd3-array': 'd3',
     'd3-axis': 'd3',
@@ -30,6 +30,7 @@ export default {
     'd3-time': 'd3',
     'd3-timer': 'd3',
     'd3-transition': 'd3',
+    'd3-zoom': 'd3'
   },
   plugins: [
     typescript()

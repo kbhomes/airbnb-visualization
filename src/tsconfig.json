@@ -27,7 +27,8 @@
             "d3-selection", 
             "d3-time", 
             "d3-timer", 
-            "d3-transition"
+            "d3-transition",
+            "d3-zoom"
         ]
     },
     "files": [

@@ -27,6 +27,8 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
         dragArea?: d3.DatalessSelection;
 
+        circlesContainerGroup?: d3.DatalessSelection;
+        circlesContainerRoot?: d3.DatalessSelection;
         neighborhoodCircles?: d3.DataSelection<Neighborhood>;
         listingCircles?: d3.DataSelection<Listing>;
     }
@@ -48,6 +50,11 @@ export class PriceQuadrantsComponent extends BaseComponent {
             .attr('class', 'chart')
             .attr('width', width)
             .attr('height', height)
+
+        this.view.circlesContainerGroup = this.view.svg.append('g')
+            .attr('class', 'circles-container');
+        
+        this.view.circlesContainerRoot = this.view.circlesContainerGroup.append('svg');
        
         
         this.attributeMap = [];
@@ -470,7 +477,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
     private drawNeighborhoods(transition = d3.transition(null)) {
         let neighborhoodsTransitionActions = () => {
-            let circleSelection = this.view.svg
+            let circleSelection = this.view.circlesContainerRoot
                 .selectAll('circle.neighborhood')
                     .data(this.filteredNeighborhoods, (n: Neighborhood) => n.name);
 
@@ -536,7 +543,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
     private drawListings(transition = d3.transition(null)) {
         let listingsTransitionActions = () => {
-            let circleSelection = this.view.svg
+            let circleSelection = this.view.circlesContainerRoot
                 .selectAll('circle.listing')
                     .data(this.filteredListings, (l: Listing) => l.id + '');
 
@@ -673,6 +680,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
         this.view.svg.select('g.quadrant-area').style('transform', innerPadding.translate(0,0));
         this.drawQuadrants(innerPadding.width(width), innerPadding.height(height), updateTransition);
 
+
         // Update the drag area
         this.view.dragArea
             .style('transform', innerPadding.translate(0,0))
@@ -687,6 +695,12 @@ export class PriceQuadrantsComponent extends BaseComponent {
             .style('left', `${innerPadding.centerX(width)}px`)
             .style('top', `${height - this.view.padding.bottom}px`)
             .style('transform', 'translateX(-50%)');
+
+        // Update the circles container 
+        this.view.circlesContainerGroup.style('transform', innerPadding.translate(0,0));
+        this.view.circlesContainerRoot
+            .attr('width', innerPadding.width(width))
+            .attr('height', innerPadding.height(height));
 
         // Draw the items
         // TODO: Remove all this dumb duplication when you're not tired
