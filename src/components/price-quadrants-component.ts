@@ -624,7 +624,6 @@ export class PriceQuadrantsComponent extends BaseComponent {
         let markupAxis = d3.axisLeft(this.view.markupScale);
         let otherAxis = d3.axisBottom(this.view.otherScale);
 
-
         //zoom to function
         var zoom = d3.zoom().on('zoom', function() {
             let transform: d3.ZoomTransform = d3.event.transform;
@@ -649,14 +648,8 @@ export class PriceQuadrantsComponent extends BaseComponent {
         });
 
 
-        d3.select('.zoomin').on('click',function(){
-        //todo: zoom in     
-         
-        });
-
-
+        //reset zoom  
         d3.select('.reset').on('click',function(){
-            //todo: reset 
             markupAxis = d3.axisLeft(self.view.markupScale);
             otherAxis = d3.axisBottom(self.view.otherScale);
 
@@ -668,7 +661,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
             });
 
             self.view.svg.selectAll('circle.listing').transition(updateTransition).attr("transform",function(d){
-                return d3.event.transform;
+                return "translate(0,0)scale(1)";
             });
 
              self.view.svg.select(".drag-area").transition(updateTransition).call(zoom.transform, d3.zoomIdentity)
@@ -676,10 +669,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
         });
 
 
-        d3.select('.zoomout').on('click',function(){
-        //todo zoom out
-
-        });
+      
 
         //call if in drag area
         this.view.circlesContainerRoot.call(zoom);
