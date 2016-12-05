@@ -29,6 +29,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
         circlesContainerGroup?: d3.DatalessSelection;
         circlesContainerRoot?: d3.DatalessSelection;
+        circlesContainerInner?: d3.DatalessSelection;
         neighborhoodCircles?: d3.DataSelection<Neighborhood>;
         listingCircles?: d3.DataSelection<Listing>;
     }
@@ -320,6 +321,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
     private initializeCircles() {
         this.view.circlesContainerGroup = this.view.svg.append('g').attr('class', 'circles-container');
         this.view.circlesContainerRoot = this.view.circlesContainerGroup.append('svg');
+        this.view.circlesContainerInner = this.view.circlesContainerRoot.append('g');
     }
 
     private updateScales() {
@@ -477,7 +479,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
     private drawNeighborhoods(transition = d3.transition(null)) {
         let neighborhoodsTransitionActions = () => {
-            let circleSelection = this.view.circlesContainerRoot
+            let circleSelection = this.view.circlesContainerInner
                 .selectAll('circle.neighborhood')
                     .data(this.filteredNeighborhoods, (n: Neighborhood) => n.name);
 
@@ -543,7 +545,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
     private drawListings(transition = d3.transition(null)) {
         let listingsTransitionActions = () => {
-            let circleSelection = this.view.circlesContainerRoot
+            let circleSelection = this.view.circlesContainerInner
                 .selectAll('circle.listing')
                     .data(this.filteredListings, (l: Listing) => l.id + '');
 
@@ -721,6 +723,8 @@ export class PriceQuadrantsComponent extends BaseComponent {
         this.view.circlesContainerRoot
             .attr('width', innerPadding.width(width))
             .attr('height', innerPadding.height(height));
+        this.view.circlesContainerInner
+            .attr('transform', `translate(-${innerPadding.left} -${innerPadding.top})`);
 
         // Draw the items
         // TODO: Remove all this dumb duplication when you're not tired
