@@ -321,6 +321,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
     private initializeCircles() {
         this.view.circlesContainerGroup = this.view.svg.append('g').attr('class', 'circles-container');
         this.view.circlesContainerRoot = this.view.circlesContainerGroup.append('svg');
+        this.view.circlesContainerRoot.append('rect').attr('class', 'bg');
         this.view.circlesContainerInner = this.view.circlesContainerRoot.append('g');
     }
 
@@ -681,7 +682,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
         });
 
         //call if in drag area
-        this.view.svg.select(".drag-area").call(zoom);
+        this.view.circlesContainerRoot.call(zoom);
 
         // Draw the axes
         this.view.svg.select('g.markup-axis')
@@ -723,6 +724,11 @@ export class PriceQuadrantsComponent extends BaseComponent {
         this.view.circlesContainerRoot
             .attr('width', innerPadding.width(width))
             .attr('height', innerPadding.height(height));
+        this.view.circlesContainerRoot
+          .select('rect.bg')
+            .attr('width', innerPadding.width(width))
+            .attr('height', innerPadding.height(height))
+            .style('fill', 'transparent');
         this.view.circlesContainerInner
             .attr('transform', `translate(-${innerPadding.left} -${innerPadding.top})`);
 
