@@ -148,14 +148,12 @@ export class PriceQuadrantsComponent extends BaseComponent {
     
 
     private initializeDrag() {
-        this.view.dragArea = this.view.svg.append('g').attr('class', 'drag-area');
+        this.view.dragArea = this.view.circlesContainerRoot;
         this.view.dragArea
-          .append('rect')
-            .attr('class', 'drag-backfill')
-            .attr('fill', 'transparent')
-            .style('cursor', 'crosshair')
+          .select('rect.backfill')
             .call(
                 d3.drag()
+                .filter(() => !event['altKey'])
                 .subject(() => [[d3.event.x, d3.event.y], [d3.event.x, d3.event.y]])
                 .on('start', () => this.selectionDragStarted())
             );
@@ -170,8 +168,8 @@ export class PriceQuadrantsComponent extends BaseComponent {
         // Get the drag boundaries, and offsets
         let offsetX = +this.view.dragArea.attr('data-offset-x');
         let offsetY = +this.view.dragArea.attr('data-offset-y');
-        let width = +this.view.dragArea.select('rect.drag-backfill').attr('width');
-        let height = +this.view.dragArea.select('rect.drag-backfill').attr('height')
+        let width = +this.view.dragArea.select('rect.backfill').attr('width');
+        let height = +this.view.dragArea.select('rect.backfill').attr('height')
         
         // Get the drag position
         let x0: number = Math.max(0, Math.min(width, d3.event.x));
@@ -185,13 +183,6 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
         // Determine whether the resulting selection should be new or appended
         let newSelection = !d3.event.sourceEvent.shiftKey;
-
-        // Add a new path to the drag area
-        // let linegen = d3.line().curve(d3.curveBasis);
-        // let path = this.view.dragArea
-        //     .append('path')
-        //     .datum(d)
-        //     .attr('class', 'drag-selection');
         
         let rect = this.view.dragArea
             .append('rect')
@@ -204,22 +195,6 @@ export class PriceQuadrantsComponent extends BaseComponent {
             // console.log(d3.event);
             let x1: number = Math.max(0, Math.min(width, d3.event.x));
             let y1: number = Math.max(0, Math.min(height, d3.event.y));
-            // let dx = x1 - x0;
-            // let dy = y1 - y0;
-
-            // // If the distance is beyond a certain radius, add it as a new point;
-            // // Otherwise, update the most recent point
-            // if (dx*dx + dy*dy > 100) {
-            //     d.push([x1, y1]);
-            //     x0 = x1;
-            //     y0 = y1;
-            // }
-            // else {
-            //     d[d.length - 1] = [x1, y1];
-            // }
-
-            // // Draw the path
-            // path.attr('d', linegen);
 
             rectLeft = Math.min(x0, x1);
             rectTop = Math.min(y0, y1);
@@ -235,10 +210,6 @@ export class PriceQuadrantsComponent extends BaseComponent {
                 rectLeft = x0;
                 rectTop = y0;
             }
-
-            // // Close off the path
-            // d.push([d[0][0], d[0][1]]);
-            // path.attr('d', linegen);
 
             // Select the actual elements
             let svgNode: SVGSVGElement = <SVGSVGElement>this.view.svg.node();
@@ -321,7 +292,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
     private initializeCircles() {
         this.view.circlesContainerGroup = this.view.svg.append('g').attr('class', 'circles-container');
         this.view.circlesContainerRoot = this.view.circlesContainerGroup.append('svg');
-        this.view.circlesContainerRoot.append('rect').attr('class', 'bg');
+        this.view.circlesContainerRoot.append('rect').attr('class', 'backfill').style('cursor', 'crosshair');
         this.view.circlesContainerInner = this.view.circlesContainerRoot.append('g');
     }
 
@@ -377,8 +348,8 @@ export class PriceQuadrantsComponent extends BaseComponent {
         this.initializeQuadrants();
         this.initializeAxes(); 
         this.initializeLevelSelect();
-        this.initializeDrag();
         this.initializeCircles();
+        this.initializeDrag();
 
         this.render();
     }
@@ -625,27 +596,37 @@ export class PriceQuadrantsComponent extends BaseComponent {
         let otherAxis = d3.axisBottom(this.view.otherScale);
 
         //zoom to function
-        var zoom = d3.zoom().on('zoom', function() {
-            let transform: d3.ZoomTransform = d3.event.transform;
-           
-            //update axis
-            self.view.svg.select('g.other-axis').call(otherAxis.scale(transform.rescaleX(self.view.otherScale)));
-            self.view.svg.select('g.markup-axis').call(markupAxis.scale(transform.rescaleY(self.view.markupScale)));
+        var zoom = d3.zoom()
+            .filter(function() {
+                // Only allow zooming on scroll wheel, or panning on alt-click
+                if (event instanceof WheelEvent)
+                    return true;
+                else if (event instanceof MouseEvent)
+                    return event.button === 0 && event.altKey;
+                else
+                    return false;
+            })
+            .on('zoom', function() {
+                let transform: d3.ZoomTransform = d3.event.transform;
+            
+                //update axis
+                self.view.svg.select('g.other-axis').call(otherAxis.scale(transform.rescaleX(self.view.otherScale)));
+                self.view.svg.select('g.markup-axis').call(markupAxis.scale(transform.rescaleY(self.view.markupScale)));
 
-            //zoom to neighborhoods
-            if (self.view.neighborhoodCircles) {
-                self.view.neighborhoodCircles
-                    .attr('transform', transform + '')
-                    .attr('r', d => self.view.sizeScale(Attribute.count.neighborhoodAccessor(d)) / transform.k);
-            }
+                //zoom to neighborhoods
+                if (self.view.neighborhoodCircles) {
+                    self.view.neighborhoodCircles
+                        .attr('transform', transform + '')
+                        .attr('r', d => self.view.sizeScale(Attribute.count.neighborhoodAccessor(d)) / transform.k);
+                }
 
-            //zoom to listings
-            if (self.view.listingCircles) {
-                self.view.listingCircles
-                    .attr('transform', transform + '')
-                    .attr('r', d => self.view.sizeScale(Attribute.count.accessor(d)) / transform.k);
-            }
-        });
+                //zoom to listings
+                if (self.view.listingCircles) {
+                    self.view.listingCircles
+                        .attr('transform', transform + '')
+                        .attr('r', d => self.view.sizeScale(Attribute.count.accessor(d)) / transform.k);
+                }
+            });
 
 
         //reset zoom  
@@ -664,7 +645,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
                 return "translate(0,0)scale(1)";
             });
 
-             self.view.svg.select(".drag-area").transition(updateTransition).call(zoom.transform, d3.zoomIdentity)
+             self.view.dragArea.transition(updateTransition).call(zoom.transform, d3.zoomIdentity)
 
         });
 
@@ -695,13 +676,11 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
 
         // Update the drag area
-        this.view.dragArea
-            .style('transform', innerPadding.translate(0,0))
-            .attr('data-offset-x', innerPadding.left)
-            .attr('data-offset-y', innerPadding.top)
-          .select('rect')
-            .attr('width', innerPadding.width(width))
-            .attr('height', innerPadding.height(height));
+        // this.view.dragArea
+        //     .style('transform', innerPadding.translate(0,0))
+        //   .select('rect')
+        //     .attr('width', innerPadding.width(width))
+        //     .attr('height', innerPadding.height(height));
         
         this.view.overlay
           .select('div.other-axis-label')
@@ -715,7 +694,9 @@ export class PriceQuadrantsComponent extends BaseComponent {
             .attr('width', innerPadding.width(width))
             .attr('height', innerPadding.height(height));
         this.view.circlesContainerRoot
-          .select('rect.bg')
+            .attr('data-offset-x', innerPadding.left)
+            .attr('data-offset-y', innerPadding.top)
+          .select('rect.backfill')
             .attr('width', innerPadding.width(width))
             .attr('height', innerPadding.height(height))
             .style('fill', 'transparent');
