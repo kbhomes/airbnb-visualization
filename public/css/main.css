@@ -199,9 +199,29 @@ div {
   text-decoration: none;
 }
 
+.selection-container {
+  overflow-y: auto;
+  margin: 5px 0px;
+}
+
+.selection-container::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 7px;
+}
+
+.selection-container::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, .5);
+  -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, .5);
+}
+
+.selection-container::-webkit-scrollbar-track {
+  border-radius: 4px;
+  background-color: rgba(230, 230, 230, .5);
+}
+
 .selection-list {
   padding: 0;
-  margin: 10px;
 }
 
 .selection-list div {

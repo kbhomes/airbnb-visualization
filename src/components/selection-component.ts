@@ -35,6 +35,13 @@ export class SelectionComponent extends BaseComponent {
                 this.dispatcher.call(DispatchEvent.Select, this, Dispatch.emptySelection());
             });
     }  
+    private enforceHeight() {
+        // Enforce the maximum height of the selection
+        let height = this.element.clientHeight;
+        d3.select(this.element)
+          .select('.selection-container')
+            .style('max-height', `${height - 10}px`);
+    }
 
     public onSelect(selection: SelectEventData) {
         super.onSelect(selection);
@@ -202,6 +209,7 @@ export class SelectionComponent extends BaseComponent {
     public render() {
         let self = this;
 
+        this.enforceHeight();
         this.renderNeighborhoods();
         this.renderListings();
         this.renderPriceBlocks();
