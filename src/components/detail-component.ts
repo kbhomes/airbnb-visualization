@@ -14,7 +14,7 @@ export class DetailComponent extends BaseComponent {
 
         listingCountDetail?: d3.DatalessSelection;
         medianPriceDetail?: d3.DatalessSelection;
-        medianRatingDetail?: d3.DatalessSelection;
+        medianTruliaPrice?: d3.DatalessSelection;
         listingLinkDetail?: d3.DatalessSelection;
 
         amenitiesColorScale?: d3.ScaleSequential<string>;
@@ -33,7 +33,7 @@ export class DetailComponent extends BaseComponent {
         this.view.moneyFormat = d3.format('$.2f');
         this.view.listingCountDetail = d3.select(this.element).select('#detail-listing-count .detail-value');
         this.view.medianPriceDetail = d3.select(this.element).select('#detail-median-price .detail-value');
-        this.view.medianRatingDetail = d3.select(this.element).select('#detail-median-rating .detail-value');
+        this.view.medianTruliaPrice = d3.select(this.element).select('#detail-median-trulia-price .detail-value');
         this.view.listingLinkDetail = d3.select(this.element).select('#detail-listing-link');
         
         this.view.amenitiesColorScale = d3.scaleSequential(d3.interpolatePurples);
@@ -84,13 +84,13 @@ export class DetailComponent extends BaseComponent {
             )
         );
 
-        // The median rating of all listings that do have valid rating scores
-        let listingsWithRatings = listings.filter(l => !isNaN(l.reviews.rating));
-        if (listingsWithRatings.length > 0) {
-            this.view.medianRatingDetail.text(d3.median(listingsWithRatings, l => Attribute.rating.accessor(l)));
+        // The truia price
+        let listingTruliaPrice = listings.filter(l => !isNaN(l.prices.trulia.rent_per_bedroom));
+        if (listingTruliaPrice.length > 0) {
+            this.view.medianTruliaPrice.text('$'+d3.median(listingTruliaPrice, l => Attribute.truilaPrice.accessor(l)));
         }
         else {
-            this.view.medianRatingDetail.text('N/A');
+            this.view.medianTruliaPrice.text('N/A');
         }
 
         // The link to the listing if there is only one selected

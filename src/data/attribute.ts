@@ -42,8 +42,8 @@ export module Attribute {
 
    export var truilaPrice: Attribute = {
         name: 'Trulia Price', 
-        accessor: l => l.prices.trulia.rent_per_bedroom, 
-        neighborhoodAccessor: n => d3.median(n.listings, l => l.prices.trulia.rent_per_bedroom),
+        accessor: l => l.prices.trulia.rent_per_bedroom/30, 
+        neighborhoodAccessor: n => d3.median(n.listings, l => (l.prices.trulia.rent_per_bedroom/30)),
         kind: 'continuous'
     };
 
