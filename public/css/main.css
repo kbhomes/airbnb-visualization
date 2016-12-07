@@ -86,6 +86,10 @@ div {
   border-right: 1px solid #ccc;
 }
 
+#quadrants .reset-zoom {
+  margin-right: 10px;
+}
+
 .quadrant-lines line {
   stroke-width: 1px;
   stroke: #ccc;

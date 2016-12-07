@@ -44,8 +44,17 @@ export class PriceQuadrantsComponent extends BaseComponent {
         this.view = {};
         this.view.padding = new d3.Padding(40);
 
-        this.view.overlay = d3.select(this.selector).append('div')
-            .attr('class', 'overlay');
+        this.view.overlay = d3.select(this.selector).append('div').attr('class', 'overlay');
+        this.view.overlay
+          .append('div')
+            .attr('class', 'top-right')
+            .style('right', `${this.view.padding.right}px`);
+
+        this.view.overlay
+          .select('div.top-right')
+          .append('button')
+            .attr('class', 'reset-zoom')
+            .text('Reset Zoom');
 
         this.view.svg = d3.select(this.selector).append('svg')
             .attr('class', 'chart')
@@ -124,9 +133,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
     }
 
     private initializeLevelSelect() {
-        let levelSelect = this.view.overlay
-          .append('div')
-            .style('right', `${this.view.padding.right}px`)
+        let levelSelect = this.view.overlay.select('div.top-right')
           .append('select')
             .attr('class', 'level-select');
             
@@ -630,7 +637,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
 
         //reset zoom  
-        d3.select('.reset').on('click',function(){
+        this.view.overlay.select('.reset-zoom').on('click',function(){
             markupAxis = d3.axisLeft(self.view.markupScale);
             otherAxis = d3.axisBottom(self.view.otherScale);
 
