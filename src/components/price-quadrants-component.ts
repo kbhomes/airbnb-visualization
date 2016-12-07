@@ -70,12 +70,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
         this.attributeMap.push(Attribute.cancellationPolicy);
 
         // Select the default quadrant names
-        this.quadrantNames = [
-            'Overpriced',
-            'Nice & Pricey', 
-            'Cheap For A Reason', 
-            'Overlooked'
-        ];
+        this.quadrantNames = [];
 
         // Select the rating attribute by default
         this.selectedAttribute = this.attributeMap[0];
@@ -698,7 +693,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
         // Draw the quadrant lines and labels
         this.view.svg.select('g.quadrant-area').style('transform', innerPadding.translate(0,0));
-        this.drawQuadrants(innerPadding.width(width), innerPadding.height(height), updateTransition);
+        // this.drawQuadrants(innerPadding.width(width), innerPadding.height(height), updateTransition);
 
 
         // Update the drag area
