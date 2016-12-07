@@ -489,7 +489,7 @@ export class ScatterPlotComponent extends BaseComponent {
             if (neighborhood === highlightedNeighborhood) 
                 return 'rgba(255, 100, 100, 0.5)';
             else
-                return 'rgba(50, 50, 100, 0.5)';
+                return 'rgba(56, 111, 164, 0.5)';
         }
     }
 
@@ -504,7 +504,7 @@ export class ScatterPlotComponent extends BaseComponent {
             if (this.highlight.listing === listing || this.highlight.neighborhood === listing.neighborhood) 
                 return 'rgba(255, 100, 100, 0.5)';
             else
-                return 'rgba(50, 50, 100, 0.5)';
+                return 'rgba(56, 111, 164, 0.5)';
         }
     }
 
