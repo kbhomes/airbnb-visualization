@@ -68,6 +68,11 @@ export class PriceQuadrantsComponent extends BaseComponent {
         this.attributeMap.push(Attribute.monthlyPrice);
         this.attributeMap.push(Attribute.rating);
         this.attributeMap.push(Attribute.cancellationPolicy);
+        this.attributeMap.push(Attribute.truilaPrice);
+        this.attributeMap.push(Attribute.numberOfReviews);
+        this.attributeMap.push(Attribute.numberOfHostListings);
+        this.attributeMap.push(Attribute.numberOfGuestIncluded);
+        
 
         // Select the default quadrant names
         this.quadrantNames = [];
@@ -329,6 +334,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
             let data = this.filteredNeighborhoods;
             markupDomain = Attribute.markup.neighborhoodDomain(data);
             sizeDomain = Attribute.count.neighborhoodDomain(data);
+            console.log(this.selectedAttribute);
             otherDomain = this.selectedAttribute.neighborhoodDomain(data);
         }
         else {

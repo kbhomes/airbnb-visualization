@@ -40,12 +40,34 @@ export module Attribute {
         kind: 'continuous'
     };
 
+   export var truilaPrice: Attribute = {
+        name: 'Trulia Price', 
+        accessor: l => l.prices.trulia.rent_per_bedroom, 
+        neighborhoodAccessor: n => d3.median(n.listings, l => l.prices.trulia.rent_per_bedroom),
+        kind: 'continuous'
+    };
+
     export var markup: Attribute = {
         name: 'Markup', 
         accessor: l => l.prices.markup_percentage, 
         neighborhoodAccessor: n => d3.median(n.listings, l => l.prices.markup_percentage),
         kind: 'continuous'
     };
+
+      export var numberOfReviews: Attribute = {
+        name: '# of Reviews', 
+        accessor: l => l.reviews.number_of_reviews, 
+        neighborhoodAccessor: n => d3.median(n.listings, l => l.reviews.number_of_reviews),
+        kind: 'continuous'
+    };
+
+       export var numberOfHostListings: Attribute = {
+        name: '# of Host Listings', 
+        accessor: l => l.host_listings_count, 
+        neighborhoodAccessor: n => d3.median(n.listings, l => l.host_listings_count),
+        kind: 'continuous'
+    };
+
 
     export var cancellationPolicy: Attribute = { 
         name: 'Cancellation Policy', 
@@ -56,8 +78,15 @@ export module Attribute {
         neighborhoodDomain: (data) => ['flexible', 'moderate', 'strict', 'super_strict_30', 'super_strict_60']
     };
 
+      export var numberOfGuestIncluded: Attribute = {
+        name: '# of Guest Included', 
+        accessor: l => l.guests_included, 
+        neighborhoodAccessor: n => d3.median(n.listings, l => l.guests_included),
+        kind: 'continuous'
+    };
+
     // Set default domain accessors
-    for (let attr of [count, rating, price, monthlyPrice, markup]) {
+    for (let attr of [count, rating, price, monthlyPrice, markup,truilaPrice,numberOfReviews,numberOfHostListings,numberOfGuestIncluded]) {
         attr.listingDomain = (data) => d3.extent(data, d => attr.accessor(d));
         attr.neighborhoodDomain = (data) => d3.extent(data, d => attr.neighborhoodAccessor(d));
     }

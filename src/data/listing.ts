@@ -27,6 +27,7 @@ export module Listing {
             amenities: parseAmenities(row['amenities']),
             cancellation_policy: row['cancellation_policy'],
             reviews: {
+                number_of_reviews: +row['number_of_reviews'],
                 number: +(row['number_of_reviews']),
                 numberPerMonth: +(row['reviews_per_month']),
                 rating: parseInt(row['review_scores_rating']),
@@ -39,6 +40,8 @@ export module Listing {
                     value: +row['review_scores_value']
                 }
             },
+            guests_included: +row['guests_included'],
+            host_listings_count: +row['host_listings_count'],
             prices: {
                 markup_amount: +row['rent_difference'],
                 markup_percentage: +row['rent_difference_percentage_of_median'] * 100,
@@ -68,7 +71,9 @@ export interface Listing {
     markupBlock: Block;
     amenities: string[];
     cancellation_policy: string;
+    guests_included:number;
     reviews: {
+        number_of_reviews: number;
         number: number;
         numberPerMonth: number;
         rating: number;
@@ -81,6 +86,7 @@ export interface Listing {
             value: number;
         }
     };
+    host_listings_count:number;
     prices: {
         markup_amount: number;
         markup_percentage: number;
