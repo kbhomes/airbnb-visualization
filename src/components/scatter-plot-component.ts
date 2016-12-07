@@ -5,7 +5,7 @@ import { Dispatch, DispatchEvent, LoadEventData, SelectEventData, HighlightEvent
 import { Listing, Neighborhood } from '../data/listing';
 import { Attribute } from '../data/attribute';
 
-export class PriceQuadrantsComponent extends BaseComponent {
+export class ScatterPlotComponent extends BaseComponent {
     
     private attributeMap: Attribute[];
     private selectedAttribute: Attribute;

@@ -13,7 +13,7 @@ export class Application {
     // Components
     private mapComponent: components.NeighborhoodMapComponent;
     private blocksComponent: components.ListingBlocksComponent;
-    private quadrantsComponent: components.PriceQuadrantsComponent;
+    private scatterPlotComponent: components.ScatterPlotComponent;
     private detailComponent: components.DetailComponent;
     private selectionComponent: components.SelectionComponent;
     private filtersComponent: components.FiltersComponent;
@@ -25,7 +25,7 @@ export class Application {
         // Initialize components
         this.mapComponent = new components.NeighborhoodMapComponent('#map .content', this.dispatcher);
         this.blocksComponent = new components.ListingBlocksComponent('#listing-blocks .content', this.dispatcher);
-        this.quadrantsComponent = new components.PriceQuadrantsComponent('#quadrants .content', this.dispatcher);
+        this.scatterPlotComponent = new components.ScatterPlotComponent('#scatter-plot .content', this.dispatcher);
         this.detailComponent = new components.DetailComponent('#details .content', this.dispatcher);
         this.selectionComponent = new components.SelectionComponent('#selection .content', this.dispatcher);
         this.filtersComponent = new components.FiltersComponent('#filters .content', this.dispatcher);

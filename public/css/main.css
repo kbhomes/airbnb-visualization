@@ -146,11 +146,11 @@ div {
   font-weight: bold;
 }
 
-#quadrants {
+#scatter-plot {
   border-right: 1px solid #ccc;
 }
 
-#quadrants .reset-zoom {
+#scatter-plot .reset-zoom {
   margin-right: 10px;
 }
 
