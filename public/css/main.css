@@ -58,8 +58,58 @@ div {
   pointer-events: auto;
 }
 
-#section-top {
+.border-bottom {
   border-bottom: 1px solid #ccc;
+}
+
+#section-logo {
+  flex-grow: 0;
+  flex-shrink: 1;
+
+  color: #666;
+  font-size: 13px;
+}
+
+#section-logo .inner * {
+  flex-shrink: 1;
+  align-self: center;
+}
+
+#section-logo .inner .spacer {
+  flex-shrink: 0;
+  flex-grow: 1;
+}
+
+#section-logo img#logo {
+  margin-right: 10px;
+}
+
+#section-logo .slogan {
+  align-self: flex-end;
+}
+
+#section-logo .menu-item {
+    margin-left: 20px;
+    padding-right: 8px;
+    background: #eee;
+    border-radius: 11px;
+    border: 1px solid #ddd;
+}
+
+#section-logo .help::before {
+    content: '?';
+    background-color: #ccc;
+    width: 22px;
+    height: 22px;
+    display: inline-block;
+    text-align: center;
+    line-height: 23px;
+    border-radius: 11px;
+    margin-right: 8px;
+    font-weight: bold;
+}
+
+#section-top {
   padding: 0;
 }
 
