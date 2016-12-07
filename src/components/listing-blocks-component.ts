@@ -12,8 +12,8 @@ export class ListingBlocksComponent extends BaseComponent {
         priceBlockGroups?: d3.DataSelection<Block>;
         markupBlockGroups?: d3.DataSelection<Block>;
 
-        priceColorScale?: d3.ScaleSequential<string>;
-        markupColorScale?: d3.ScaleSequential<string>;
+        priceColorScale?: d3.ScaleLinear<string, string>;
+        markupColorScale?: d3.ScaleLinear<string, string>;
     }
 
     public constructor(selector: string, dispatcher: Dispatch) {
@@ -29,8 +29,8 @@ export class ListingBlocksComponent extends BaseComponent {
             .attr('width', width)
             .attr('height', height);
 
-        this.view.priceColorScale = d3.scaleSequential(this.interpolateRed);
-        this.view.markupColorScale = d3.scaleSequential(this.interpolateRed);
+        this.view.priceColorScale = d3.scaleLinear<string>().range(['#edf8fb', '#386fa4']);
+        this.view.markupColorScale = d3.scaleLinear<string>().range(['#edf8fb', '#386fa4']);
     }
 
     private interpolateRed(t: number) : string {
