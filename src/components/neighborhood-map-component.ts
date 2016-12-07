@@ -5,12 +5,20 @@ import { Dispatch, DispatchEvent, LoadEventData, SelectEventData, HighlightEvent
 import { NeighborhoodGeoJSON, NeighborhoodGeoJSONFeature } from '../data/geojson';
 import { Attribute } from '../data/attribute';
 import { Listing, Neighborhood } from '../data/listing';
+
+interface LegendItem {
+    representative: number,
+    text: string,
+    min: number,
+    max: number
+}
+
 export class NeighborhoodMapComponent extends BaseComponent {
 
     private view: {
-        svg?: d3.Selection<d3.BaseType, {}, d3.BaseType, {}>;
-        paths?: d3.Selection<d3.BaseType, NeighborhoodGeoJSONFeature, d3.BaseType, {}>;
-
+        svg?: d3.DatalessSelection;
+        paths?: d3.DataSelection<NeighborhoodGeoJSONFeature>;
+        legend?: d3.DataSelection<LegendItem>;
         moneyFormat?: (n:number) => string;
     }
 
@@ -29,8 +37,53 @@ export class NeighborhoodMapComponent extends BaseComponent {
             .attr('height', height);
     }
 
+    private initializeLegend() {
+        let width = this.element.clientWidth,
+            height = this.element.clientHeight;
+
+        let legendGroup = this.view.svg
+          .append('g')
+            .attr('class', 'legend')
+            .attr('transform', `translate(10, ${height - 30})`);
+
+        let legendItems: LegendItem[] = [
+            { representative: 0, text: '$0 - $200', min: 0, max: 200 },
+            { representative: 200, text: '$200 - $300', min: 200, max: 300 },
+            { representative: 300, text: '$300 - $400', min: 300, max: 400 },
+            { representative: 400, text: '$400 - $600', min: 400, max: 600 },
+            { representative: 600, text: '$600 - $1000', min: 600, max: 1000 },
+            { representative: 1000, text: '$1000 - $1600', min: 1000, max: 1600 }
+        ];
+
+        let itemWidth = (width - 20) / legendItems.length;
+        let rectSize = 12;
+
+        let itemSelection = legendGroup
+          .selectAll('g.legend-item')
+            .data(legendItems);
+
+        let itemEnter = itemSelection
+          .enter()
+          .append('g')
+            .attr('class', 'legend-item')
+            .attr('transform', (d,i) => `translate(${i*itemWidth}, 0)`);
+        itemEnter
+          .append('rect')
+            .attr('width', rectSize)
+            .attr('height', rectSize)
+            .style('fill', d => this.getColor(d.representative));
+        itemEnter
+          .append('text')
+            .text(d => d.text)
+            .attr('x', rectSize + 2)
+            .attr('y', rectSize / 2);
+
+        this.view.legend = itemSelection.merge(itemEnter);
+    }
+
     public onLoad(data: LoadEventData) {
         super.onLoad(data);
+        this.initializeLegend();
         this.render();
     }
 
@@ -80,18 +133,17 @@ export class NeighborhoodMapComponent extends BaseComponent {
 //color scale: https://color.adobe.com/greens-color-theme-7334761/edit/?copy=true&base=2&rule=Custom&selected=4&name=Copy%20of%20greens&mode=hsv&rgbvalues=0,0.15,0.09999959999997828,0.013500000000000014,0.27,0.14602431599999785,0.07820000000000002,0.46,0.20546692119988363,0.21170000000000003,0.73,0.2721690243998254,0.49455095400014937,0.9,0.423&swatchOrder=0,1,2,3,4 for each green
     private getColor(averageNeighborhoodPrice):string{
 
-        if(averageNeighborhoodPrice>0 && averageNeighborhoodPrice<=199 ){
+        if(averageNeighborhoodPrice>=0 && averageNeighborhoodPrice < 200 ){
             return 'rgb(204,236,230)';
-        }
-        if(averageNeighborhoodPrice>200 && averageNeighborhoodPrice<=300 ){
+        }else if(averageNeighborhoodPrice>=200 && averageNeighborhoodPrice< 300 ){
             return 'rgb(153,216,201)';
-        }else if(averageNeighborhoodPrice>301 && averageNeighborhoodPrice<=399 ){
+        }else if(averageNeighborhoodPrice>=300 && averageNeighborhoodPrice<400 ){
             return 'rgb(102,194,164)';
-        }else if(averageNeighborhoodPrice>401 && averageNeighborhoodPrice<=600 ){
+        }else if(averageNeighborhoodPrice>=400 && averageNeighborhoodPrice<600 ){
             return 'rgb(65,174,118)';
-        }else if(averageNeighborhoodPrice>601 && averageNeighborhoodPrice<=1000){
+        }else if(averageNeighborhoodPrice>=600 && averageNeighborhoodPrice<1000){
             return 'rgb(35,139,69)'
-        }else if(averageNeighborhoodPrice>1401 && averageNeighborhoodPrice<1600){
+        }else if(averageNeighborhoodPrice>=1000 && averageNeighborhoodPrice<1600){
             return 'rgb(0,88,36)';
         }
 

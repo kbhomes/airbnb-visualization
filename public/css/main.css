@@ -132,6 +132,20 @@ div {
   font-weight: bold;
 }
 
+#map .legend text {
+  font-size: 10px;
+  dominant-baseline: middle;
+}
+
+#map .legend.selected rect {
+  stroke-width: 0.5px;
+  stroke: black;
+}
+
+#map .legend.selected text {
+  font-weight: bold;
+}
+
 #quadrants {
   border-right: 1px solid #ccc;
 }
