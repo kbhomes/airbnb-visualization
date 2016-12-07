@@ -17,7 +17,7 @@ export class DetailComponent extends BaseComponent {
         medianTruliaPrice?: d3.DatalessSelection;
         listingLinkDetail?: d3.DatalessSelection;
 
-        amenitiesColorScale?: d3.ScaleSequential<string>;
+        amenitiesColorScale?: d3.ScaleLinear<string, string>;
         amenitiesSVG?: d3.DatalessSelection;
         amenitiesGrid?: d3.DataSelection<[string, number]>;
         amenitiesHoverDetails?: d3.DatalessSelection;
@@ -36,7 +36,7 @@ export class DetailComponent extends BaseComponent {
         this.view.medianTruliaPrice = d3.select(this.element).select('#detail-median-trulia-price .detail-value');
         this.view.listingLinkDetail = d3.select(this.element).select('#detail-listing-link');
         
-        this.view.amenitiesColorScale = d3.scaleSequential(d3.interpolatePurples);
+        this.view.amenitiesColorScale = d3.scaleLinear<string>().range(['#edf8fb', '#386fa4']);
         this.view.amenitiesSVG = d3.select(this.element)
           .select('#detail-amenities .detail-value')
           .append('svg')
