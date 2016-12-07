@@ -13,6 +13,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
     private quadrantNames: [string, string, string, string];
 
     private view: {
+        title?: d3.DatalessSelection;
         overlay?: d3.DatalessSelection;
         svg?: d3.DatalessSelection;
         padding?: d3.Padding;
@@ -44,14 +45,15 @@ export class PriceQuadrantsComponent extends BaseComponent {
         this.view = {};
         this.view.padding = new d3.Padding(40);
 
+        this.view.title = d3.select(this.element.parentElement).select('.title');
         this.view.overlay = d3.select(this.selector).append('div').attr('class', 'overlay');
         this.view.overlay
           .append('div')
-            .attr('class', 'top-right')
-            .style('right', `${this.view.padding.right}px`);
+            .attr('class', 'top-left')
+            .style('top', '5px');
 
         this.view.overlay
-          .select('div.top-right')
+          .select('div.top-left')
           .append('button')
             .attr('class', 'reset-zoom')
             .text('Reset Zoom');
@@ -78,6 +80,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
         // Select the rating attribute by default
         this.selectedAttribute = this.attributeMap[0];
         this.selectedLevel = 'Neighborhoods';
+        this.updateTitle();
     }
 
     private initializeQuadrants() {
@@ -133,7 +136,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
     }
 
     private initializeLevelSelect() {
-        let levelSelect = this.view.overlay.select('div.top-right')
+        let levelSelect = this.view.overlay.select('div.top-left')
           .append('select')
             .attr('class', 'level-select');
             
@@ -301,6 +304,20 @@ export class PriceQuadrantsComponent extends BaseComponent {
         this.view.circlesContainerRoot = this.view.circlesContainerGroup.append('svg');
         this.view.circlesContainerRoot.append('rect').attr('class', 'backfill').style('cursor', 'crosshair');
         this.view.circlesContainerInner = this.view.circlesContainerRoot.append('g');
+    }
+
+    private updateTitle() {
+        let title = '';
+
+        if (this.selectedLevel === 'Neighborhoods')
+            title += 'Neighborhood ';
+        else   
+            title += 'Individual ';
+
+        title += ' Markup vs. ';
+        title += this.selectedAttribute.name;
+
+        this.view.title.text(title);
     }
 
     private updateScales() {
@@ -595,6 +612,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
         // Create the padding for the scatter plot itself
         let innerPadding = d3.Padding.add(this.view.padding, new d3.Padding(0, 40, 40, 0));
 
+        this.updateTitle();
         this.updateScales();
 
         let updateTransition = d3.transition(null).duration(1000);
