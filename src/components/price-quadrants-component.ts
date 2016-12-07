@@ -643,21 +643,22 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
             self.view.svg.select('g.other-axis').transition(updateTransition).call(otherAxis);
             self.view.svg.select('g.markup-axis').transition(updateTransition).call(markupAxis);
-        
-            self.view.svg.selectAll('circle.neighborhood').transition(updateTransition).attr("transform",function(d){
+            
+             if (self.view.neighborhoodCircles) {
+             self.view.neighborhoodCircles.transition(updateTransition).attr("transform",function(d){
                 return "translate(0,0)scale(1)" ;
             });
+             }
 
-            self.view.svg.selectAll('circle.listing').transition(updateTransition).attr("transform",function(d){
+            if (self.view.listingCircles) {
+           self.view.listingCircles.transition(updateTransition).attr("transform",function(d){
                 return "translate(0,0)scale(1)";
             });
-
-             self.view.dragArea.transition(updateTransition).call(zoom.transform, d3.zoomIdentity)
+            }
+              self.view.circlesContainerRoot.transition(updateTransition).call(zoom.transform, d3.zoomIdentity)
 
         });
 
-
-      
 
         //call if in drag area
         this.view.circlesContainerRoot.call(zoom);
