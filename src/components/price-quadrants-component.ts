@@ -65,7 +65,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
         
         this.attributeMap = [];
         this.attributeMap.push(Attribute.price);
-        this.attributeMap.push(Attribute.truilaPrice);
+        this.attributeMap.push(Attribute.truliaPrice);
         this.attributeMap.push(Attribute.monthlyPrice);
         this.attributeMap.push(Attribute.rating);
         this.attributeMap.push(Attribute.cancellationPolicy);
@@ -75,7 +75,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
         
 
         // Select the default quadrant names
-        this.quadrantNames = [];
+        this.quadrantNames = [undefined, undefined, undefined, undefined];
 
         // Select the rating attribute by default
         this.selectedAttribute = this.attributeMap[0];
@@ -306,6 +306,73 @@ export class PriceQuadrantsComponent extends BaseComponent {
         this.view.circlesContainerInner = this.view.circlesContainerRoot.append('g');
     }
 
+    private initializeZoom() {
+        let self = this;
+
+        var zoom = d3.zoom()
+            .filter(function() {
+                // Only allow zooming on scroll wheel, or panning on alt-click
+                if (event instanceof WheelEvent)
+                    return true;
+                else if (event instanceof MouseEvent)
+                    return event.button === 0 && event.altKey;
+                else
+                    return false;
+            })
+            .on('zoom', function() {
+                let transform: d3.ZoomTransform = d3.event.transform;
+                let markupAxis = d3.axisLeft(self.view.markupScale).scale(transform.rescaleY(self.view.markupScale));
+                let otherAxis = d3.axisBottom(self.view.otherScale).scale(transform.rescaleX(self.view.otherScale));
+            
+                //update axis
+                self.view.svg.select('g.other-axis').call(otherAxis);
+                self.view.svg.select('g.markup-axis').call(markupAxis);
+
+                //zoom to neighborhoods
+                if (self.view.neighborhoodCircles) {
+                    self.view.neighborhoodCircles
+                        .attr('transform', transform + '')
+                        .attr('r', d => self.view.sizeScale(Attribute.count.neighborhoodAccessor(d)) / transform.k);
+                }
+
+                //zoom to listings
+                if (self.view.listingCircles) {
+                    self.view.listingCircles
+                        .attr('transform', transform + '')
+                        .attr('r', d => self.view.sizeScale(Attribute.count.accessor(d)) / transform.k);
+                }
+            });
+
+        //reset zoom  
+        this.view.overlay.select('.reset-zoom').on('click', function () {
+            let transition = d3.transition(null).duration(500);
+            let markupAxis = d3.axisLeft(self.view.markupScale);
+            let otherAxis = d3.axisBottom(self.view.otherScale);
+
+            self.view.svg.select('g.other-axis').transition(transition).call(otherAxis);
+            self.view.svg.select('g.markup-axis').transition(transition).call(markupAxis);
+
+            if (self.view.neighborhoodCircles) {
+                self.view.neighborhoodCircles
+                  .transition(transition)
+                    .attr("transform", "translate(0,0)scale(1)");
+            }
+
+            if (self.view.listingCircles) {
+                self.view.listingCircles
+                  .transition(transition)
+                    .attr("transform", "translate(0,0) scale(1)");
+            }
+
+            self.view.circlesContainerRoot
+                .transition(transition)
+                .call(zoom.transform, d3.zoomIdentity);
+        });
+
+        //call if in drag area
+        this.view.circlesContainerRoot.call(zoom);
+    }
+
     private updateTitle() {
         let title = '';
 
@@ -375,6 +442,7 @@ export class PriceQuadrantsComponent extends BaseComponent {
         this.initializeLevelSelect();
         this.initializeCircles();
         this.initializeDrag();
+        this.initializeZoom();
 
         this.render();
     }
@@ -600,10 +668,6 @@ export class PriceQuadrantsComponent extends BaseComponent {
         }
     }
 
-        private scaleTransition() {
-        
-        }
-
     public render() {
         let self = this;
 
@@ -620,67 +684,6 @@ export class PriceQuadrantsComponent extends BaseComponent {
 
         let markupAxis = d3.axisLeft(this.view.markupScale);
         let otherAxis = d3.axisBottom(this.view.otherScale);
-
-        //zoom to function
-        var zoom = d3.zoom()
-            .filter(function() {
-                // Only allow zooming on scroll wheel, or panning on alt-click
-                if (event instanceof WheelEvent)
-                    return true;
-                else if (event instanceof MouseEvent)
-                    return event.button === 0 && event.altKey;
-                else
-                    return false;
-            })
-            .on('zoom', function() {
-                let transform: d3.ZoomTransform = d3.event.transform;
-            
-                //update axis
-                self.view.svg.select('g.other-axis').call(otherAxis.scale(transform.rescaleX(self.view.otherScale)));
-                self.view.svg.select('g.markup-axis').call(markupAxis.scale(transform.rescaleY(self.view.markupScale)));
-
-                //zoom to neighborhoods
-                if (self.view.neighborhoodCircles) {
-                    self.view.neighborhoodCircles
-                        .attr('transform', transform + '')
-                        .attr('r', d => self.view.sizeScale(Attribute.count.neighborhoodAccessor(d)) / transform.k);
-                }
-
-                //zoom to listings
-                if (self.view.listingCircles) {
-                    self.view.listingCircles
-                        .attr('transform', transform + '')
-                        .attr('r', d => self.view.sizeScale(Attribute.count.accessor(d)) / transform.k);
-                }
-            });
-
-
-        //reset zoom  
-        this.view.overlay.select('.reset-zoom').on('click',function(){
-            markupAxis = d3.axisLeft(self.view.markupScale);
-            otherAxis = d3.axisBottom(self.view.otherScale);
-
-            self.view.svg.select('g.other-axis').transition(updateTransition).call(otherAxis);
-            self.view.svg.select('g.markup-axis').transition(updateTransition).call(markupAxis);
-            
-             if (self.view.neighborhoodCircles) {
-             self.view.neighborhoodCircles.transition(updateTransition).attr("transform",function(d){
-                return "translate(0,0)scale(1)" ;
-            });
-             }
-
-            if (self.view.listingCircles) {
-           self.view.listingCircles.transition(updateTransition).attr("transform",function(d){
-                return "translate(0,0)scale(1)";
-            });
-            }
-              self.view.circlesContainerRoot.transition(updateTransition).call(zoom.transform, d3.zoomIdentity)
-
-        });
-
-
-        //call if in drag area
-        this.view.circlesContainerRoot.call(zoom);
 
         // Draw the axes
         this.view.svg.select('g.markup-axis')
@@ -701,14 +704,6 @@ export class PriceQuadrantsComponent extends BaseComponent {
         this.view.svg.select('g.quadrant-area').style('transform', innerPadding.translate(0,0));
         // this.drawQuadrants(innerPadding.width(width), innerPadding.height(height), updateTransition);
 
-
-        // Update the drag area
-        // this.view.dragArea
-        //     .style('transform', innerPadding.translate(0,0))
-        //   .select('rect')
-        //     .attr('width', innerPadding.width(width))
-        //     .attr('height', innerPadding.height(height));
-        
         this.view.overlay
           .select('div.other-axis-label')
             .style('left', `${innerPadding.centerX(width)}px`)
@@ -731,17 +726,11 @@ export class PriceQuadrantsComponent extends BaseComponent {
             .attr('transform', `translate(-${innerPadding.left} -${innerPadding.top})`);
 
         // Draw the items
-        // TODO: Remove all this dumb duplication when you're not tired
         if (this.selectedLevel === 'Neighborhoods') {
             this.drawNeighborhoods(updateTransition);
         }
         else if (this.selectedLevel === 'Listings') {
             this.drawListings(updateTransition);
         }
-
-
-
-		}
-		 
-
+	}
 } 

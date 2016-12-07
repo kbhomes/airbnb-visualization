@@ -89,7 +89,7 @@ export class DetailComponent extends BaseComponent {
         if (listingTruliaPrice.length > 0) {
             this.view.medianTruliaPrice.text(
                  this.view.moneyFormat(
-                        d3.median(listingTruliaPrice, l => Attribute.truilaPrice.accessor(l))
+                        d3.median(listingTruliaPrice, l => Attribute.truliaPrice.accessor(l))
                      )
                  );
         }

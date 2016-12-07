@@ -40,7 +40,7 @@ export module Attribute {
         kind: 'continuous'
     };
 
-   export var truilaPrice: Attribute = {
+   export var truliaPrice: Attribute = {
         name: 'Trulia Daily Price', 
         accessor: l => l.prices.trulia.rent_per_bedroom/30, 
         neighborhoodAccessor: n => d3.median(n.listings, l => (l.prices.trulia.rent_per_bedroom/30)),
@@ -86,7 +86,7 @@ export module Attribute {
     };
 
     // Set default domain accessors
-    for (let attr of [count, rating, price, monthlyPrice, markup,truilaPrice,numberOfReviews,numberOfHostListings,numberOfGuestIncluded]) {
+    for (let attr of [count, rating, price, monthlyPrice, markup,truliaPrice,numberOfReviews,numberOfHostListings,numberOfGuestIncluded]) {
         attr.listingDomain = (data) => d3.extent(data, d => attr.accessor(d));
         attr.neighborhoodDomain = (data) => d3.extent(data, d => attr.neighborhoodAccessor(d));
     }
