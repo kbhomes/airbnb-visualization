@@ -65,10 +65,10 @@ export class PriceQuadrantsComponent extends BaseComponent {
         
         this.attributeMap = [];
         this.attributeMap.push(Attribute.price);
+        this.attributeMap.push(Attribute.truilaPrice);
         this.attributeMap.push(Attribute.monthlyPrice);
         this.attributeMap.push(Attribute.rating);
         this.attributeMap.push(Attribute.cancellationPolicy);
-        this.attributeMap.push(Attribute.truilaPrice);
         this.attributeMap.push(Attribute.numberOfReviews);
         this.attributeMap.push(Attribute.numberOfHostListings);
         this.attributeMap.push(Attribute.numberOfGuestIncluded);

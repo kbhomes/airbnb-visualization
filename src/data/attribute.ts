@@ -27,7 +27,7 @@ export module Attribute {
     };
 
     export var price: Attribute = {
-        name: 'Daily Price', 
+        name: 'Airbnb Daily Price', 
         accessor: l => l.prices.airbnb.daily, 
         neighborhoodAccessor: n => d3.median(n.listings, l => l.prices.airbnb.daily),
         kind: 'continuous'
@@ -41,7 +41,7 @@ export module Attribute {
     };
 
    export var truilaPrice: Attribute = {
-        name: 'Trulia Price', 
+        name: 'Trulia Daily Price', 
         accessor: l => l.prices.trulia.rent_per_bedroom/30, 
         neighborhoodAccessor: n => d3.median(n.listings, l => (l.prices.trulia.rent_per_bedroom/30)),
         kind: 'continuous'
