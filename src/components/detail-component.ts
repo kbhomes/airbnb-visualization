@@ -87,7 +87,11 @@ export class DetailComponent extends BaseComponent {
         // The truia price
         let listingTruliaPrice = listings.filter(l => !isNaN(l.prices.trulia.rent_per_bedroom));
         if (listingTruliaPrice.length > 0) {
-            this.view.medianTruliaPrice.text('$'+d3.median(listingTruliaPrice, l => Attribute.truilaPrice.accessor(l)));
+            this.view.medianTruliaPrice.text(
+                 this.view.moneyFormat(
+                        d3.median(listingTruliaPrice, l => Attribute.truilaPrice.accessor(l))
+                     )
+                 );
         }
         else {
             this.view.medianTruliaPrice.text('N/A');
