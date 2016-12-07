@@ -128,10 +128,10 @@ export class ListingBlocksComponent extends BaseComponent {
 
         let displayedListings = this.allSelectedListings;
 
-        // if (displayedListings.length === 0) {
-        //     if (this.highlight.neighborhood)
-        //         displayedListings = this.highlight.neighborhood.listings;
-        // }
+        if (this.allSelectedListings.length === 0 && Dispatch.isEmptySelection(this.selection)) {
+            if (this.highlight.neighborhood)
+                displayedListings = this.highlight.neighborhood.listings;
+        }
 
         // Update the counts for our given listings
         for (let listing of displayedListings) {
