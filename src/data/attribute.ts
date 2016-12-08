@@ -55,14 +55,14 @@ export module Attribute {
     };
 
       export var numberOfReviews: Attribute = {
-        name: '# of Reviews', 
+        name: 'Number of Reviews', 
         accessor: l => l.reviews.number_of_reviews, 
         neighborhoodAccessor: n => d3.median(n.listings, l => l.reviews.number_of_reviews),
         kind: 'continuous'
     };
 
        export var numberOfHostListings: Attribute = {
-        name: '# of Host Listings', 
+        name: 'Number of Host Listings', 
         accessor: l => l.host_listings_count, 
         neighborhoodAccessor: n => d3.median(n.listings, l => l.host_listings_count),
         kind: 'continuous'
@@ -79,7 +79,7 @@ export module Attribute {
     };
 
       export var numberOfGuestIncluded: Attribute = {
-        name: '# of Guest Included', 
+        name: 'Number of Guest Included', 
         accessor: l => l.guests_included, 
         neighborhoodAccessor: n => d3.median(n.listings, l => l.guests_included),
         kind: 'continuous'

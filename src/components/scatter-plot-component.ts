@@ -70,7 +70,6 @@ export class ScatterPlotComponent extends BaseComponent {
         this.attributeMap.push(Attribute.rating);
         this.attributeMap.push(Attribute.cancellationPolicy);
         this.attributeMap.push(Attribute.numberOfReviews);
-        this.attributeMap.push(Attribute.numberOfHostListings);
         this.attributeMap.push(Attribute.numberOfGuestIncluded);
         
 

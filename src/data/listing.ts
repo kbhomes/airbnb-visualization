@@ -41,7 +41,6 @@ export module Listing {
                 }
             },
             guests_included: +row['guests_included'],
-            host_listings_count: +row['host_listings_count'],
             prices: {
                 markup_amount: +row['rent_difference'],
                 markup_percentage: +row['rent_difference_percentage_of_median'] * 100,
@@ -86,7 +85,6 @@ export interface Listing {
             value: number;
         }
     };
-    host_listings_count:number;
     prices: {
         markup_amount: number;
         markup_percentage: number;
