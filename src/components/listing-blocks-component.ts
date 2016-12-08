@@ -29,8 +29,8 @@ export class ListingBlocksComponent extends BaseComponent {
             .attr('width', width)
             .attr('height', height);
 
-        this.view.priceColorScale = d3.scaleLinear<string>().range(['#edf8fb', '#386fa4']);
-        this.view.markupColorScale = d3.scaleLinear<string>().range(['#edf8fb', '#386fa4']);
+        this.view.priceColorScale = d3.scaleLinear<string>().range(['#ffffff', '#386fa4']);
+        this.view.markupColorScale = d3.scaleLinear<string>().range(['#ffffff', '#386fa4']);
     }
 
     private interpolateRed(t: number) : string {
@@ -302,7 +302,8 @@ export class ListingBlocksComponent extends BaseComponent {
 
                 this.hideListingsWithinBlock(l[otherBlockKey]);
                 debouncedUpdateColor();
-            });
+            })
+            .on('click', l => this.dispatchListingSelection(l, !d3.event.shiftKey));
 
         let listingBarsUpdate = listingBarsSelection.merge(listingBarsEnter);
         listingBarsUpdate
