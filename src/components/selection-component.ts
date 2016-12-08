@@ -21,6 +21,8 @@ export class SelectionComponent extends BaseComponent {
     public constructor(selector: string, dispatcher: Dispatch) {
         super(selector, dispatcher);
 
+        let self = this;
+
         this.view = {};
         this.view.links = d3.select(this.element.parentElement).select('.selection-links');
         this.view.links
@@ -30,9 +32,13 @@ export class SelectionComponent extends BaseComponent {
             });
         this.view.links
             .select('a.apply-filter')
-            .on('click', () => {
-                this.dispatcher.call(DispatchEvent.Filter, this, Dispatch.filterFromSelection(this.selection));
-                this.dispatcher.call(DispatchEvent.Select, this, Dispatch.emptySelection());
+            .on('click', function() {
+                let disabled = d3.select(this).classed('disabled');
+
+                if (!disabled) {
+                    self.dispatcher.call(DispatchEvent.Filter, self, Dispatch.filterFromSelection(self.selection));
+                    self.dispatcher.call(DispatchEvent.Select, self, Dispatch.emptySelection());
+                }
             });
     }  
     private enforceHeight() {
@@ -202,6 +208,13 @@ export class SelectionComponent extends BaseComponent {
             this.view.links.style('display', 'none');
         }
         else {
+            if (Dispatch.isOnlyListingSelection(this.selection)) {
+                this.view.links.select('.apply-filter').attr('class', 'apply-filter disabled');
+            }
+            else {
+                this.view.links.select('.apply-filter').attr('class', 'apply-filter');
+            }
+
             this.view.links.style('display', 'inline-block');
         }
     }
