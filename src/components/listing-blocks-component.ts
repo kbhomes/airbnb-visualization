@@ -80,6 +80,12 @@ export class ListingBlocksComponent extends BaseComponent {
         let selectedPriceBlocks = this.selection.priceBlocks || [];
         let selectedMarkupBlocks = this.selection.markupBlocks || [];
 
+        if (selectedPriceBlocks.length === 0 && selectedMarkupBlocks.length === 0 && this.selection.listings.length === 1) {
+            let listing = this.selection.listings[0];
+            selectedPriceBlocks = [listing.priceBlock];
+            selectedMarkupBlocks = [listing.markupBlock];
+        }
+
         let allPriceBlocks = (this.filter.priceBlocks.length) ? this.filter.priceBlocks : this.data.priceBlocks;
         let allMarkupBlocks = (this.filter.markupBlocks.length) ? this.filter.markupBlocks : this.data.markupBlocks;
 
@@ -149,7 +155,7 @@ export class ListingBlocksComponent extends BaseComponent {
             }
             else {
                 if (block.type === 'price') {
-                    if (this.selection.priceBlocks.length) {
+                    if (this.selection.priceBlocks.length || this.selection.listings.length === 1) {
                         return 'white';
                     }
                     else {
@@ -157,7 +163,7 @@ export class ListingBlocksComponent extends BaseComponent {
                     }
                 } 
                 else {
-                    if (this.selection.markupBlocks.length) {
+                    if (this.selection.markupBlocks.length || this.selection.listings.length === 1) {
                         return 'white';
                     }
                     else {
