@@ -115,17 +115,25 @@ export class NeighborhoodMapComponent extends BaseComponent {
         if(neighborhood == undefined){
             return 'grey';
         }
+        
+        // Any highlighted neighborhood should always be red
+        if ((neighborhood === this.highlight.neighborhood) || (this.highlight.listing && this.highlight.listing.neighborhood === neighborhood)) {
+            return 'rgba(255, 100, 100, 0.5)';
+        }
 
-        if (this.selection.neighborhoods.indexOf(neighborhood) !== -1 || neighborhood === this.highlight.neighborhood ) {
+        // There is a selection but it yields no listings
+        if (!Dispatch.isEmptySelection(this.selection) && this.allSelectedListings.length === 0) {
+            return this.shadeOfGreen(neighborhood);
+        }
+
+        // The neighborhood is selected
+        if (this.selection.neighborhoods.indexOf(neighborhood) !== -1) {
             return 'rgba(255, 100, 100, 0.5)';
         }
         
-        if (this.selection.listings.length && this.selection.listings.some(l => l.neighborhood === neighborhood)) {
+        // Some of the selected listings belong in this neighborhood
+        if (this.selection.listings.length && this.allSelectedListings.some(l => l.neighborhood === neighborhood)) {
                 return 'rgba(255, 100, 100, 0.5)';
-        }
-        
-        if (this.highlight.listing && this.highlight.listing.neighborhood === neighborhood) {
-            return 'rgba(255, 100, 100, 0.5)';
         }
         
         return this.shadeOfGreen(neighborhood);
