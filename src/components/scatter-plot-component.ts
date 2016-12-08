@@ -111,7 +111,7 @@ export class ScatterPlotComponent extends BaseComponent {
         this.view.svg.append('g').attr('class', 'other-axis');
         this.view.svg
             .append('g').attr('class', 'axis-label markup-axis-label')
-            .append('text').text('Markup').style('transform', 'rotate(-90deg)');
+            .append('text').text('Markup Percentage').style('transform', 'rotate(-90deg)');
             
         let attributeSelect = this.view.overlay
             .append('div').attr('class', 'axis-label other-axis-label')
