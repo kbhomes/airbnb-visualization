@@ -61,19 +61,18 @@ div {
   pointer-events: auto;
 }
 
-.section div.overlay .section-help {
-  top: 0;
-  right: 0;
-  background-color: #ddd;
-  width: 18px;
-  height: 18px;
+.section .section-help {
+  background-color: #eee;
+  width: 16px;
+  height: 16px;
   display: inline-block;
   text-align: center;
-  line-height: 20px;
+  line-height: 16px;
   border-radius: 11px;
   margin: 2px;
-  font-size: 12px;
+  font-size: 11px;
   color: #888;
+  vertical-align: bottom;
 }
 
 .border-bottom {
