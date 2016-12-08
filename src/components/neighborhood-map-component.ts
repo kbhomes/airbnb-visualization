@@ -111,19 +111,24 @@ export class NeighborhoodMapComponent extends BaseComponent {
 
     }
 
-    private getNeighborhoodRegion(neighborhood:Neighborhood):string{
-        let selectedNeighborhoods = this.selection.neighborhoods || [];
-        let highlightedNeighborhood = this.highlight.neighborhood;
-        
+    private getNeighborhoodRegion(neighborhood:Neighborhood): string {
         if(neighborhood == undefined){
-            return 'grey'
+            return 'grey';
         }
 
-        if (selectedNeighborhoods.indexOf(neighborhood) !== -1 || neighborhood === highlightedNeighborhood ) {
+        if (this.selection.neighborhoods.indexOf(neighborhood) !== -1 || neighborhood === this.highlight.neighborhood ) {
             return 'rgba(255, 100, 100, 0.5)';
-        }else {
-            return this.shadeOfGreen(neighborhood);
         }
+        
+        if (this.selection.listings.length && this.selection.listings.some(l => l.neighborhood === neighborhood)) {
+                return 'rgba(255, 100, 100, 0.5)';
+        }
+        
+        if (this.highlight.listing && this.highlight.listing.neighborhood === neighborhood) {
+            return 'rgba(255, 100, 100, 0.5)';
+        }
+        
+        return this.shadeOfGreen(neighborhood);
     }
 
 //returns shade of green
@@ -250,7 +255,7 @@ export class NeighborhoodMapComponent extends BaseComponent {
 
         //label each neighborhood
         //TODO: tidy label up 
-        let labelSelection = this.view.svg
+        let labelSelection = this.view.pathsContainer
           .selectAll('g.map-label')
             .data(this.data.geo.features);
         
