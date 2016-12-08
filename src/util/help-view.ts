@@ -12,8 +12,10 @@ export function HelpView(element: HTMLElement) {
             let helpView = document.createElement('div');
             helpView.className = 'help-view';
             helpView.style.display = 'none';
-            helpView.innerHTML = text;
+            helpView.innerHTML = '<div class="inner">' + text + '</div>';
             document.body.appendChild(helpView);
+
+            let viewShouldStayVisible = false;
 
             // Show and hide the help view 
             element.addEventListener('mouseenter', (event) => {
@@ -46,8 +48,22 @@ export function HelpView(element: HTMLElement) {
 
                 helpView.className = `help-view ${vertical}-${horizontal}`;
             });
+
             element.addEventListener('mouseleave', (event) => {
+                // Hide the view after 500ms, to allow the user to hover over the view
+                setTimeout(() => {
+                    if (!viewShouldStayVisible)
+                        helpView.style.display = 'none';
+                }, 100);
+            });
+
+            helpView.addEventListener('mouseenter', (event) => {
+                viewShouldStayVisible = true;
+            });
+
+            helpView.addEventListener('mouseleave', (event) => {
                 helpView.style.display = 'none';
+                viewShouldStayVisible = false;
             });
         });
 }
