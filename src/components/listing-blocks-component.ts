@@ -280,30 +280,39 @@ export class ListingBlocksComponent extends BaseComponent {
             .attr('height', d => scaleHeight(Block.value(block, d)))
             .attr('y', d => y + (height - scaleHeight(Block.value(block, d))))
             .on('mouseenter', l => {
-                otherGroups.selectAll('rect.listing-bar').attr('fill', (d:Listing) => barFill(d, l)); 
-                this.drawListingsWithinBlock(l[otherBlockKey], l);
-                debouncedUpdateColor(true);
+                // Dispatch a listing highlight
+                if (this.filteredListings.indexOf(l) !== -1) {
+                    otherGroups.selectAll('rect.listing-bar').attr('fill', (d:Listing) => barFill(d, l)); 
+                    this.drawListingsWithinBlock(l[otherBlockKey], l);
+                    debouncedUpdateColor(true);
 
-                thisGroups
-                    .filter(d => this.isBlockEnabled(d))
-                    .selectAll('rect.listing-bar')
-                    .attr('fill', (d:Listing) => barFill(d, l));
+                    thisGroups
+                        .filter(d => this.isBlockEnabled(d))
+                        .selectAll('rect.listing-bar')
+                        .attr('fill', (d:Listing) => barFill(d, l));
 
-                otherGroups
-                    .filter(d => this.isBlockEnabled(d))
-                    .selectAll('rect.block-rect')
-                    .attr('fill', 'white');
+                    otherGroups
+                        .filter(d => this.isBlockEnabled(d))
+                        .selectAll('rect.block-rect')
+                        .attr('fill', 'white');
+                }
             })
             .on('mouseleave', l => {
-                thisGroups
-                    .filter(d => this.isBlockEnabled(d))
-                    .selectAll('rect.listing-bar')
-                    .attr('fill', (d:Listing) => barFill(d, undefined)); 
+                // Dispatch a listing un-highlight
+                if (this.filteredListings.indexOf(l) !== -1) {
+                    thisGroups
+                        .filter(d => this.isBlockEnabled(d))
+                        .selectAll('rect.listing-bar')
+                        .attr('fill', (d:Listing) => barFill(d, undefined)); 
 
-                this.hideListingsWithinBlock(l[otherBlockKey]);
-                debouncedUpdateColor();
+                    this.hideListingsWithinBlock(l[otherBlockKey]);
+                    debouncedUpdateColor();
+                }
             })
-            .on('click', l => this.dispatchListingSelection(l, !d3.event.shiftKey));
+            .on('click', l => {
+                if (this.filteredListings.indexOf(l) !== -1)
+                    this.dispatchListingSelection(l, !d3.event.shiftKey);
+            });
 
         let listingBarsUpdate = listingBarsSelection.merge(listingBarsEnter);
         listingBarsUpdate
