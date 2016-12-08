@@ -85,6 +85,11 @@ export class ListingBlocksComponent extends BaseComponent {
             selectedPriceBlocks = [listing.priceBlock];
             selectedMarkupBlocks = [listing.markupBlock];
         }
+        else if (Dispatch.isEmptySelection(this.selection) && this.highlight.listing) {
+            let listing = this.highlight.listing;
+            selectedPriceBlocks = [listing.priceBlock];
+            selectedMarkupBlocks = [listing.markupBlock];
+        }
 
         let allPriceBlocks = (this.filter.priceBlocks.length) ? this.filter.priceBlocks : this.data.priceBlocks;
         let allMarkupBlocks = (this.filter.markupBlocks.length) ? this.filter.markupBlocks : this.data.markupBlocks;
@@ -257,6 +262,10 @@ export class ListingBlocksComponent extends BaseComponent {
             
             // If the listing is only single listing selected
             if (Dispatch.isOnlyListingSelection(this.selection) && this.selection.listings.length === 1 && this.selection.listings[0] === listing)
+                return 'red';
+
+            // If nothing is selected and this listing is highlighted
+            if (Dispatch.isEmptySelection(this.selection) && this.highlight.listing === listing)
                 return 'red';
             
             // If the listing is highlighted
