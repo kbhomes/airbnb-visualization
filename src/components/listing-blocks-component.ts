@@ -80,7 +80,7 @@ export class ListingBlocksComponent extends BaseComponent {
         let selectedPriceBlocks = this.selection.priceBlocks || [];
         let selectedMarkupBlocks = this.selection.markupBlocks || [];
 
-        if (selectedPriceBlocks.length === 0 && selectedMarkupBlocks.length === 0 && this.selection.listings.length === 1) {
+        if (Dispatch.isOnlyListingSelection(this.selection) && this.selection.listings.length === 1) {
             let listing = this.selection.listings[0];
             selectedPriceBlocks = [listing.priceBlock];
             selectedMarkupBlocks = [listing.markupBlock];
@@ -155,7 +155,7 @@ export class ListingBlocksComponent extends BaseComponent {
             }
             else {
                 if (block.type === 'price') {
-                    if (this.selection.priceBlocks.length || this.selection.listings.length === 1) {
+                    if (this.selection.priceBlocks.length || (Dispatch.isOnlyListingSelection(this.selection) && this.selection.listings.length === 1)) {
                         return 'white';
                     }
                     else {
@@ -163,7 +163,7 @@ export class ListingBlocksComponent extends BaseComponent {
                     }
                 } 
                 else {
-                    if (this.selection.markupBlocks.length || this.selection.listings.length === 1) {
+                    if (this.selection.markupBlocks.length || (Dispatch.isOnlyListingSelection(this.selection) && this.selection.listings.length === 1)) {
                         return 'white';
                     }
                     else {
@@ -251,9 +251,15 @@ export class ListingBlocksComponent extends BaseComponent {
         let barWidth = width / block.listings.length;
 
         let barFill = (listing: Listing, highlight: Listing) => {
+            // If the listing was filtered out, show nothing
             if (this.filteredListings.indexOf(listing) === -1)
                 return 'white';
             
+            // If the listing is only single listing selected
+            if (Dispatch.isOnlyListingSelection(this.selection) && this.selection.listings.length === 1 && this.selection.listings[0] === listing)
+                return 'red';
+            
+            // If the listing is highlighted
             if (listing === highlight)
                 return 'red';
                 

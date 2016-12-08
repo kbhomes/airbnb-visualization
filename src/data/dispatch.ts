@@ -16,6 +16,16 @@ export module Dispatch {
         );
     }
 
+    export function isOnlyListingSelection(selection: SelectEventData) {
+        return (
+            selection.listings.length &&
+            selection.neighborhoods.length === 0 &&
+            selection.priceBlocks.length === 0 &&
+            selection.markupBlocks.length === 0 &&
+            selection.amenities.length === 0
+        );
+    }
+
     export function emptySelection() : SelectEventData {
         return {
             neighborhoods: [],
