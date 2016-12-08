@@ -28,6 +28,7 @@ div {
 .section {
   flex: 1;
   padding: 5px;
+  position: relative;
 }
 
 .section div.title {
@@ -45,18 +46,34 @@ div {
   position: relative;
 }
 
-.section div.content div.overlay {
+.section div.overlay {
   position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
   pointer-events: none;
+  z-index: 1;
 }
 
-.section div.content div.overlay > div {
+.section div.overlay > div {
   position: absolute;
   pointer-events: auto;
+}
+
+.section div.overlay .section-help {
+  top: 0;
+  right: 0;
+  background-color: #ddd;
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  text-align: center;
+  line-height: 20px;
+  border-radius: 11px;
+  margin: 2px;
+  font-size: 12px;
+  color: #888;
 }
 
 .border-bottom {

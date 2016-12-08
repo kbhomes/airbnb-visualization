@@ -46,7 +46,7 @@ export class ScatterPlotComponent extends BaseComponent {
         this.view.padding = new d3.Padding(40);
 
         this.view.title = d3.select(this.element.parentElement).select('.title');
-        this.view.overlay = d3.select(this.selector).append('div').attr('class', 'overlay');
+        this.view.overlay = d3.select(this.selector).select('.overlay');
         this.view.overlay
           .append('div')
             .attr('class', 'top-left')
