@@ -27,6 +27,7 @@ export class ScatterPlotComponent extends BaseComponent {
         quadrantLabels?: d3.DataSelection<string>;
 
         dragArea?: d3.DatalessSelection;
+        zoom?: d3.ZoomBehavior<Element, {}>;
 
         circlesContainerGroup?: d3.DatalessSelection;
         circlesContainerRoot?: d3.DatalessSelection;
@@ -201,7 +202,6 @@ export class ScatterPlotComponent extends BaseComponent {
         .on('drag', () => {
             didMove = true;
 
-            // console.log(d3.event);
             let x1: number = Math.max(0, Math.min(width, d3.event.x));
             let y1: number = Math.max(0, Math.min(height, d3.event.y));
 
@@ -370,6 +370,7 @@ export class ScatterPlotComponent extends BaseComponent {
 
         //call if in drag area
         this.view.circlesContainerRoot.call(zoom);
+        this.view.zoom = zoom;
     }
 
     private updateTitle() {
@@ -400,7 +401,6 @@ export class ScatterPlotComponent extends BaseComponent {
             let data = this.filteredNeighborhoods;
             markupDomain = Attribute.markup.neighborhoodDomain(data);
             sizeDomain = Attribute.count.neighborhoodDomain(data);
-            console.log(this.selectedAttribute);
             otherDomain = this.selectedAttribute.neighborhoodDomain(data);
         }
         else {
@@ -573,6 +573,18 @@ export class ScatterPlotComponent extends BaseComponent {
                 .attr('fill', d => this.getNeighborhoodCircleFill(d));
         }
 
+        // If a zoom transform exists:
+        let transform = d3.zoomTransform(this.view.circlesContainerRoot.node() as Element);
+        if (!(transform.x === 0 && transform.y === 0 && transform.k === 1)) {
+            // Reset the zoom transform
+            this.view.circlesContainerRoot
+              .transition(transition)
+                .call(this.view.zoom.transform, d3.zoomIdentity);
+
+            // Transition the elements after the transform transition
+            transition = transition.transition();
+        }
+
         if (this.view.neighborhoodCircles && this.view.listingCircles) {
             this.view.listingCircles
                 .style('pointer-events', 'none')
@@ -638,6 +650,18 @@ export class ScatterPlotComponent extends BaseComponent {
                 .attr('r', d => this.view.sizeScale(Attribute.price.accessor(d)))
                 .attr('fill', d => this.getListingCircleFill(d))
         };
+
+        // If a zoom transform exists:
+        let transform = d3.zoomTransform(this.view.circlesContainerRoot.node() as Element);
+        if (!(transform.x === 0 && transform.y === 0 && transform.k === 1)) {
+            // Reset the zoom transform
+            this.view.circlesContainerRoot
+              .transition(transition)
+                .call(this.view.zoom.transform, d3.zoomIdentity);
+
+            // Transition the elements after the transform transition
+            transition = transition.transition();
+        }
 
         if (this.view.listingCircles && this.view.neighborhoodCircles) {
             transition.duration(100);
