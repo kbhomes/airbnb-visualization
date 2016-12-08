@@ -61,6 +61,11 @@ export class DetailComponent extends BaseComponent {
         this.render();
     }
 
+    public onHighlight(highlight: HighlightEventData) {
+        super.onHighlight(highlight);
+        this.render();
+    }
+
     public onFilter(filter: FilterEventData) {
         super.onFilter(filter);
         this.render();
@@ -241,8 +246,17 @@ export class DetailComponent extends BaseComponent {
 
         // Keep track of all the listings that are selected
         if (Dispatch.isEmptySelection(this.selection)) {
-            // Nothing was selected, so render the default details
-            this.renderAllDetails();
+            // If something is highlighted, then render those
+            if (this.highlight.neighborhood) {
+                this.renderListingDetails(this.highlight.neighborhood.listings);
+            }
+            else if (this.highlight.listing) {
+                this.renderListingDetails([this.highlight.listing]);
+            }
+            else {
+                // Nothing was selected, so render the default details
+                this.renderAllDetails();
+            }
         }
         else {
             // Render all selected listings
