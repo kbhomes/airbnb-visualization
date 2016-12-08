@@ -6,6 +6,7 @@
         "noEmitOnError": true,
         "moduleResolution": "node",
         "types": [
+            "whatwg-fetch",
             "d3-array", 
             "d3-axis", 
             "d3-collection", 

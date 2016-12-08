@@ -5,7 +5,7 @@
         <link rel="stylesheet" href="css/main.css" />
     </head>
     <body>
-        <div class="vertical">
+        <div class="main vertical">
             <div class="section border-bottom" id="section-logo">
                 <div class="inner section horizontal">
                     <img src="images/logo-arrow.png" id="logo" height="30" />
@@ -13,33 +13,33 @@
                         Comparing Airbnb and Trulia prices in San Francisco
                     </span>
                     <span class="spacer"></span>
-                    <span class="menu-item help price">Price</span>
-                    <span class="menu-item help markup">Markup</span>
-                    <span class="menu-item help tutorial">Tutorial</spen>
+                    <span class="menu-item help price" data-help-view="views/variable-price-help.html">Price</span>
+                    <span class="menu-item help markup" data-help-view="views/variable-markup-help.html">Markup</span>
+                    <span class="menu-item help tutorial" data-help-view="views/tutorial-help.html">Tutorial</spen>
                 </div>
             </div>
             <div class="section horizontal border-bottom" id="section-top">
-                <div class="section border-right" id="map">
+                <div class="section vertical border-right" id="map">
                     <div class="title">
                         <span class="text">Map</span>
-                        <div class="section-help">?</div>
+                        <div class="section-help" data-help-view="views/map-help.html">?</div>
                     </div>
                     <div class="content"></div>
                 </div>
-                <div class="section border-right" id="scatter-plot">
+                <div class="section vertical border-right" id="scatter-plot">
                     <div class="title">
                         <span class="text">Scatter Plot</span>
-                        <div class="section-help">?</div>
+                        <div class="section-help" data-help-view="views/scatter-plot-help.html">?</div>
                     </div>
                     <div class="content">
                         <div class="overlay"></div>
                     </div>
                 </div>
                 <div class="section vertical" id="panel-right">
-                    <div class="section" id="selection">
+                    <div class="section vertical" id="selection">
                         <div class="title">
                             <span class="text">Selection</span>
-                            <div class="section-help">?</div>
+                            <div class="section-help" data-help-view="views/selection-help.html">?</div>
                             <div class="selection-links" style="display:none">
                                 <span>&bull; </span>
                                 <a class="reset" href="javascript:void(0)">Reset</a>
@@ -57,10 +57,10 @@
                             </div>
                         </div>
                     </div>
-                    <div class="section" id="filters">
+                    <div class="section vertical" id="filters">
                         <div class="title">
                             <span class="text">Filters</span>
-                            <div class="section-help">?</div>
+                            <div class="section-help" data-help-view="views/filters-help.html">?</div>
                             <div class="filter-links" style="display:none">
                                 <span>&bull; </span>
                                 <a class="reset" href="javascript:void(0)">Reset</a>
@@ -79,10 +79,10 @@
                             </table>
                         </div>
                     </div>
-                    <div class="section" id="details">
+                    <div class="section vertical" id="details">
                         <div class="title">
                             <span class="text">Details</span>
-                            <div class="section-help">?</div>
+                            <div class="section-help" data-help-view="views/details-help.html">?</div>
                         </div>
                         <div class="content">
                             <div id="detail-listing-count" class="detail">
@@ -112,10 +112,10 @@
                     </div>
                 </div>
             </div>
-            <div class="section" id="listing-blocks">
+            <div class="section vertical" id="listing-blocks">
                 <div class="title">
                     <span class="text">Prices &amp; Markups</span>
-                    <div class="section-help">?</div>
+                    <div class="section-help" data-help-view="views/prices-markup-help.html">?</div>
                 </div>
                 <div class="content"></div>
             </div>
