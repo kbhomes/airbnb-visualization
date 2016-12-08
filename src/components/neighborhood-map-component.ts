@@ -17,6 +17,7 @@ export class NeighborhoodMapComponent extends BaseComponent {
 
     private view: {
         svg?: d3.DatalessSelection;
+        pathsContainer?: d3.DatalessSelection;
         paths?: d3.DataSelection<NeighborhoodGeoJSONFeature>;
         legend?: d3.DataSelection<LegendItem>;
         moneyFormat?: (n:number) => string;
@@ -35,6 +36,9 @@ export class NeighborhoodMapComponent extends BaseComponent {
             .attr('class', 'map-chart')
             .attr('width', width)
             .attr('height', height);
+        this.view.pathsContainer = this.view.svg.append('g')
+            .attr('class', 'map-container')
+            .attr('transform', 'translate(0 -20)');
     }
 
     private initializeLegend() {
@@ -181,7 +185,7 @@ export class NeighborhoodMapComponent extends BaseComponent {
             .translate(transl);
 
         
-        let pathsSelection = this.view.svg.selectAll('path')
+        let pathsSelection = this.view.pathsContainer.selectAll('path')
             .data(this.data.geo.features, d => d['id']);
 
         // Draw all the neighborhoods for the first time
