@@ -582,7 +582,7 @@ export class ScatterPlotComponent extends BaseComponent {
                 .attr('r', d => this.view.sizeScale(Attribute.count.neighborhoodAccessor(d)))
                 .attr('fill', d => this.getNeighborhoodCircleFill(d))
                 .attr('opacity', d => {
-                    if (isNaN(this.selectedAttribute.neighborhoodAccessor(d)))
+                    if (this.selectedAttribute.kind === 'continuous' && isNaN(this.selectedAttribute.neighborhoodAccessor(d)))
                         return 0;
                     else
                         return 1;
@@ -619,7 +619,7 @@ export class ScatterPlotComponent extends BaseComponent {
                 .attr('r', d => this.view.sizeScale(Attribute.count.neighborhoodAccessor(d)))
               .transition().duration(1000)
                 .attr('opacity', d => {
-                    if (isNaN(this.selectedAttribute.neighborhoodAccessor(d)))
+                    if (this.selectedAttribute.kind === 'continuous' && isNaN(this.selectedAttribute.neighborhoodAccessor(d)))
                         return 0;
                     else
                         return 1;
@@ -670,7 +670,7 @@ export class ScatterPlotComponent extends BaseComponent {
                 .attr('r', d => this.view.sizeScale(Attribute.price.accessor(d)))
                 .attr('fill', d => this.getListingCircleFill(d))
                 .attr('opacity', d => {
-                    if (isNaN(this.selectedAttribute.accessor(d)))
+                    if (this.selectedAttribute.kind === 'continuous' && isNaN(this.selectedAttribute.accessor(d)))
                         return 0;
                     else
                         return 1;
@@ -696,7 +696,7 @@ export class ScatterPlotComponent extends BaseComponent {
                 .style('pointer-events', 'auto')
               .transition(transition)
                 .attr('opacity', d => {
-                    if (isNaN(this.selectedAttribute.accessor(d)))
+                    if (this.selectedAttribute.kind === 'continuous' && isNaN(this.selectedAttribute.accessor(d)))
                         return 0;
                     else
                         return 1;
