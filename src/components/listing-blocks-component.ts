@@ -355,7 +355,16 @@ export class ListingBlocksComponent extends BaseComponent {
         if (priceBlockSectionLabel.empty()) {
             priceBlockSectionLabel = this.view.svg.append('text')
                 .attr('class', 'price-block-label')
-                .style('font-size', '10px')
+                .style('font-size', '10px');
+
+            priceBlockSectionLabel.append('tspan')
+                .attr('x', padding)
+                .attr('dy', '-1em')
+                .text('Airbnb');
+
+            priceBlockSectionLabel.append('tspan')
+                .attr('x', padding)
+                .attr('dy', '1em')
                 .text('Price:');
         }
         priceBlockSectionLabel
