@@ -562,7 +562,7 @@ export class ScatterPlotComponent extends BaseComponent {
                 .append('circle')
                 .attr('class', 'neighborhood')
                 .attr('opacity', 0)
-                .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d)) )
+                .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d) || 0))
                 .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d)))
                 .attr('r', d => this.view.sizeScale(Attribute.count.neighborhoodAccessor(d)))
                 .on('mouseenter', d => this.dispatchNeighborhoodHighlight(d, true))
@@ -577,11 +577,16 @@ export class ScatterPlotComponent extends BaseComponent {
             this.view.neighborhoodCircles = circleSelection.merge(circleEnter);
             this.view.neighborhoodCircles
               .transition().duration(1000)
-                .attr('opacity', 1)
-                .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d)))
+                .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d) || 0))
                 .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d)))
                 .attr('r', d => this.view.sizeScale(Attribute.count.neighborhoodAccessor(d)))
-                .attr('fill', d => this.getNeighborhoodCircleFill(d));
+                .attr('fill', d => this.getNeighborhoodCircleFill(d))
+                .attr('opacity', d => {
+                    if (isNaN(this.selectedAttribute.neighborhoodAccessor(d)))
+                        return 0;
+                    else
+                        return 1;
+                });;
         }
 
         // If a zoom transform exists:
@@ -600,7 +605,7 @@ export class ScatterPlotComponent extends BaseComponent {
             this.view.listingCircles
                 .style('pointer-events', 'none')
               .transition(transition)
-                .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d.neighborhood)))
+                .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d.neighborhood) || 0))
                 .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d.neighborhood)))
               .transition()
                 .attr('r', d => this.view.sizeScale(Attribute.count.neighborhoodAccessor(d.neighborhood)))
@@ -609,11 +614,16 @@ export class ScatterPlotComponent extends BaseComponent {
             this.view.neighborhoodCircles
                 .style('pointer-events', 'auto')
             .transition(transition)
-                .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d)))
+                .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d) || 0))
                 .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d)))
                 .attr('r', d => this.view.sizeScale(Attribute.count.neighborhoodAccessor(d)))
               .transition().duration(1000)
-                .attr('opacity', 1);
+                .attr('opacity', d => {
+                    if (isNaN(this.selectedAttribute.neighborhoodAccessor(d)))
+                        return 0;
+                    else
+                        return 1;
+                });
 
             transition.on('end', neighborhoodsTransitionActions);
         }
@@ -640,7 +650,7 @@ export class ScatterPlotComponent extends BaseComponent {
                 .append('circle')
                 .attr('class', 'listing')
                 .attr('opacity', 0)
-                .attr('cx', d => this.view.otherScale(this.selectedAttribute.accessor(d)))
+                .attr('cx', d => this.view.otherScale(this.selectedAttribute.accessor(d) || 0))
                 .attr('cy', d => this.view.markupScale(Attribute.markup.accessor(d)))
                 .attr('r', d => this.view.sizeScale(Attribute.price.accessor(d)))
                 .on('mouseenter', d => this.dispatchListingHighlight(d, true))
@@ -655,11 +665,16 @@ export class ScatterPlotComponent extends BaseComponent {
             this.view.listingCircles = circleSelection.merge(circleEnter);
             this.view.listingCircles
               .transition().duration(1000)
-                .attr('opacity', 1)
-                .attr('cx', d => this.view.otherScale(this.selectedAttribute.accessor(d)))
+                .attr('cx', d => this.view.otherScale(this.selectedAttribute.accessor(d) || 0))
                 .attr('cy', d => this.view.markupScale(Attribute.markup.accessor(d)))
                 .attr('r', d => this.view.sizeScale(Attribute.price.accessor(d)))
                 .attr('fill', d => this.getListingCircleFill(d))
+                .attr('opacity', d => {
+                    if (isNaN(this.selectedAttribute.accessor(d)))
+                        return 0;
+                    else
+                        return 1;
+                });
         };
 
         // If a zoom transform exists:
@@ -675,12 +690,17 @@ export class ScatterPlotComponent extends BaseComponent {
         }
 
         if (this.view.listingCircles && this.view.neighborhoodCircles) {
-            transition.duration(100);
+            transition.duration(500);
             
             this.view.listingCircles
                 .style('pointer-events', 'auto')
               .transition(transition)
-                .attr('opacity', 1);
+                .attr('opacity', d => {
+                    if (isNaN(this.selectedAttribute.accessor(d)))
+                        return 0;
+                    else
+                        return 1;
+                });
 
             this.view.neighborhoodCircles
                 .style('pointer-events', 'none')
