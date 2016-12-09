@@ -356,7 +356,7 @@ div {
   position: absolute;
   min-width: 200px;
   max-width: 400px;
-  max-height: 400px;
+  max-height: 600px;
   background-color: rgba(255, 255, 255, .98);
   border: 1px solid #ccc;
   z-index: 1;
@@ -455,4 +455,8 @@ div {
 .internal-link {
   background-color: #f8f8f8;
   color: blue;
+}
+
+ul.authors li {
+  margin: 0;
 }
