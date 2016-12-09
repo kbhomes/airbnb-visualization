@@ -320,8 +320,19 @@ export class ScatterPlotComponent extends BaseComponent {
             })
             .on('zoom', function() {
                 let transform: d3.ZoomTransform = d3.event.transform;
-                let markupAxis = d3.axisLeft(self.view.markupScale).scale(transform.rescaleY(self.view.markupScale));
-                let otherAxis = d3.axisBottom(self.view.otherScale).scale(transform.rescaleX(self.view.otherScale));
+                let markupAxis: d3.Axis<any>;
+                let otherAxis: d3.Axis<any>;
+
+                if (self.selectedAttribute.kind === 'continuous') {
+                    transform = d3.event.transform;
+                    markupAxis = d3.axisLeft(self.view.markupScale).scale(transform.rescaleY(self.view.markupScale));
+                    otherAxis = d3.axisBottom(self.view.otherScale).scale(transform.rescaleX(self.view.otherScale));
+                }
+                else {
+                    transform = d3.zoomIdentity;
+                    markupAxis = d3.axisLeft(self.view.markupScale).scale(transform.rescaleY(self.view.markupScale));
+                    otherAxis = d3.axisBottom(self.view.otherScale);
+                }
             
                 //update axis
                 self.view.svg.select('g.other-axis').call(otherAxis);
@@ -597,10 +608,10 @@ export class ScatterPlotComponent extends BaseComponent {
 
             this.view.neighborhoodCircles
                 .style('pointer-events', 'auto')
+            .transition(transition)
                 .attr('cx', d => this.view.otherScale(this.selectedAttribute.neighborhoodAccessor(d)))
                 .attr('cy', d => this.view.markupScale(Attribute.markup.neighborhoodAccessor(d)))
                 .attr('r', d => this.view.sizeScale(Attribute.count.neighborhoodAccessor(d)))
-              .transition(transition)
               .transition().duration(1000)
                 .attr('opacity', 1);
 
